@@ -1,0 +1,112 @@
+/* Define the gold color */
+.root { /* Define variable usable throughout */
+    -fx-gold-color: #F1DA2C;
+}
+
+/* Style for the logo */
+.splash-logo {
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 10, 0.0, 0, 0); /* Spread=0.0, OffsetX=0, OffsetY=0 */
+}
+
+/* Base style for the splash screen buttons */
+.splash-button {
+    -fx-font-family: "System"; /* Or your preferred font */
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+    -fx-pref-width: 280px;
+    -fx-pref-height: 55px;
+    -fx-background-radius: 8; /* Keep the rounded corners */
+    -fx-cursor: hand; /* Set cursor via CSS */
+    -fx-text-fill: black; /* Default text color */
+
+    /* Apply the gold shadow by default */
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 10, 0.0, 0, 0);
+}
+
+/* Style specifically for the primary (Login) button */
+.button-primary {
+    -fx-background-color: -fx-gold-color; /* Use the variable */
+}
+.button-primary:hover {
+    -fx-background-color: derive(-fx-gold-color, -15%); /* Darken gold on hover */
+    -fx-effect: null; /* Remove shadow on hover */
+}
+
+
+/* Style specifically for the secondary (Create Account) button */
+.button-secondary {
+    -fx-background-color: #FDEED2;
+}
+.button-secondary:hover {
+    -fx-background-color: derive(#FDEED2, -15%); /* Darken beige on hover */
+    -fx-effect: null; /* Remove shadow on hover */
+}
+
+/* General hover rule for *any* splash button to remove shadow if not covered above */
+/* This is slightly redundant given the specific hover rules, but can be a fallback */
+.splash-button:hover {
+    -fx-effect: null;
+}
+
+
+/* --- Authentication Screens --- */
+
+.auth-title {
+    /* Add shadow similar to buttons if desired */
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 10, 0.0, 0, 0);
+}
+
+.auth-form-container {
+    -fx-background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
+    -fx-background-radius: 15; /* Rounded corners */
+    -fx-border-color: rgba(255, 255, 255, 0.1); /* Subtle border */
+    -fx-border-radius: 15;
+    -fx-border-width: 1;
+    -fx-max-width: 450px; /* Control max width */
+}
+
+.form-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E0E0E0; /* Light gray text */
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 5px; /* Slight left padding */
+}
+
+.text-input { /* Style for both TextField and PasswordField */
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, +50%); /* Gray prompt text */
+    -fx-background-radius: 5;
+    -fx-border-color: #444; /* Dark border */
+    -fx-border-radius: 5;
+    -fx-border-width: 1;
+    -fx-pref-height: 40px;
+}
+.text-input:focused {
+    -fx-border-color: -fx-gold-color; /* Gold border when focused */
+    -fx-border-width: 2;
+}
+
+.error-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #FF6B6B; /* Reddish error color */
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+.message-label { /* For general messages in register */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    /* Text fill color set dynamically in controller */
+}
+
+.auth-link { /* Style for Hyperlinks */
+    -fx-font-size: 13px;
+    -fx-text-fill: #FDEED2; /* Light beige link color */
+}
+.auth-link:hover {
+    -fx-text-fill: -fx-gold-color; /* Gold on hover */
+}

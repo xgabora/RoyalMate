@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Link the CSS file -->
+<StackPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.SplashController">
+    <children>
+        <!-- Background Image with Opacity -->
+        <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.20" pickOnBounds="true" preserveRatio="false">
+            <image>
+                <Image url="@../../../../images/background.png" backgroundLoading="true" />
+            </image>
+        </ImageView>
+
+        <!-- Logo Image (Even Bigger, Higher) - Assign style class -->
+        <ImageView fx:id="logoImageView" styleClass="splash-logo" fitHeight="420.0" fitWidth="420.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER">
+            <image>
+                <Image url="@../../../../images/royalmate_logo.png" backgroundLoading="true" />
+            </image>
+            <StackPane.margin>
+                <Insets bottom="200.0" />
+            </StackPane.margin>
+        </ImageView>
+
+        <!-- Container for Buttons or Status Message (Positioned Higher) -->
+        <VBox fx:id="statusContainer" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" spacing="15.0" StackPane.alignment="BOTTOM_CENTER">
+            <StackPane.margin>
+                <Insets bottom="100.0" />
+            </StackPane.margin>
+            <!-- Content (Buttons/Label) will be added dynamically by the controller -->
+        </VBox>
+
+    </children>
+</StackPane>
