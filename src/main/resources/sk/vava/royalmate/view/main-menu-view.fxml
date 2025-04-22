@@ -20,7 +20,11 @@
                         <Font size="14.0"/>
                     </font>
                 </Button>
+
             </children>
+
+
+
             <BorderPane.margin>
                 <Insets />
             </BorderPane.margin>
@@ -29,11 +33,24 @@
             </padding>
         </HBox>
     </top>
+
+
+
+
+
+
     <center>
+
         <Label fx:id="welcomeLabel" text="Homepage - Content Goes Here" textFill="white" BorderPane.alignment="CENTER">
             <font>
                 <Font size="24.0" />
             </font>
         </Label>
+    </center>
+    <center>
+        <VBox alignment="CENTER" spacing="40">
+<!--            <Label text="Welcome to the Main Menu!" textFill="white"/>-->
+            <Button text=" Spin the Wheel " onAction="#SpinWheel"/>
+        </VBox>
     </center>
 </BorderPane>
