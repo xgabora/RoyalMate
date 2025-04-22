@@ -8,17 +8,12 @@ Projekt RoyalMate je semestrálnou prácou v rámci predmetu **VAVA_B** na FIIT 
 
 **ADAM:** 
 
- - vytvoriť DB model a ostatné EA súbory
- - vytvoriť Figma UI návrh
- - dokončiť grafické návrhy textúr
- - vytvoriť databázu a prepojiť ju s  projektom
+- dokončiť obrazovku slot hry, testovať zvyšné veci
 
 **VŠETCI ČLENOVIA TÍMU:** 
 
-- pridať sa do Discord kanála ([https://discord.gg/K4yTXsME](https://discord.gg/K4yTXsME))
- - zapísať sa do RACI matice (https://docs.google.com/spreadsheets/d/1JBKc4BeDQtOA-quhslUQo3Hlfsjiwf6uL1vK1YDgjmE/edit?usp=sharing)
- - vyskúšať si pull-núť tento repozitár, spustiť vzorovú prázdnu aplikáciu (JDK 17, IntelliJ ideálne)
- - oboznámiť sa s JIRA Software (pozvánku máte v mejle)
+ - vyskúšať si pull-núť tento repozitár, spustiť aplikáciu v IDE aj ako .jar, zbuildiť aplikáciu (JDK 17+, IntelliJ ideálne)
+ - ak nejde otvoriť .JAR, tu je riešenie: https://www.youtube.com/watch?v=S5Tra0WEypU
  - rozmýšľať nad svojou funkcionalitou - čo sa dá spraviť, ako
  - pre ideálny štart s JAVAFX obetovať jedno poobedie / večer času: https://www.youtube.com/watch?v=9XJicRt_FaI&ab_channel=BroCode
 
