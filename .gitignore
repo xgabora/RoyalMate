@@ -12,6 +12,10 @@ target/
 *.iml
 *.ipr
 
+# Databaza #
+
+src/main/java/sk/vava/royalmate/util/Config.java
+
 ### Eclipse ###
 .apt_generated
 .classpath

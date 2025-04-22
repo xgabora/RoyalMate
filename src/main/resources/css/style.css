@@ -48,6 +48,23 @@
     -fx-effect: null;
 }
 
+/* LOCALE */
+
+.lang-button {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-padding: 4px 8px; /* Smaller padding */
+    -fx-min-width: 40px; /* Ensure minimum size */
+    -fx-cursor: hand;
+}
+
+.lang-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.4);
+}
+
 
 /* --- Authentication Screens --- */
 
