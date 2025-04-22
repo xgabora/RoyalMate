@@ -1,5 +1,7 @@
 package sk.vava.royalmate.controller;
-
+import javafx.stage.Stage;
+import javafx.util.Duration;
+import java.util.Random;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -81,4 +83,20 @@ public class MainMenuController {
             LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e);
         }
     }
+    @FXML
+    private void SpinWheel (){
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sk/vava/royalmate/view/Wheel.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Wheel of Game ");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+}
 }
