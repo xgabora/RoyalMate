@@ -298,7 +298,10 @@
 .page-title {
     -fx-font-size: 36px;
     -fx-font-weight: bold;
-    -fx-padding: 0 0 15px 0;
+    -fx-padding: 0;
+
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 10, 0.0, 0, 0);
+
 }
 
 .admin-section {
@@ -367,9 +370,9 @@
 }
 
 .action-button.warning {
-    -fx-background-color: #f0ad4e; /* Orange/Yellow */
-    -fx-text-fill: white;
+    -fx-background-color: #F1DA2C; /* RM Gold */
+    -fx-text-fill: black;
 }
 .action-button.warning:hover {
-    -fx-background-color: derive(#f0ad4e, -15%);
+    -fx-background-color: derive(#F1DA2C, -15%);
 }
