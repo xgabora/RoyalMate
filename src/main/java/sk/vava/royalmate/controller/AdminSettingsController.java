@@ -5,6 +5,10 @@ import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils; // Needed for Image -> BufferedImage
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -28,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -281,8 +286,34 @@ public class AdminSettingsController {
     }
 
     // --- Placeholder Game Button Handlers ---
-    @FXML void handleGameList(ActionEvent event) { LOGGER.info("Open Game List clicked (Placeholder)"); }
-    @FXML void handleAddGame(ActionEvent event) { LOGGER.info("Add New Game clicked (Placeholder)"); }
+// ... inside AdminSettingsController ...
+
+    @FXML void handleGameList(ActionEvent event) {
+        LOGGER.info("Open Game List clicked");
+        navigateTo(event, "/sk/vava/royalmate/view/game-list-view.fxml");
+    }
+    @FXML void handleAddGame(ActionEvent event) {
+        LOGGER.info("Add New Game clicked");
+        navigateTo(event, "/sk/vava/royalmate/view/add-game-view.fxml");
+    }
+
+    // --- Navigation Helper ---
+    private void navigateTo(ActionEvent event, String fxmlPath) {
+        Node source = (Node) event.getSource();
+        try {
+            Scene scene = source.getScene();
+            if (scene == null) { /* ... error handling ... */ return; }
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource(fxmlPath)), LocaleManager.getBundle());
+            Parent nextRoot = loader.load();
+            scene.setRoot(nextRoot);
+            LOGGER.info("Successfully navigated to: " + fxmlPath);
+        } catch (IOException | NullPointerException e) {
+            LOGGER.log(Level.SEVERE, "Failed to load FXML: " + fxmlPath, e);
+            showMessage(playerMessageLabel, "Error loading page.", true); // Show error on current screen
+        } catch (ClassCastException e) {
+            LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e);
+        }
+    }
 
 
     // --- Message Display Helpers ---

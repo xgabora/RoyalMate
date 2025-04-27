@@ -42,6 +42,20 @@
     -fx-effect: null; /* Remove shadow on hover */
 }
 
+/* Style specifically for the secondary (Create Account) button */
+.button-secondary-small {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 15px;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-background-color: #FDEED2;
+}
+.button-secondary-small:hover {
+    -fx-background-color: derive(#FDEED2, -15%); /* Darken beige on hover */
+    -fx-effect: null; /* Remove shadow on hover */
+}
+
 /* General hover rule for *any* splash button to remove shadow if not covered above */
 /* This is slightly redundant given the specific hover rules, but can be a fallback */
 .splash-button:hover {
@@ -375,4 +389,137 @@
 }
 .action-button.warning:hover {
     -fx-background-color: derive(#F1DA2C, -15%);
+}
+
+/* --- Add Game Screen --- */
+.page-title { /* Reused from admin settings */
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 15px 0;
+    -fx-text-fill: #F1DA2C;
+}
+
+.image-upload-box {
+    -fx-padding: 15px;
+    -fx-border-color: #555;
+    -fx-border-width: 2px;
+    -fx-border-style: dashed;
+    -fx-border-radius: 8px;
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-alignment: center;
+    -fx-min-height: 180px; /* Ensure minimum size */
+    -fx-cursor: hand;
+}
+.image-upload-box:hover {
+    -fx-border-color: -fx-gold-color;
+    -fx-background-color: rgba(241, 218, 44, 0.1);
+}
+
+.symbol-upload-box {
+    -fx-padding: 5px;
+    -fx-border-color: #444;
+    -fx-border-width: 1px;
+    -fx-border-style: solid;
+    -fx-border-radius: 5px;
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-alignment: center;
+    -fx-pref-width: 90px; /* Adjust size */
+    -fx-pref-height: 100px;
+    -fx-cursor: hand;
+}
+.symbol-upload-box:hover {
+    -fx-border-color: #777;
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+}
+
+.upload-prompt-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #ccc;
+    -fx-padding: 5px 0;
+}
+.upload-hint-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #888;
+}
+
+/* Style ComboBoxes if needed */
+/* Style ToggleButtons in gameTypeBox (reuse .tab-button ?) */
+.tab-button { /* Applied to game type toggles */
+    -fx-background-color: transparent;
+    -fx-text-fill: #AAAAAA;
+    -fx-font-size: 14px; /* Smaller */
+    -fx-font-weight: bold;
+    -fx-padding: 5px 15px; /* Adjust padding */
+    -fx-border-color: #555; /* Add border */
+    -fx-border-width: 1px;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-background-insets: 0;
+    -fx-cursor: hand;
+}
+.tab-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: white;
+}
+.tab-button:selected {
+    -fx-background-color: #F1DA2C;
+    -fx-text-fill: black;
+    -fx-border-color: #F1DA2C;
+}
+
+/* --- Game List Screen --- */
+.game-row-base {
+    -fx-padding: 10px 15px; /* Padding inside each row */
+    -fx-border-color: #444;
+    -fx-border-width: 0 0 1px 0; /* Bottom border only */
+}
+
+/* Alternating row colors */
+.game-row {
+    -fx-background-color: rgba(255, 255, 255, 0.03); /* Slightly lighter */
+}
+.game-row-alt {
+    -fx-background-color: rgba(0, 0, 0, 0.1); /* Slightly darker */
+}
+
+.game-row-base:hover {
+    -fx-background-color: rgba(241, 218, 44, 0.1); /* Goldish highlight on hover */
+}
+
+.game-name-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.game-type-chip {
+    -fx-background-color: #555; /* Dark grey chip */
+    -fx-background-radius: 10px;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 2px 8px;
+    -fx-max-width: 100px; /* Limit width */
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+/* Optional: Different colors for different game types */
+/* Add these classes dynamically in createGameRow if needed */
+.game-type-chip-SLOT { -fx-background-color: #2980B9; } /* Blue */
+.game-type-chip-ROULETTE { -fx-background-color: #C0392B; } /* Red */
+.game-type-chip-COINFLIP { -fx-background-color: #16A085; } /* Green */
+
+
+.game-sub-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #AAAAAA; /* Light grey */
+}
+
+/* Ensure action buttons in list are reasonably sized */
+.action-button {
+    /* Base style from admin settings */
+    -fx-font-size: 12px;
+    -fx-padding: 6px 12px;
+    -fx-min-width: 100px; /* Give buttons some width */
 }

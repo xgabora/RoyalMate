@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.Double?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Polygon?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.AddGameController">
+    <top>
+        <fx:include source="navbar-view.fxml" />
+    </top>
+    <center>
+        <StackPane BorderPane.alignment="CENTER">
+            <children>
+                <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.15" pickOnBounds="true" preserveRatio="false">
+                    <image>
+                        <Image url="@../../../../images/background.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" StackPane.alignment="TOP_CENTER">
+                    <content>
+                        <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: transparent;">
+                            <padding>
+                                <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
+                            </padding>
+                            <children>
+                                <Label fx:id="titleLabel" styleClass="page-title" text="%admin.title.addgame" textFill="#F1DA2C" />
+
+                                <!-- Main Layout GridPane (2 columns, 2 main rows) -->
+                                <GridPane hgap="30.0" vgap="20.0" maxWidth="950.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="450.0" /> <!-- Left column -->
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="450.0" /> <!-- Right column -->
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" vgrow="NEVER" /> <!-- Row 0: Top elements -->
+                                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" /> <!-- Row 1: Lower elements -->
+                                    </rowConstraints>
+                                    <children>
+
+                                        <!-- === Column 0 === -->
+
+                                        <!-- Row 0, Col 0: Name, Type, Description -->
+                                        <VBox spacing="15.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                            <children>
+                                                <Label styleClass="form-label" text="%admin.addgame.label.gamename" />
+                                                <TextField fx:id="gameNameField" styleClass="text-input" promptText="Enter unique game name"/>
+                                                <Label styleClass="form-label" text="%admin.addgame.label.gametype" />
+                                                <HBox fx:id="gameTypeBox" spacing="10.0" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <ToggleButton fx:id="slotToggleButton" styleClass="tab-button" text="SLOTS" />
+                                                        <ToggleButton fx:id="rouletteToggleButton" styleClass="tab-button" text="ROULETTE" />
+                                                        <ToggleButton fx:id="coinflipToggleButton" styleClass="tab-button" text="COINFLIP" />
+                                                    </children>
+                                                </HBox>
+                                                <Label styleClass="form-label" text="%admin.addgame.label.description" />
+                                                <TextArea fx:id="descriptionArea" styleClass="text-area-input" prefRowCount="4" wrapText="true" promptText="Enter game description"/>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Row 1, Col 0: Lower Left Section (Stakes, Button, Message) -->
+                                        <VBox spacing="15.0" GridPane.columnIndex="0" GridPane.rowIndex="1" alignment="TOP_LEFT">
+                                            <children>
+                                                <!-- Nested GridPane for Stakes/Vol/Color -->
+                                                <GridPane hgap="20.0" vgap="10.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="100.0"/>
+                                                        <ColumnConstraints hgrow="SOMETIMES" />
+                                                    </columnConstraints>
+                                                    <rowConstraints>
+                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" /> <RowConstraints minHeight="10.0" prefHeight="30.0" /> <RowConstraints minHeight="10.0" prefHeight="30.0" /> <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                                                    </rowConstraints>
+                                                    <children>
+                                                        <Label styleClass="form-label" text="%admin.addgame.label.minwager" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                                        <ComboBox fx:id="minWagerComboBox" prefWidth="180.0" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                                        <Label styleClass="form-label" text="%admin.addgame.label.maxwager" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                                        <ComboBox fx:id="maxWagerComboBox" prefWidth="180.0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                                        <Label styleClass="form-label" text="%admin.addgame.label.volatility" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                                        <ComboBox fx:id="volatilityComboBox" prefWidth="180.0" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                                        <Label styleClass="form-label" text="%admin.addgame.label.bgcolor" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                                        <ComboBox fx:id="bgColorComboBox" prefWidth="180.0" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                                    </children>
+                                                </GridPane>
+
+                                                <!-- Separator -->
+                                                <Separator />
+
+                                                <!-- Action Button -->
+                                                <HBox alignment="CENTER_LEFT" spacing="20.0"> <!-- Changed alignment -->
+                                                    <children>
+                                                        <Button fx:id="actionButton" styleClass="splash-button, button-primary" text="%admin.button.addnewgame" onAction="#handleSaveGameAction"/>
+                                                    </children>
+                                                    <VBox.margin>
+                                                        <Insets top="10.0" />
+                                                    </VBox.margin>
+                                                </HBox>
+
+                                                <!-- Message Label -->
+                                                <Label fx:id="generalMessageLabel" styleClass="message-label" text="" managed="false" visible="false"/>
+
+                                            </children>
+                                        </VBox>
+
+
+                                        <!-- === Column 1 === -->
+
+                                        <!-- Row 0, Col 1: Cover Thumbnail -->
+                                        <VBox fx:id="coverUploadBox" alignment="TOP_CENTER" spacing="10.0" styleClass="image-upload-box" GridPane.rowIndex="0" GridPane.columnIndex="1" onMouseClicked="#handleUploadCoverImage">
+                                            <children>
+                                                <ImageView fx:id="coverImageView" fitHeight="150.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" />
+                                                <Label fx:id="coverPromptLabel" text="%admin.addgame.label.uploadcover" textAlignment="CENTER" styleClass="upload-prompt-label"/>
+                                                <Label fx:id="coverHintLabel" text="(Recommended 16:9, png/jpg)" styleClass="upload-hint-label"/>
+                                                <Label fx:id="coverErrorLabel" styleClass="error-label" managed="false" visible="false"/>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Row 1, Col 1: Symbol Uploads -->
+                                        <VBox spacing="10.0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                                            <children>
+                                                <Label fx:id="symbolPromptLabel" styleClass="form-label" text="%admin.addgame.label.symbols"/>
+                                                <GridPane fx:id="symbolGrid" hgap="10.0" vgap="10.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" /> <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" /> <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                    </columnConstraints>
+                                                    <rowConstraints>
+                                                        <RowConstraints minHeight="10.0" prefHeight="110.0" vgrow="SOMETIMES" /> <RowConstraints minHeight="10.0" prefHeight="110.0" vgrow="SOMETIMES" />
+                                                    </rowConstraints>
+                                                    <!-- Symbol upload boxes added dynamically -->
+                                                </GridPane>
+                                                <Label fx:id="symbolErrorLabel" styleClass="error-label" managed="false" visible="false"/>
+                                            </children>
+                                        </VBox>
+
+                                    </children>
+                                </GridPane>
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>

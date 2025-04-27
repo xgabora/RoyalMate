@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.GameListController">
+    <top>
+        <fx:include source="navbar-view.fxml" />
+    </top>
+    <center>
+        <StackPane BorderPane.alignment="CENTER">
+            <children>
+                <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.15" pickOnBounds="true" preserveRatio="false">
+                    <image>
+                        <Image url="@../../../../images/background.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: transparent;" StackPane.alignment="TOP_CENTER">
+                    <padding>
+                        <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
+                    </padding>
+                    <children>
+                        <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+                            <children>
+                                <Label styleClass="page-title" text="%admin.title.gamelist" textFill="#F1DA2C" />
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+                            <children>
+                                <Button fx:id="addNewGameButton" mnemonicParsing="false" onAction="#handleAddGame" styleClass="button-secondary-small" text="%admin.button.addnewgame" />
+                            </children>
+                        </HBox>
+
+
+                        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                            <content>
+                                <VBox fx:id="gameListContainer" spacing="10.0" style="-fx-background-color: transparent;" />
+                            </content>
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </ScrollPane>
+                        <Label fx:id="messageLabel" styleClass="message-label" managed="false" visible="false"/>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>
