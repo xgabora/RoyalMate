@@ -523,3 +523,228 @@
     -fx-padding: 6px 12px;
     -fx-min-width: 100px; /* Give buttons some width */
 }
+
+/* --- Homepage --- */
+.homepage-banner-pane {
+    -fx-alignment: center;
+    -fx-max-width: 1000px; /* Limit banner width */
+    /* Optional background while image loads or if none */
+    /* -fx-background-color: #333; */
+    -fx-padding: 5px; /* Optional padding around banner */
+}
+
+.top-games-title {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 10, 0.0, 0, 0); /* Glow effect */
+    -fx-padding: 10px 0;
+}
+
+.game-grid-cell {
+    -fx-alignment: center;
+    -fx-background-color: rgba(0, 0, 0, 0.3); /* Dark semi-transparent background */
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0.0, 2, 2); /* Subtle drop shadow */
+}
+.game-grid-cell:hover {
+    -fx-border-color: -fx-gold-color;
+    -fx-effect: dropshadow(three-pass-box, -fx-gold-color, 15, 0.3, 0, 0); /* Gold glow on hover */
+}
+
+.game-cover-image {
+    -fx-background-radius: 8; /* Match cell radius */
+}
+
+/* --- Game Search Page --- */
+.search-bar {
+    -fx-background-color: white;
+    -fx-background-radius: 20; /* Rounded corners */
+    -fx-padding: 5px;
+    -fx-border-color: #555;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-max-width: 500px; /* Limit width */
+}
+.search-bar:focused { /* Style when textfield inside has focus */
+    -fx-border-color: -fx-gold-color;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 5, 0.0, 0, 0);
+}
+
+.search-input {
+    -fx-background-color: transparent; /* Make TextField background transparent */
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+    -fx-padding: 5px;
+}
+
+.filter-toggle-button {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 18px;
+    -fx-background-radius: 15;
+    -fx-border-color: #AAA;
+    -fx-border-radius: 15;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+.filter-toggle-button:hover {
+    -fx-background-color: #f0f0f0;
+}
+.filter-toggle-button:selected {
+    -fx-background-color: -fx-gold-color; /* Yellow when selected */
+    -fx-text-fill: black;
+    -fx-border-color: transparent;
+}
+
+.game-count-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-gold-color;
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 8, 0.0, 0, 0); /* Glow */
+    -fx-padding: 5px 0;
+}
+
+/* TilePane styling - Adjust padding/gaps as needed in FXML */
+.tile-pane {
+    /* -fx-padding: 15px; */
+    /* -fx-hgap: 20; */
+    /* -fx-vgap: 20; */
+}
+
+/* --- Chat Screen Styles (REVISED) --- */
+
+/* Ensure the main VBox holding chat content is transparent */
+.chat-main-content {
+    -fx-background-color: transparent;
+}
+
+/* Input bar styling */
+.chat-input-bar-new {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 5px;
+    -fx-border-color: #DDDDDD;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+.chat-input-field-new {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #AAAAAA;
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Gold Send button style */
+.send-button-new {
+    -fx-background-color: -fx-gold-color;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+    -fx-min-width: 80px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0.0, 0, 1);
+}
+.send-button-new:hover {
+    -fx-background-color: derive(-fx-gold-color, -15%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0.0, 0, 2);
+}
+
+/* Pinned message bar style */
+.pinned-message-bar-new {
+    -fx-background-color: -fx-gold-color;
+    -fx-background-radius: 5;
+    -fx-alignment: center-left;
+}
+
+/* Pinned message text label */
+.pinned-message-label-new {
+    -fx-text-fill: #444444; /* Dark Grey Text */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* ScrollPane styling */
+.chat-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.chat-scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+/* Subtle scrollbar */
+.chat-scroll-pane .scroll-bar:vertical .thumb,
+.chat-scroll-pane .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 5;
+}
+.chat-scroll-pane .scroll-bar:vertical,
+.chat-scroll-pane .scroll-bar:horizontal {
+    -fx-background-color:transparent;
+    -fx-padding: 2;
+}
+.chat-scroll-pane .increment-button,
+.chat-scroll-pane .decrement-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent; /* Ensure no border */
+}
+
+/* Container holding all message bubbles */
+.chat-message-container {
+    -fx-background-color: transparent; /* Explicitly transparent */
+}
+
+/* Individual message bubbles */
+.chat-bubble-user-new, .chat-bubble-other-new {
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 15;
+}
+
+.chat-bubble-user-new {
+    -fx-background-color: #E0E0E0; /* Light grey */
+}
+
+.chat-bubble-other-new {
+    -fx-background-color: #37474F; /* Darker grey/blue */
+}
+
+/* Sender name label inside bubble */
+.chat-sender-label-new {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 0 0 2px 0;
+    -fx-underline: true; /* Added underline */
+}
+/* Text color set in controller based on sender */
+.chat-bubble-user-new .chat-sender-label-new { -fx-text-fill: black; }
+.chat-bubble-other-new .chat-sender-label-new { -fx-text-fill: #E1F5FE; } /* Light Blue text */
+
+
+/* Message text label inside bubble */
+.chat-message-label-new {
+    -fx-font-size: 14px;
+}
+.chat-bubble-user-new .chat-message-label-new { -fx-text-fill: black; }
+.chat-bubble-other-new .chat-message-label-new { -fx-text-fill: white; }
+
+/* Timestamp label inside bubble */
+.chat-time-label-new {
+    -fx-font-size: 10px;
+    -fx-padding: 3px 0 0 0;
+}
+.chat-bubble-user-new .chat-time-label-new { -fx-text-fill: #555555; }
+.chat-bubble-other-new .chat-time-label-new { -fx-text-fill: #B0BEC5; }

@@ -1,8 +1,11 @@
 package sk.vava.royalmate.data;
 
+import sk.vava.royalmate.model.Account; // Need Account for mapping username later maybe
 import sk.vava.royalmate.model.ChatMessage;
 
 import java.sql.*;
+import java.util.ArrayList; // Import ArrayList
+import java.util.List; // Import List
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,18 +14,20 @@ public class ChatMessageDAO {
 
     private static final Logger LOGGER = Logger.getLogger(ChatMessageDAO.class.getName());
     private static final String PINNED_MESSAGE_FUTURE_DATE = "2030-01-19 03:14:07"; // Marker date
+    private static final String TABLE_NAME = "chat_messages"; // Underscore version if your table uses it
+    private static final String ACCOUNT_TABLE_NAME = "accounts";
 
-    // SQL Queries
-    private static final String FIND_PINNED_SQL = "SELECT * FROM chat_messages WHERE sent_at >= ? ORDER BY sent_at DESC LIMIT 1";
-    private static final String INSERT_PINNED_SQL = "INSERT INTO chat_messages (sender_id, message_text, sent_at) VALUES (?, ?, ?)";
-    private static final String UPDATE_PINNED_SQL = "UPDATE chat_messages SET message_text = ?, sender_id = ? WHERE id = ?";
-    // Add FIND_ALL_RECENT_SQL, INSERT_REGULAR_SQL etc. as needed for general chat
+    // Ensure column names here match your DB schema EXACTLY
+    private static final String FIND_PINNED_SQL = "SELECT cm.*, a.username as sender_username FROM " + TABLE_NAME + " cm JOIN " + ACCOUNT_TABLE_NAME + " a ON cm.sender_id = a.id WHERE cm.sent_at >= ? ORDER BY cm.sent_at DESC LIMIT 1";
+    private static final String INSERT_PINNED_SQL = "INSERT INTO " + TABLE_NAME + " (sender_id, message_text, sent_at) VALUES (?, ?, ?)";
+    private static final String UPDATE_PINNED_SQL = "UPDATE " + TABLE_NAME + " SET message_text = ?, sender_id = ? WHERE id = ?";
 
-    /**
-     * Finds the currently pinned message (marked by a future date).
-     *
-     * @return Optional containing the ChatMessage if a pinned one exists, empty otherwise.
-     */
+    private static final String FIND_RECENT_SQL = "SELECT cm.*, a.username as sender_username FROM " + TABLE_NAME + " cm JOIN " + ACCOUNT_TABLE_NAME + " a ON cm.sender_id = a.id WHERE cm.sent_at < ? ORDER BY cm.sent_at DESC LIMIT ?";
+    // --------------------------------------------------------------------
+    private static final String INSERT_REGULAR_SQL = "INSERT INTO " + TABLE_NAME + " (sender_id, message_text, sent_at) VALUES (?, ?, CURRENT_TIMESTAMP)";
+
+
+    // --- Existing methods (findPinnedMessage, updatePinnedMessage, insertPinnedMessage) ---
     public Optional<ChatMessage> findPinnedMessage() {
         LOGGER.fine("Attempting to find pinned chat message.");
         try (Connection conn = DatabaseManager.getConnection();
@@ -32,7 +37,7 @@ public class ChatMessageDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToChatMessage(rs));
+                    return Optional.of(mapResultSetToChatMessage(rs)); // Use updated mapper
                 } else {
                     LOGGER.fine("No pinned chat message found.");
                     return Optional.empty();
@@ -43,7 +48,6 @@ public class ChatMessageDAO {
             return Optional.empty();
         }
     }
-
     /**
      * Updates the text and sender of an existing pinned message.
      *
@@ -109,15 +113,102 @@ public class ChatMessageDAO {
         }
     }
 
-    // --- Helper method to map ResultSet ---
-    private ChatMessage mapResultSetToChatMessage(ResultSet rs) throws SQLException {
-        return ChatMessage.builder()
-                .id(rs.getLong("id"))
-                .senderId(rs.getInt("sender_id"))
-                .messageText(rs.getString("message_text"))
-                .sentAt(rs.getTimestamp("sent_at"))
-                .build();
+
+    // --- NEW METHODS ---
+    /**
+     * Fetches the most recent regular chat messages (excluding the pinned one).
+     * Includes the sender's username.
+     *
+     * @param limit The maximum number of messages to retrieve.
+     * @return A List of ChatMessage objects, ordered most recent first. Empty list on error.
+     */
+    public List<ChatMessage> findRecentMessages(int limit) {
+        LOGGER.fine("Finding last " + limit + " regular chat messages.");
+        List<ChatMessage> messages = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(FIND_RECENT_SQL)) {
+
+            pstmt.setTimestamp(1, Timestamp.valueOf(PINNED_MESSAGE_FUTURE_DATE));
+            pstmt.setInt(2, limit); // Correctly applying limit
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    messages.add(mapResultSetToChatMessage(rs));
+                }
+            }
+            LOGGER.fine("Found " + messages.size() + " recent messages.");
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding recent chat messages", e);
+        }
+        // Return newest first as fetched from DB (DESC order)
+        return messages;
     }
 
-    // Add methods for fetching recent regular messages, inserting regular messages etc.
+    /**
+     * Inserts a new regular chat message with the current timestamp.
+     *
+     * @param senderId    The ID of the user sending the message.
+     * @param messageText The text content of the message.
+     * @return true if successful, false otherwise.
+     */
+    public boolean insertRegularMessage(int senderId, String messageText) {
+        LOGGER.fine("Attempting to insert regular chat message for sender ID: " + senderId);
+        if (messageText == null || messageText.trim().isEmpty()) {
+            LOGGER.warning("Attempted to insert empty chat message.");
+            return false;
+        }
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(INSERT_REGULAR_SQL)) {
+
+            pstmt.setInt(1, senderId);
+            pstmt.setString(2, messageText.trim()); // Trim whitespace
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                LOGGER.fine("Successfully inserted regular chat message.");
+                return true;
+            } else {
+                LOGGER.warning("Failed to insert regular chat message, no rows affected.");
+                return false;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error inserting regular chat message for sender ID: " + senderId, e);
+            return false;
+        }
+    }
+    // --- END NEW METHODS ---
+
+
+    /** Helper method to map ResultSet to ChatMessage object (MODIFIED) */
+    private ChatMessage mapResultSetToChatMessage(ResultSet rs) throws SQLException {
+        ChatMessage msg = ChatMessage.builder()
+                .id(rs.getLong("id"))
+                .senderId(rs.getInt("sender_id")) // Use underscore if needed
+                .messageText(rs.getString("message_text")) // Use underscore if needed
+                .sentAt(rs.getTimestamp("sent_at")) // Use underscore if needed
+                .build();
+
+        // Check if the joined username column exists and add it
+        if (hasColumn(rs, "sender_username")) {
+            msg.setSenderUsername(rs.getString("sender_username"));
+        } else {
+            msg.setSenderUsername("Unknown"); // Fallback if join fails or column missing
+        }
+
+        return msg;
+    }
+
+    /** Utility to check if a column exists in the ResultSet metadata */
+    private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columns = rsmd.getColumnCount();
+        for (int x = 1; x <= columns; x++) {
+            if (columnName.equalsIgnoreCase(rsmd.getColumnLabel(x))) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

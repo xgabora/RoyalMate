@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.GameSearchController">
+    <top>
+        <fx:include source="navbar-view.fxml" />
+    </top>
+    <center>
+        <StackPane BorderPane.alignment="CENTER">
+            <children>
+                <!-- Background -->
+                <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.15" pickOnBounds="true" preserveRatio="false">
+                    <image>
+                        <Image url="@../../../../images/background.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <!-- Main Content VBox -->
+                <VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-background-color: transparent;" StackPane.alignment="TOP_CENTER">
+                    <padding>
+                        <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
+                    </padding>
+                    <children>
+                        <!-- Container for Search Bar and Filters -->
+                        <VBox alignment="TOP_CENTER" spacing="15.0" maxWidth="Infinity"> <!-- Allow VBox to take full width -->
+                            <children>
+                                <!-- Search Bar HBox (Takes full width of parent VBox) -->
+                                <HBox alignment="CENTER_LEFT" styleClass="search-bar" maxWidth="Infinity"> <!-- Use maxWidth, HBox.hgrow not needed here -->
+                                    <children>
+                                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                            <image><Image url="@../../../../images/search_icon.png" /></image>
+                                            <HBox.margin><Insets left="10.0" right="5.0" /></HBox.margin>
+                                        </ImageView>
+                                        <!-- TextField grows within the HBox -->
+                                        <TextField fx:id="searchTextField" promptText="%gamesearch.search.placeholder" styleClass="search-input" HBox.hgrow="ALWAYS"/>
+                                    </children>
+                                </HBox>
+
+                                <!-- Filter Toggles HBox (Centered below search) -->
+                                <HBox alignment="CENTER" spacing="10.0"> <!-- Changed to CENTER alignment -->
+                                    <children>
+                                        <ToggleButton fx:id="slotsFilterButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%gamesearch.filter.slots" />
+                                        <ToggleButton fx:id="rouletteFilterButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%gamesearch.filter.roulette" />
+                                        <ToggleButton fx:id="coinflipFilterButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%gamesearch.filter.coinflip" />
+                                    </children>
+                                </HBox>
+                            </children>
+                            <VBox.margin>
+                                <Insets bottom="10.0"/>
+                            </VBox.margin>
+                        </VBox>
+
+                        <!-- Game Count Label -->
+                        <Label fx:id="gameCountLabel" styleClass="game-count-label" text="X GAMES FOUND" textFill="#F1DA2C" />
+
+                        <!-- Scrollable Game Grid -->
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                            <content>
+                                <TilePane fx:id="gameGridPane" alignment="CENTER" hgap="20.0" vgap="20.0" prefColumns="4" style="-fx-background-color: transparent;">
+                                    <padding>
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    </padding>
+                                </TilePane>
+                            </content>
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </ScrollPane>
+
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>

@@ -200,8 +200,19 @@ public class NavbarController {
         topWinsLink.setDisable(!enabled);
     }
 
-    @FXML private void handleGames(ActionEvent event) { LOGGER.info("Navigate to Games (Placeholder)"); }
-    @FXML private void handleChat(ActionEvent event) { LOGGER.info("Navigate to Chat (Placeholder)"); }
+    @FXML
+    private void handleGames(ActionEvent event) {
+        LOGGER.info("Navigate to Games Search (from navbar)");
+        // Navigate without any pre-selected filters
+        navigateTo(event, "/sk/vava/royalmate/view/game-search-view.fxml");
+    }
+
+    @FXML
+    private void handleChat(ActionEvent event) {
+        LOGGER.info("Navigate to Chat");
+        navigateTo(event, "/sk/vava/royalmate/view/chat-view.fxml"); // Correct path
+    }
+
     @FXML private void handleTopWins(ActionEvent event) { LOGGER.info("Navigate to Top Wins (Placeholder)"); }
 
     @FXML

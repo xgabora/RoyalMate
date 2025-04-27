@@ -18,6 +18,6 @@ public class ChatMessage {
     private String messageText;
     private Timestamp sentAt;
 
-    // Optional: Add reference to the sender Account object if needed later
-    // private Account sender;
+    // Transient field to hold username after JOIN
+    private transient String senderUsername;
 }
