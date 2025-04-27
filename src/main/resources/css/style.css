@@ -208,3 +208,84 @@
     -fx-stroke-width: 1;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.0, 0, 2);
 }
+
+/* --- Profile Screen --- */
+.profile-header {
+    /* Optional: Add background or padding if needed */
+}
+
+.profile-username {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.profile-membersince {
+    -fx-font-size: 14px;
+    -fx-text-fill: #CCCCCC; /* Light grey */
+    -fx-padding: 5px 0 0 2px; /* Add slight top padding */
+}
+
+.profile-tabs {
+    /* Optional styling for the tab button container */
+    -fx-padding: 10px 0;
+}
+
+.tab-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #AAAAAA; /* Greyish text */
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 20px;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-cursor: hand;
+}
+
+.tab-button:hover {
+    -fx-text-fill: white;
+}
+
+.tab-button:selected {
+    -fx-text-fill: #F1DA2C; /* Gold text for selected tab */
+    -fx-border-color: #F1DA2C;
+    -fx-border-width: 0 0 3 0; /* Bottom border */
+}
+
+.tab-content-pane {
+    /* Optional common styling for tab content areas */
+    -fx-padding: 20px;
+    /* -fx-background-color: rgba(255, 255, 255, 0.05); /* Very subtle background */
+    /* -fx-background-radius: 8; */
+    -fx-max-width: 500px; /* Limit width of content */
+}
+
+.balance-display {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 10px 0 20px 0;
+}
+
+.amount-input {
+    -fx-max-width: 150px; /* Limit width of amount field */
+    -fx-alignment: center-right;
+}
+
+.stats-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #DDDDDD;
+    -fx-padding: 3px 0;
+}
+
+/* Re-use message-label style for profile messages */
+.message-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-padding: 5px 0;
+}
+
+/* Re-use form-label style for settings */
+/* Re-use text-input style for settings password fields */
+/* Re-use lang-button style for settings language buttons */

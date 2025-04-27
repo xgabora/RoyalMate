@@ -3,6 +3,7 @@ package sk.vava.royalmate.service;
 import sk.vava.royalmate.data.AccountDAO;
 import sk.vava.royalmate.model.Account;
 import sk.vava.royalmate.util.PasswordUtil;
+import sk.vava.royalmate.util.SessionManager;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -124,4 +125,118 @@ public class AuthService {
             throw new RuntimeException("Failed to save the new account due to a database error.");
         }
     }
+
+    // --- NEW METHODS ---
+
+    /**
+     * Attempts to withdraw funds from the user's account.
+     *
+     * @param accountId The ID of the account.
+     * @param amount    The amount to withdraw (must be positive).
+     * @return True if withdrawal successful, false otherwise (e.g., insufficient funds, invalid amount, DB error).
+     * @throws IllegalArgumentException if amount is invalid (null, zero, negative).
+     * @throws IllegalStateException if the current balance cannot be retrieved.
+     */
+    public boolean withdrawFunds(int accountId, BigDecimal amount) throws IllegalArgumentException, IllegalStateException {
+        LOGGER.info("Withdrawal attempt for account ID: " + accountId + ", Amount: " + amount);
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be positive.");
+        }
+
+        // Fetch the LATEST account details for accurate balance check
+        Account currentAccount = accountDAO.findByUsername(SessionManager.getCurrentAccount().getUsername())
+                .orElseThrow(() -> new IllegalStateException("Cannot retrieve current account data for withdrawal."));
+
+        BigDecimal currentBalance = currentAccount.getBalance();
+        if (currentBalance == null) {
+            throw new IllegalStateException("Current account balance is unexpectedly null.");
+        }
+
+        // Check for sufficient funds
+        if (currentBalance.compareTo(amount) < 0) {
+            LOGGER.warning("Withdrawal failed for account ID: " + accountId + ". Insufficient funds.");
+            return false; // Indicate insufficient funds
+        }
+
+        // Perform withdrawal by subtracting the amount (adding negative amount)
+        boolean success = accountDAO.updateBalance(accountId, amount.negate());
+
+        if (success) {
+            LOGGER.info("Withdrawal successful for account ID: " + accountId + ", Amount: " + amount);
+            // Refresh session data with the updated account info
+            SessionManager.setCurrentAccount(accountDAO.findByUsername(currentAccount.getUsername()).orElse(null)); // Re-fetch
+            return true;
+        } else {
+            LOGGER.severe("Withdrawal failed during database update for account ID: " + accountId);
+            return false; // Indicate database error
+        }
+    }
+
+    /**
+     * Changes the user's password after verifying the old one.
+     *
+     * @param accountId        The ID of the account.
+     * @param oldPasswordPlain The current plain text password.
+     * @param newPasswordPlain The new plain text password.
+     * @return True if password change was successful, false otherwise (e.g., old password incorrect, DB error).
+     * @throws IllegalArgumentException if new password is null or empty.
+     */
+    public boolean changePassword(int accountId, String oldPasswordPlain, String newPasswordPlain) throws IllegalArgumentException {
+        LOGGER.info("Password change attempt for account ID: " + accountId);
+
+        if (newPasswordPlain == null || newPasswordPlain.isEmpty()) {
+            throw new IllegalArgumentException("New password cannot be empty.");
+        }
+        // Add complexity checks for newPasswordPlain if needed here
+
+        Account currentAccount = SessionManager.getCurrentAccount(); // Get from session first
+        if (currentAccount == null || currentAccount.getId() != accountId) {
+            // Fetch from DB if session is invalid or doesn't match (shouldn't happen ideally)
+            currentAccount = accountDAO.findByUsername(SessionManager.getCurrentAccount().getUsername())
+                    .filter(acc -> acc.getId() == accountId)
+                    .orElse(null);
+            if (currentAccount == null) {
+                LOGGER.severe("Cannot find account to change password for ID: " + accountId);
+                return false;
+            }
+        }
+
+
+        // 1. Verify old password
+        if (!PasswordUtil.checkPassword(oldPasswordPlain, currentAccount.getPasswordHash())) {
+            LOGGER.warning("Password change failed for account ID: " + accountId + ". Old password incorrect.");
+            return false; // Indicate wrong old password
+        }
+
+        // 2. Hash the new password
+        String newPasswordHash = PasswordUtil.hashPassword(newPasswordPlain);
+
+        // 3. Update in database
+        boolean success = accountDAO.updatePasswordHash(accountId, newPasswordHash);
+
+        if (success) {
+            LOGGER.info("Password change successful for account ID: " + accountId);
+            // Re-fetch and update session data as password hash changed
+            SessionManager.setCurrentAccount(accountDAO.findByUsername(currentAccount.getUsername()).orElse(null));
+            return true;
+        } else {
+            LOGGER.severe("Password change failed during database update for account ID: " + accountId);
+            return false; // Indicate database error
+        }
+    }
+
+    // Placeholder for Statistics (implement later)
+    public java.util.Map<String, Long> getUserStatistics(int accountId) {
+        LOGGER.fine("Fetching placeholder statistics for account ID: " + accountId);
+        // Replace with actual data retrieval when gameplay is implemented
+        return java.util.Map.of(
+                "totalSpins", 0L,
+                "totalWins", 0L,
+                "gamesPlayed", 0L
+        );
+    }
+
+    // --- END NEW METHODS ---
+
 }

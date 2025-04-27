@@ -19,6 +19,7 @@ public class AccountDAO {
     private static final String UPDATE_LAST_LOGIN_SQL = "UPDATE accounts SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?";
     private static final String UPDATE_LAST_WOF_SPIN_SQL = "UPDATE accounts SET last_wof_spin_at = CURRENT_TIMESTAMP WHERE id = ?"; // <-- NEW SQL
     private static final String UPDATE_BALANCE_SQL = "UPDATE accounts SET balance = balance + ? WHERE id = ?"; // <-- NEW SQL
+    private static final String UPDATE_PASSWORD_HASH_SQL = "UPDATE accounts SET password_hash = ? WHERE id = ?"; // <-- NEW SQL
 
 
     /**
@@ -220,6 +221,43 @@ public class AccountDAO {
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating balance for account ID: " + accountId, e);
+            return false;
+        }
+    }
+    // --- END NEW METHOD ---
+
+    // --- NEW METHOD ---
+    /**
+     * Updates the password hash for a given account ID.
+     *
+     * @param accountId       The ID of the account.
+     * @param newPasswordHash The new, already hashed password.
+     * @return true if the update was successful, false otherwise.
+     */
+    public boolean updatePasswordHash(int accountId, String newPasswordHash) {
+        LOGGER.fine("Attempting to update password hash for account ID: " + accountId);
+        if (newPasswordHash == null || newPasswordHash.isEmpty()) {
+            LOGGER.warning("Attempted to update password with null or empty hash for account ID: " + accountId);
+            return false;
+        }
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE_PASSWORD_HASH_SQL)) {
+
+            pstmt.setString(1, newPasswordHash);
+            pstmt.setInt(2, accountId);
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                LOGGER.info("Successfully updated password hash for account ID: " + accountId);
+                return true;
+            } else {
+                LOGGER.warning("Failed to update password hash, account ID not found?: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating password hash for account ID: " + accountId, e);
             return false;
         }
     }

@@ -1,5 +1,6 @@
 package sk.vava.royalmate.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -46,6 +47,8 @@ public class NavbarController {
     @FXML private Label balanceLabel;
     @FXML private ImageView profileIconImageView;
     @FXML private Button logoutButton;
+    @FXML private VBox userInfoVBox; // Inject the VBox containing username/balance
+
 
     // New FXML fields for WoF Alert
     @FXML private HBox wofAlertBar;
@@ -56,7 +59,8 @@ public class NavbarController {
     @FXML
     public void initialize() {
         loadUserData();
-        checkWofEligibilityAndUpdateUI(); // Check eligibility on init
+        checkWofEligibilityAndUpdateUI();
+        addNavigationClickHandlers(); // Add click handlers
         LOGGER.info("Navbar initialized for locale: " + LocaleManager.getCurrentLocale().toLanguageTag());
 
         // Make alert bar clickable
@@ -141,6 +145,40 @@ public class NavbarController {
 
     // --- End WoF Logic ---
 
+    private void addNavigationClickHandlers() {
+        // Logo -> Main Menu
+        logoImageView.setCursor(javafx.scene.Cursor.HAND);
+        logoImageView.setOnMouseClicked(this::handleLogoClick);
+
+        // User Info Area (Username/Balance) -> Profile
+        Node userInfoArea = usernameLabel.getParent(); // Get the VBox container
+        if (userInfoArea != null) {
+            userInfoArea.setCursor(javafx.scene.Cursor.HAND);
+            userInfoArea.setOnMouseClicked(this::handleProfileClick);
+        } else {
+            LOGGER.warning("Could not find parent VBox for username/balance labels to add click handler.");
+            // Fallback: Add handlers to labels directly (less ideal for hit area)
+            usernameLabel.setCursor(javafx.scene.Cursor.HAND);
+            usernameLabel.setOnMouseClicked(this::handleProfileClick);
+            balanceLabel.setCursor(javafx.scene.Cursor.HAND);
+            balanceLabel.setOnMouseClicked(this::handleProfileClick);
+        }
+
+        // Profile Icon -> Profile
+        profileIconImageView.setCursor(javafx.scene.Cursor.HAND);
+        profileIconImageView.setOnMouseClicked(this::handleProfileClick);
+    }
+
+    // --- New Click Handlers ---
+    private void handleLogoClick(MouseEvent event) {
+        LOGGER.info("Logo clicked - Navigating to Main Menu.");
+        navigateTo(event, "/sk/vava/royalmate/view/main-menu-view.fxml");
+    }
+
+    private void handleProfileClick(MouseEvent event) {
+        LOGGER.info("User info/icon clicked - Navigating to Profile.");
+        navigateTo(event, "/sk/vava/royalmate/view/profile-view.fxml");
+    }
 
     private void setNavLinksEnabled(boolean enabled) {
         gamesLink.setDisable(!enabled);
@@ -191,4 +229,11 @@ public class NavbarController {
             LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e);
         }
     }
+
+    public void refreshUserDataDisplay() {
+        // Public method that can be called by other controllers (like ProfileController after withdrawal)
+        LOGGER.info("Refreshing navbar user data display.");
+        Platform.runLater(this::loadUserData); // Ensure UI update happens on FX thread
+    }
+
 }

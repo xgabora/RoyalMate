@@ -37,17 +37,20 @@
                 <!-- Right: User Info & Profile -->
                 <HBox alignment="CENTER_RIGHT" spacing="15.0">
                     <children>
-                        <VBox alignment="CENTER_RIGHT">
+                        <!-- User Info VBox -->
+                        <VBox fx:id="userInfoVBox" alignment="CENTER_RIGHT">
                             <children>
                                 <Label fx:id="usernameLabel" styleClass="user-info-label" text="Username" />
                                 <Label fx:id="balanceLabel" styleClass="balance-label" text="Balance: €0.00" />
                             </children>
                         </VBox>
+                        <!-- Profile Icon -->
                         <ImageView fx:id="profileIconImageView" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                             <image>
                                 <Image url="@../../../../images/profile_icon.png" backgroundLoading="true" />
                             </image>
                         </ImageView>
+                        <!-- Logout Button -->
                         <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" styleClass="logout-button" text="%navbar.logout" />
                     </children>
                 </HBox>

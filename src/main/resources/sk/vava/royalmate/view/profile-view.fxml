@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.ProfileController">
+    <top>
+        <!-- Include Navbar -->
+        <fx:include fx:id="navbarComponent" source="navbar-view.fxml" />
+    </top>
+    <center>
+        <!-- Main Content Area with Background -->
+        <StackPane BorderPane.alignment="CENTER">
+            <children>
+                <!-- Background Image -->
+                <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.20" pickOnBounds="true" preserveRatio="false">
+                    <image>
+                        <Image url="@../../../../images/background.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <!-- Profile Content VBox -->
+                <VBox alignment="TOP_CENTER" maxWidth="800.0" spacing="20.0" StackPane.alignment="TOP_CENTER">
+                    <StackPane.margin>
+                        <Insets top="30.0" />
+                    </StackPane.margin>
+                    <children>
+                        <!-- Header Section -->
+                        <HBox alignment="CENTER_LEFT" spacing="30.0" styleClass="profile-header">
+                            <padding>
+                                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                            </padding>
+                            <children>
+                                <ImageView fx:id="profileIconBig" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <!-- Ensure profile_icon_white.png exists -->
+                                        <Image url="@../../../../images/profile_icon_white.png" />
+                                    </image>
+                                </ImageView>
+                                <VBox alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label fx:id="usernameLabel" styleClass="profile-username" text="Username" textFill="WHITE" />
+                                        <Label fx:id="memberSinceLabel" styleClass="profile-membersince" text="member since DD.MM.YYYY" textFill="#CCCCCC" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- Tab Buttons -->
+                        <HBox alignment="CENTER" spacing="5.0" styleClass="profile-tabs">
+                            <children>
+                                <ToggleButton fx:id="balanceTabButton" mnemonicParsing="false" styleClass="tab-button" text="%profile.tab.balance" />
+                                <ToggleButton fx:id="statsTabButton" mnemonicParsing="false" styleClass="tab-button" text="%profile.tab.statistics" />
+                                <ToggleButton fx:id="settingsTabButton" mnemonicParsing="false" styleClass="tab-button" text="%profile.tab.settings" />
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" />
+                            </padding>
+                        </HBox>
+
+                        <!-- Tab Content Area -->
+                        <StackPane fx:id="tabContentPane" alignment="TOP_CENTER">
+                            <VBox.margin>
+                                <Insets />
+                            </VBox.margin>
+                            <padding>
+                                <Insets bottom="20.0" left="50.0" right="50.0" top="10.0" />
+                            </padding>
+                            <children>
+                                <!-- Balance Content (Initially Visible) -->
+                                <VBox fx:id="balanceContent" alignment="TOP_CENTER" spacing="15.0" styleClass="tab-content-pane">
+                                    <children>
+                                        <Label fx:id="currentBalanceLabel" styleClass="balance-display" text="Current Balance: €0.00" textFill="WHITE" />
+                                        <HBox alignment="CENTER" spacing="10.0">
+                                            <children>
+                                                <Label text="%profile.label.enteramount" textFill="#CCCCCC" />
+                                                <TextField fx:id="withdrawAmountField" promptText="0.00" styleClass="amount-input" />
+                                            </children>
+                                        </HBox>
+                                        <Button fx:id="withdrawButton" mnemonicParsing="false" onAction="#handleWithdraw" styleClass="splash-button, button-primary" text="%profile.button.withdraw" />
+                                        <Label fx:id="balanceMessageLabel" managed="false" styleClass="message-label" text="Message area" visible="false" />
+                                    </children>
+                                </VBox>
+
+                                <!-- Statistics Content (Initially Hidden) -->
+                                <VBox fx:id="statsContent" alignment="TOP_LEFT" spacing="10.0" styleClass="tab-content-pane" visible="false" managed="false">
+                                    <children>
+                                        <Label fx:id="totalSpinsLabel" styleClass="stats-label" text="Total Spins: 0" textFill="#DDDDDD"/>
+                                        <Label fx:id="totalWinsLabel" styleClass="stats-label" text="Total Wins (€): 0" textFill="#DDDDDD"/>
+                                        <Label fx:id="gamesPlayedLabel" styleClass="stats-label" text="Games Played: 0" textFill="#DDDDDD"/>
+                                    </children>
+                                    <padding>
+                                        <Insets left="20.0" />
+                                    </padding>
+                                </VBox>
+
+                                <!-- Settings Content (Initially Hidden) -->
+                                <VBox fx:id="settingsContent" alignment="TOP_CENTER" spacing="15.0" styleClass="tab-content-pane" visible="false" managed="false">
+                                    <children>
+                                        <!-- Language Settings -->
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <Label styleClass="form-label" text="%profile.label.language" textFill="WHITE"/>
+                                            <HBox spacing="10.0">
+                                                <Button fx:id="enButton" mnemonicParsing="false" onAction="#handleSetLocaleEN" styleClass="lang-button" text="EN" />
+                                                <Button fx:id="skButton" mnemonicParsing="false" onAction="#handleSetLocaleSK" styleClass="lang-button" text="SK" />
+                                            </HBox>
+                                        </HBox>
+                                        <!-- Change Password -->
+                                        <Separator prefWidth="200.0">
+                                            <padding>
+                                                <Insets bottom="5.0" top="15.0" />
+                                            </padding>
+                                        </Separator>
+                                        <Label styleClass="form-label" text="%profile.label.changepassword" textFill="WHITE">
+                                            <font><Font name="System Bold" size="16.0" /></font>
+                                        </Label>
+                                        <VBox alignment="CENTER_LEFT" spacing="5.0" maxWidth="300.0">
+                                            <Label styleClass="form-label" text="%profile.label.oldpassword" textFill="#CCCCCC"/>
+                                            <PasswordField fx:id="oldPasswordField" promptText="Enter current password" styleClass="text-input"/>
+                                            <Label styleClass="form-label" text="%profile.label.newpassword" textFill="#CCCCCC"/>
+                                            <PasswordField fx:id="newPasswordField" promptText="Enter new password" styleClass="text-input"/>
+                                            <Label styleClass="form-label" text="%profile.label.repeatpassword" textFill="#CCCCCC"/>
+                                            <PasswordField fx:id="repeatPasswordField" promptText="Confirm new password" styleClass="text-input"/>
+                                        </VBox>
+                                        <Button fx:id="changePasswordButton" mnemonicParsing="false" onAction="#handleChangePassword" styleClass="splash-button, button-secondary" text="%profile.button.changepassword" />
+                                        <Label fx:id="passwordMessageLabel" managed="false" styleClass="message-label" text="Message area" visible="false" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </StackPane>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>
