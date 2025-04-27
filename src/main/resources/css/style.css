@@ -218,6 +218,8 @@
     -fx-font-size: 36px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
+
+    -fx-effect: dropshadow(gaussian, #FFFFFF, 10, 0.0, 0, 0);
 }
 
 .profile-membersince {
@@ -250,6 +252,9 @@
     -fx-text-fill: #F1DA2C; /* Gold text for selected tab */
     -fx-border-color: #F1DA2C;
     -fx-border-width: 0 0 3 0; /* Bottom border */
+
+    /* Apply the gold shadow by default */
+    -fx-effect: dropshadow(gaussian, -fx-gold-color, 10, 0.0, 0, 0);
 }
 
 .tab-content-pane {
@@ -268,9 +273,12 @@
 }
 
 .amount-input {
-    -fx-max-width: 150px; /* Limit width of amount field */
+    -fx-max-width: 250px;
     -fx-alignment: center-right;
+    -fx-pref-height: 40px; /* Make the input field taller */
+    -fx-font-size: 16px; /* Adjust font size if needed for height */
 }
+
 
 .stats-label {
     -fx-font-size: 16px;
