@@ -4,9 +4,12 @@ module sk.vava.royalmate {
     // JavaFX modules needed for UI and FXML loading
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.swing;
 
     // Standard Java module for logging
     requires java.logging;
+
+    requires java.desktop;
 
     // Standard Java module for JDBC database access
     requires java.sql;

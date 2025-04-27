@@ -31,6 +31,10 @@
                         <Hyperlink fx:id="chatLink" onAction="#handleChat" styleClass="nav-link" text="%navbar.chat" />
                         <Label styleClass="nav-separator" text="|" />
                         <Hyperlink fx:id="topWinsLink" onAction="#handleTopWins" styleClass="nav-link" text="%navbar.topwins" />
+                        <!-- Server Link (Admin Only) -->
+                        <Label fx:id="serverSeparator" styleClass="nav-separator" text="|" managed="false" visible="false" />
+                        <Hyperlink fx:id="serverLink" onAction="#handleServer" styleClass="nav-link" text="%navbar.server" managed="false" visible="false" />
+
                     </children>
                 </HBox>
 

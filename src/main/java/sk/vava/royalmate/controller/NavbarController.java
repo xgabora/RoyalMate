@@ -55,12 +55,17 @@ public class NavbarController {
     @FXML private ImageView wofIcon;
     @FXML private Label wofAlertLabel;
 
+    @FXML private Hyperlink serverLink; // Inject server link
+    @FXML private Label serverSeparator; // Inject separator
+
+
 
     @FXML
     public void initialize() {
         loadUserData();
         checkWofEligibilityAndUpdateUI();
-        addNavigationClickHandlers(); // Add click handlers
+        addNavigationClickHandlers();
+        setupAdminFeatures(); // NEW call
         LOGGER.info("Navbar initialized for locale: " + LocaleManager.getCurrentLocale().toLanguageTag());
 
         // Make alert bar clickable
@@ -145,6 +150,15 @@ public class NavbarController {
 
     // --- End WoF Logic ---
 
+    private void setupAdminFeatures() {
+        boolean isAdmin = SessionManager.isAdmin();
+        // Show/hide server link and its separator based on admin status
+        serverLink.setVisible(isAdmin);
+        serverLink.setManaged(isAdmin);
+        serverSeparator.setVisible(isAdmin);
+        serverSeparator.setManaged(isAdmin);
+    }
+
     private void addNavigationClickHandlers() {
         // Logo -> Main Menu
         logoImageView.setCursor(javafx.scene.Cursor.HAND);
@@ -196,6 +210,12 @@ public class NavbarController {
         LOGGER.info("User " + username + " logging out from navbar.");
         SessionManager.logout();
         navigateTo(event, "/sk/vava/royalmate/view/splash-view.fxml");
+    }
+
+    @FXML
+    private void handleServer(ActionEvent event) {
+        LOGGER.info("Navigate to Server Settings");
+        navigateTo(event, "/sk/vava/royalmate/view/admin-settings-view.fxml"); // Navigate to admin view
     }
 
 

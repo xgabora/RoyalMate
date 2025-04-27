@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.AdminSettingsController">
+    <top>
+        <fx:include source="navbar-view.fxml" />
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" BorderPane.alignment="CENTER">
+            <content>
+                <VBox alignment="TOP_CENTER" spacing="30.0" style="-fx-background-color: transparent;">
+                    <padding>
+                        <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
+                    </padding>
+                    <children>
+                        <!-- Title -->
+                        <Label styleClass="page-title" text="%admin.title" textFill="#F1DA2C" />
+
+                        <!-- Banner Settings -->
+                        <VBox styleClass="admin-section" spacing="10.0">
+                            <Label styleClass="admin-section-title" text="%admin.section.banner"/>
+                            <ImageView fx:id="bannerImageView" fitHeight="150.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true" style="-fx-border-color: grey; -fx-border-width: 1;"/>
+                            <Button fx:id="uploadBannerButton" onAction="#handleUploadBanner" styleClass="splash-button button-primary" text="%admin.button.uploadbanner"/>
+                            <Label fx:id="bannerMessageLabel" styleClass="message-label" managed="false" visible="false"/>
+                        </VBox>
+
+                        <!-- Chat Settings -->
+                        <VBox styleClass="admin-section" spacing="10.0">
+                            <Label styleClass="admin-section-title" text="%admin.section.chat"/>
+                            <Label styleClass="form-label" text="%admin.label.pinnedmessage"/>
+                            <TextArea fx:id="pinnedMessageArea" prefRowCount="3" wrapText="true" styleClass="text-area-input"/>
+                            <Button fx:id="updateChatButton" onAction="#handleUpdatePinnedMessage" styleClass="splash-button button-primary" text="%admin.button.updatechat"/>
+                            <Label fx:id="chatMessageLabel" styleClass="message-label" managed="false" visible="false"/>
+                        </VBox>
+
+                        <!-- Player Settings -->
+                        <VBox styleClass="admin-section" spacing="10.0">
+                            <Label styleClass="admin-section-title" text="%admin.section.player"/>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <Label styleClass="form-label" text="%admin.label.selectplayer" minWidth="100.0"/>
+                                <ComboBox fx:id="playerComboBox" prefWidth="250.0"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <Label styleClass="form-label" text="%admin.label.enteramount" minWidth="100.0"/>
+                                <TextField fx:id="amountField" promptText="0.00" styleClass="amount-input" prefWidth="150.0"/>
+                                <Button fx:id="addFundsButton" onAction="#handleAddFunds" styleClass="action-button positive" text="%admin.button.addfunds"/>
+                                <Button fx:id="subtractFundsButton" onAction="#handleSubtractFunds" styleClass="action-button negative" text="%admin.button.subtractfunds"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <Button fx:id="makeAdminButton" onAction="#handleMakeAdmin" styleClass="action-button warning" text="%admin.button.makeadmin"/>
+                                <Button fx:id="removeAccountButton" onAction="#handleRemoveAccount" styleClass="action-button negative" text="%admin.button.removeaccount"/>
+                            </HBox>
+                            <Label fx:id="playerMessageLabel" styleClass="message-label" managed="false" visible="false"/>
+                        </VBox>
+
+                        <!-- Game Settings (Placeholders) -->
+                        <VBox styleClass="admin-section" spacing="10.0">
+                            <Label styleClass="admin-section-title" text="%admin.section.game"/>
+                            <HBox spacing="20.0">
+                                <Button fx:id="gameListButton" onAction="#handleGameList" styleClass="splash-button button-secondary" text="%admin.button.opengamelist"/>
+                                <Button fx:id="addGameButton" onAction="#handleAddGame" styleClass="splash-button button-secondary" text="%admin.button.addnewgame"/>
+                            </HBox>
+                        </VBox>
+
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

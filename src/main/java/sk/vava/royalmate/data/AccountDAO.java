@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.util.ArrayList; // Import ArrayList
+import java.util.List; // Import List
+
 public class AccountDAO {
 
     private static final Logger LOGGER = Logger.getLogger(AccountDAO.class.getName());
@@ -20,7 +23,9 @@ public class AccountDAO {
     private static final String UPDATE_LAST_WOF_SPIN_SQL = "UPDATE accounts SET last_wof_spin_at = CURRENT_TIMESTAMP WHERE id = ?"; // <-- NEW SQL
     private static final String UPDATE_BALANCE_SQL = "UPDATE accounts SET balance = balance + ? WHERE id = ?"; // <-- NEW SQL
     private static final String UPDATE_PASSWORD_HASH_SQL = "UPDATE accounts SET password_hash = ? WHERE id = ?"; // <-- NEW SQL
-
+    private static final String FIND_ALL_SQL = "SELECT * FROM accounts ORDER BY username ASC"; // <-- NEW SQL
+    private static final String UPDATE_ADMIN_STATUS_SQL = "UPDATE accounts SET is_admin = ? WHERE id = ?"; // <-- NEW SQL
+    private static final String DELETE_ACCOUNT_SQL = "DELETE FROM accounts WHERE id = ?"; // <-- NEW SQL
 
     /**
      * Finds an account by its username.
@@ -263,7 +268,92 @@ public class AccountDAO {
     }
     // --- END NEW METHOD ---
 
+    // --- NEW METHODS ---
 
+    /**
+     * Retrieves all accounts from the database, ordered by username.
+     *
+     * @return A List of Account objects. Returns an empty list on error.
+     */
+    public List<Account> findAll() {
+        LOGGER.fine("Attempting to find all accounts.");
+        List<Account> accounts = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement(); // Simple query, Statement is fine
+             ResultSet rs = stmt.executeQuery(FIND_ALL_SQL)) {
+
+            while (rs.next()) {
+                accounts.add(mapResultSetToAccount(rs));
+            }
+            LOGGER.fine("Found " + accounts.size() + " accounts.");
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding all accounts", e);
+            // Return empty list on error, don't throw exception up usually for find operations
+        }
+        return accounts;
+    }
+
+    /**
+     * Updates the admin status for a given account ID.
+     *
+     * @param accountId The ID of the account.
+     * @param isAdmin   The new admin status (true or false).
+     * @return true if the update was successful, false otherwise.
+     */
+    public boolean updateAdminStatus(int accountId, boolean isAdmin) {
+        LOGGER.info("Attempting to set admin status to " + isAdmin + " for account ID: " + accountId);
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE_ADMIN_STATUS_SQL)) {
+
+            pstmt.setBoolean(1, isAdmin);
+            pstmt.setInt(2, accountId);
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                LOGGER.info("Successfully updated admin status for account ID: " + accountId);
+                return true;
+            } else {
+                LOGGER.warning("Failed to update admin status, account ID not found?: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating admin status for account ID: " + accountId, e);
+            return false;
+        }
+    }
+
+    /**
+     * Deletes an account by its ID.
+     * WARNING: This is a destructive operation. Consider soft deletes (setting an 'is_active' flag) in real apps.
+     * Depending on FOREIGN KEY constraints (e.g., ON DELETE RESTRICT), this might fail if the user has related records.
+     *
+     * @param accountId The ID of the account to delete.
+     * @return true if the deletion was successful, false otherwise.
+     */
+    public boolean deleteAccount(int accountId) {
+        LOGGER.warning("Attempting to DELETE account ID: " + accountId); // Log as warning due to destructive nature
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(DELETE_ACCOUNT_SQL)) {
+
+            pstmt.setInt(1, accountId);
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                LOGGER.info("Successfully deleted account ID: " + accountId);
+                return true;
+            } else {
+                LOGGER.warning("Failed to delete account, account ID not found?: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            // Catch potential foreign key constraint violations (error code might vary by DB)
+            LOGGER.log(Level.SEVERE, "Error deleting account ID: " + accountId + ". Possible FK constraints?", e);
+            return false;
+        }
+    }
+    // --- END NEW METHODS ---
 
     /**
      * Helper method to map a ResultSet row to an Account object.

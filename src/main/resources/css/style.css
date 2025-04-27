@@ -294,6 +294,82 @@
     -fx-padding: 5px 0;
 }
 
-/* Re-use form-label style for settings */
-/* Re-use text-input style for settings password fields */
-/* Re-use lang-button style for settings language buttons */
+/* --- Admin Settings --- */
+.page-title {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 15px 0;
+}
+
+.admin-section {
+    -fx-padding: 20px;
+    -fx-background-color: rgba(255, 255, 255, 0.05); /* Subtle section background */
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-max-width: 700px; /* Limit width */
+    -fx-alignment: top-left;
+}
+
+.admin-section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #F1DA2C; /* Gold */
+    -fx-padding: 0 0 10px 0;
+    -fx-border-color: #F1DA2C;
+    -fx-border-width: 0 0 2 0; /* Bottom border */
+    -fx-alignment: center-left;
+}
+
+.text-area-input { /* Style for TextArea */
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, +50%);
+    -fx-background-radius: 5;
+    -fx-border-color: #444;
+    -fx-border-radius: 5;
+    -fx-border-width: 1;
+    -fx-pref-height: 80px; /* Default height */
+}
+.text-area-input .content { /* Target inner content area */
+    -fx-background-color: white;
+}
+.text-area-input:focused {
+    -fx-border-color: -fx-gold-color;
+    -fx-border-width: 2;
+}
+
+/* Specific Action Buttons */
+.action-button { /* Base style for player action buttons */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 15px;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.action-button.positive {
+    -fx-background-color: #5cb85c; /* Green */
+    -fx-text-fill: white;
+}
+.action-button.positive:hover {
+    -fx-background-color: derive(#5cb85c, -15%);
+}
+
+.action-button.negative {
+    -fx-background-color: #d9534f; /* Red */
+    -fx-text-fill: white;
+}
+.action-button.negative:hover {
+    -fx-background-color: derive(#d9534f, -15%);
+}
+
+.action-button.warning {
+    -fx-background-color: #f0ad4e; /* Orange/Yellow */
+    -fx-text-fill: white;
+}
+.action-button.warning:hover {
+    -fx-background-color: derive(#f0ad4e, -15%);
+}
