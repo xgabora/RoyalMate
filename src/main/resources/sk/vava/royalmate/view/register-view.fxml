@@ -10,86 +10,59 @@
 
 <StackPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.RegisterController">
     <children>
-        <!-- Background Image -->
         <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.4" pickOnBounds="true" preserveRatio="false">
             <image>
                 <Image url="@../../../../images/background.png" backgroundLoading="true" />
             </image>
         </ImageView>
 
-        <!-- Centered Content Area -->
         <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="450.0" spacing="15.0">
             <children>
-                <!-- Title -->
-                <Text fill="#F1DA2C" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="auth-title" text="CREATE AN ACCOUNT" textAlignment="CENTER" wrappingWidth="448.13671875">
-                    <font>
-                        <Font name="System Bold" size="48.0" />
-                    </font>
+                <Text fill="#F1DA2C" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="auth-title" text="%register.title" textAlignment="CENTER" wrappingWidth="448.13671875"> <font>
+                    <Font name="System Bold" size="48.0" />
+                </font>
                     <VBox.margin>
                         <Insets bottom="5.0" />
                     </VBox.margin>
                 </Text>
 
-                <!-- Form Container -->
                 <VBox fx:id="formContainer" alignment="TOP_CENTER" spacing="10.0" styleClass="auth-form-container">
                     <padding>
                         <Insets bottom="25.0" left="40.0" right="40.0" top="25.0" />
                     </padding>
                     <children>
-                        <!-- Email -->
-                        <Label styleClass="form-label" text="E-mail" textFill="WHITE" />
-                        <TextField fx:id="emailField" promptText="Enter your email address" styleClass="text-input" />
+                        <Label styleClass="form-label" text="%register.label.email" textFill="WHITE" /> <TextField fx:id="emailField" promptText="%register.prompt.email" styleClass="text-input" /> <Label styleClass="form-label" text="%register.label.username" textFill="WHITE"> <VBox.margin>
+                        <Insets top="8.0" />
+                    </VBox.margin>
+                    </Label>
+                        <TextField fx:id="usernameField" promptText="%register.prompt.username" styleClass="text-input" /> <Label styleClass="form-label" text="%register.label.password" textFill="WHITE"> <VBox.margin>
+                        <Insets top="8.0" />
+                    </VBox.margin>
+                    </Label>
+                        <PasswordField fx:id="passwordField" promptText="%register.prompt.password" styleClass="text-input" /> <Label styleClass="form-label" text="%register.label.repeatPassword" textFill="WHITE"> <VBox.margin>
+                        <Insets top="8.0" />
+                    </VBox.margin>
+                    </Label>
+                        <PasswordField fx:id="repeatPasswordField" promptText="%register.prompt.repeatPassword" styleClass="text-input" /> <Label fx:id="passwordErrorLabel" managed="false" styleClass="error-label" text="Error Placeholder" textFill="RED" visible="false">
+                        <VBox.margin>
+                            <Insets top="2.0" />
+                        </VBox.margin>
+                    </Label>
 
-                        <!-- Username -->
-                        <Label styleClass="form-label" text="Username" textFill="WHITE">
-                            <VBox.margin>
-                                <Insets top="8.0" />
-                            </VBox.margin>
-                        </Label>
-                        <TextField fx:id="usernameField" promptText="Choose a username" styleClass="text-input" />
-
-                        <!-- Password -->
-                        <Label styleClass="form-label" text="Password" textFill="WHITE">
-                            <VBox.margin>
-                                <Insets top="8.0" />
-                            </VBox.margin>
-                        </Label>
-                        <PasswordField fx:id="passwordField" promptText="Create a password" styleClass="text-input" />
-
-                        <!-- Repeat Password -->
-                        <Label styleClass="form-label" text="Repeat Password" textFill="WHITE">
-                            <VBox.margin>
-                                <Insets top="8.0" />
-                            </VBox.margin>
-                        </Label>
-                        <PasswordField fx:id="repeatPasswordField" promptText="Confirm your password" styleClass="text-input" />
-
-                        <!-- Password Mismatch Error -->
-                        <Label fx:id="passwordErrorLabel" managed="false" styleClass="error-label" text="Passwords do not match." textFill="RED" visible="false">
-                            <VBox.margin>
-                                <Insets top="2.0" />
-                            </VBox.margin>
-                        </Label>
-
-                        <!-- General Error/Success Message Area -->
-                        <Label fx:id="messageLabel" managed="false" styleClass="message-label" text="Message here" visible="false">
+                        <Label fx:id="messageLabel" managed="false" styleClass="message-label" text="Message Placeholder" visible="false">
                             <VBox.margin>
                                 <Insets top="5.0" />
                             </VBox.margin>
                         </Label>
 
-                        <!-- Create Account Button -->
-                        <Button fx:id="createAccountButton" mnemonicParsing="false" onAction="#handleCreateAccount" styleClass="splash-button, button-primary" text="CREATE AN ACCOUNT">
-                            <VBox.margin>
-                                <Insets top="15.0" />
-                            </VBox.margin>
+                        <Button fx:id="createAccountButton" mnemonicParsing="false" onAction="#handleCreateAccount" styleClass="splash-button, button-primary" text="%button.register"> <VBox.margin>
+                            <Insets top="15.0" />
+                        </VBox.margin>
                         </Button>
 
-                        <!-- Login Link -->
-                        <Hyperlink fx:id="loginLink" onAction="#handleLoginLink" styleClass="auth-link" text="Already have an account?" textFill="#FDEED2">
-                            <VBox.margin>
-                                <Insets top="8.0" />
-                            </VBox.margin>
+                        <Hyperlink fx:id="loginLink" onAction="#handleLoginLink" styleClass="auth-link" text="%register.link.login" textFill="#FDEED2"> <VBox.margin>
+                            <Insets top="8.0" />
+                        </VBox.margin>
                         </Hyperlink>
                     </children>
                 </VBox>

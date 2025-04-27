@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<!-- Root is now a VBox -->
+<VBox fx:id="navbarRootContainer" spacing="0.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.NavbarController">
+    <children>
+        <!-- Original Navbar Content in an HBox -->
+        <HBox fx:id="navbarContent" alignment="CENTER_LEFT" prefHeight="60.0" styleClass="navbar" spacing="20.0">
+            <padding>
+                <Insets left="20.0" right="20.0" />
+            </padding>
+            <children>
+                <!-- Left: Logo -->
+                <ImageView fx:id="logoImageView" fitHeight="40.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../../../images/royalmate_slim.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <!-- Center: Navigation Links -->
+                <HBox alignment="CENTER" spacing="15.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Hyperlink fx:id="gamesLink" onAction="#handleGames" styleClass="nav-link" text="%navbar.games" />
+                        <Label styleClass="nav-separator" text="|" />
+                        <Hyperlink fx:id="chatLink" onAction="#handleChat" styleClass="nav-link" text="%navbar.chat" />
+                        <Label styleClass="nav-separator" text="|" />
+                        <Hyperlink fx:id="topWinsLink" onAction="#handleTopWins" styleClass="nav-link" text="%navbar.topwins" />
+                    </children>
+                </HBox>
+
+                <!-- Right: User Info & Profile -->
+                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                    <children>
+                        <VBox alignment="CENTER_RIGHT">
+                            <children>
+                                <Label fx:id="usernameLabel" styleClass="user-info-label" text="Username" />
+                                <Label fx:id="balanceLabel" styleClass="balance-label" text="Balance: €0.00" />
+                            </children>
+                        </VBox>
+                        <ImageView fx:id="profileIconImageView" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../../../../images/profile_icon.png" backgroundLoading="true" />
+                            </image>
+                        </ImageView>
+                        <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" styleClass="logout-button" text="%navbar.logout" />
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <!-- Wheel of Fortune Alert Bar (Initially Hidden) -->
+        <HBox fx:id="wofAlertBar" alignment="CENTER" spacing="10.0" styleClass="wof-alert-bar" managed="false" visible="false" onMouseClicked="#handleWofAlertClick">
+            <padding>
+                <Insets bottom="5.0" top="5.0" />
+            </padding>
+            <children>
+                <ImageView fx:id="wofIcon" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../../../images/wheel_icon.png" /> <!-- Make sure wheel_icon.png exists -->
+                    </image>
+                </ImageView>
+                <Label fx:id="wofAlertLabel" styleClass="wof-alert-label" text="%navbar.wof.alert" />
+            </children>
+            <VBox.margin>
+                <Insets />
+            </VBox.margin>
+        </HBox>
+    </children>
+</VBox>

@@ -127,3 +127,84 @@
 .auth-link:hover {
     -fx-text-fill: -fx-gold-color; /* Gold on hover */
 }
+
+/* --- Navbar --- */
+.navbar {
+    -fx-background-color: #F1DA2C; /* Yellow background */
+    -fx-border-color: derive(#F1DA2C, -20%); /* Slightly darker border */
+    -fx-border-width: 0 0 1 0; /* Bottom border only */
+}
+
+.nav-link {
+    -fx-text-fill: black; /* Black text for links */
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-underline: false; /* Remove default underline */
+    -fx-border-color: transparent; /* Remove border */
+}
+.nav-link:hover {
+    -fx-text-fill: #444; /* Darker gray on hover */
+    -fx-underline: true; /* Underline on hover */
+}
+
+.nav-separator {
+    -fx-text-fill: rgba(0, 0, 0, 0.5); /* Semi-transparent black separator */
+    -fx-font-size: 16px;
+}
+
+.user-info-label {
+    -fx-text-fill: black;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.balance-label {
+    -fx-text-fill: #333; /* Dark gray for balance */
+    -fx-font-size: 12px;
+}
+
+.logout-button {
+    -fx-background-color: #E05D5D; /* Reddish color */
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 5px 10px;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0.0, 0, 1); /* Subtle shadow */
+}
+.logout-button:hover {
+    -fx-background-color: derive(#E05D5D, -15%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 7, 0.0, 0, 2);
+}
+
+/* --- Wheel of Fortune Alert Bar --- */
+.wof-alert-bar {
+    -fx-background-color: #E05D5D; /* Reddish background */
+    -fx-padding: 5px 15px; /* Padding */
+    -fx-alignment: center;
+    -fx-cursor: hand; /* Indicate clickable */
+}
+.wof-alert-bar:hover {
+    -fx-background-color: derive(#E05D5D, -15%); /* Darken on hover */
+}
+
+.wof-alert-label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* --- Wheel Styles --- */
+.wheel-center-dot {
+    -fx-fill: #888888; /* Medium grey */
+    -fx-stroke: #555555;
+    -fx-stroke-width: 1;
+}
+
+.wheel-pointer {
+    -fx-fill: #555555; /* Dark grey pointer */
+    -fx-stroke: black;
+    -fx-stroke-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.0, 0, 2);
+}

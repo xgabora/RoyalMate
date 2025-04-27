@@ -1,102 +1,54 @@
 package sk.vava.royalmate.controller;
-import javafx.stage.Stage;
-import javafx.util.Duration;
-import java.util.Random;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label; // Import Label
-import sk.vava.royalmate.model.Account;
-import sk.vava.royalmate.util.SessionManager; // Correct package used
 
-import java.io.IOException;
+// Removed: import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+// Removed: import javafx.fxml.FXMLLoader;
+// Removed: import javafx.scene.Node;
+// Removed: import javafx.scene.Parent;
+// Removed: import javafx.scene.Scene;
+// Removed: import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import sk.vava.royalmate.model.Account;
+import sk.vava.royalmate.util.LocaleManager; // Keep LocaleManager if needed here
+import sk.vava.royalmate.util.SessionManager;
+
+// Removed: import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 public class MainMenuController {
 
     private static final Logger LOGGER = Logger.getLogger(MainMenuController.class.getName());
 
-    @FXML private Button logoutButton;
-    @FXML private Label welcomeLabel; // fx:id for the welcome label
+    // Removed: @FXML private Button logoutButton;
+    @FXML private Label welcomeLabel;
+
+    // Optional: Inject the controller of the included navbar
+    // This allows the MainMenuController to interact with the NavbarController if needed
+    @FXML private NavbarController navbarComponentController; // Name must be <fx:id>Controller
 
     @FXML
     public void initialize() {
         // Set welcome message using logged-in user's data
         Account currentUser = SessionManager.getCurrentAccount();
         if (currentUser != null) {
+            // You could potentially use LocaleManager here too if the welcome text needed parameters
             welcomeLabel.setText("Welcome, " + currentUser.getUsername() + "!");
             LOGGER.info("Main menu initialized for user: " + currentUser.getUsername());
+
+            // Example: Accessing the included controller (if needed)
+            if (navbarComponentController != null) {
+                LOGGER.fine("NavbarController injected successfully.");
+                // You could call public methods on navbarComponentController here
+            } else {
+                LOGGER.warning("NavbarController was not injected. Check FXML fx:id and controller class name.");
+            }
+
         } else {
-            // This shouldn't happen if navigation is correct, but handle defensively
             welcomeLabel.setText("Welcome!");
             LOGGER.warning("MainMenuController initialized but no user in session!");
-            // Optionally navigate back to login immediately
-            // navigateTo(logoutButton, "/sk/vava/royalmate/view/login-view.fxml");
+            // If no user, ideally redirect back to login from here?
+            // navigateToLogin(); // You'd need a navigation method here
         }
     }
-
-    @FXML
-    private void handleLogout(ActionEvent event) {
-        String username = "Unknown User";
-        if (SessionManager.isLoggedIn()) {
-            username = SessionManager.getCurrentAccount().getUsername();
-        }
-        LOGGER.info("User " + username + " logging out.");
-
-        // Clear the session
-        SessionManager.logout();
-
-        // Navigate back to the Login screen
-        navigateTo(event, "/sk/vava/royalmate/view/login-view.fxml");
-    }
-
-
-    // Navigation helper (Consider moving this to a NavigationUtil class later)
-    private void navigateTo(ActionEvent event, String fxmlPath) {
-        try {
-            // Get the source node (the button that was clicked) to find the scene
-            Node source = (Node) event.getSource();
-            Scene scene = source.getScene();
-            if (scene == null) {
-                LOGGER.severe("Could not get current scene from event source.");
-                // Optionally show an alert to the user
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            if (loader.getLocation() == null) {
-                throw new IOException("Cannot find FXML file: " + fxmlPath);
-            }
-            Parent nextRoot = loader.load();
-            scene.setRoot(nextRoot);
-            LOGGER.info("Successfully navigated to: " + fxmlPath);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to load FXML: " + fxmlPath, e);
-            // TODO: Show an error message to the user (e.g., using an Alert)
-        } catch (ClassCastException e) {
-            LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e);
-        }
-    }
-    @FXML
-    private void SpinWheel (){
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sk/vava/royalmate/view/Wheel.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Wheel of Game ");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-}
 }

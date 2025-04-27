@@ -2,6 +2,7 @@ package sk.vava.royalmate.data;
 
 import sk.vava.royalmate.model.Account;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -16,6 +17,8 @@ public class AccountDAO {
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM accounts WHERE email = ?";
     private static final String INSERT_ACCOUNT_SQL = "INSERT INTO accounts (username, password_hash, email, balance, profile_picture_color, is_admin, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_LAST_LOGIN_SQL = "UPDATE accounts SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?";
+    private static final String UPDATE_LAST_WOF_SPIN_SQL = "UPDATE accounts SET last_wof_spin_at = CURRENT_TIMESTAMP WHERE id = ?"; // <-- NEW SQL
+    private static final String UPDATE_BALANCE_SQL = "UPDATE accounts SET balance = balance + ? WHERE id = ?"; // <-- NEW SQL
 
 
     /**
@@ -154,6 +157,75 @@ public class AccountDAO {
         }
     }
 
+    // --- NEW METHOD ---
+    /**
+     * Updates the last_wof_spin_at timestamp for a given account ID to the current time.
+     *
+     * @param accountId The ID of the account to update.
+     * @return true if the update was successful, false otherwise.
+     */
+    public boolean updateLastWofSpinTimestamp(int accountId) {
+        LOGGER.fine("Updating last WoF spin time for account ID: " + accountId);
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE_LAST_WOF_SPIN_SQL)) {
+
+            pstmt.setInt(1, accountId);
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                LOGGER.fine("Successfully updated last WoF spin time for account ID: " + accountId);
+                // IMPORTANT: Update the Account object in SessionManager if needed after spin
+                // This usually happens in the Service layer after calling this DAO method.
+                return true;
+            } else {
+                LOGGER.warning("Failed to update last WoF spin time, account ID not found?: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating last WoF spin time for account ID: " + accountId, e);
+            return false;
+        }
+    }
+    // --- END NEW METHOD ---
+
+    // --- NEW METHOD ---
+    /**
+     * Adds the specified amount to the account's balance.
+     *
+     * @param accountId The ID of the account.
+     * @param amountToAdd The BigDecimal amount to add (can be positive or negative).
+     * @return true if the update was successful, false otherwise.
+     */
+    public boolean updateBalance(int accountId, BigDecimal amountToAdd) {
+        LOGGER.fine("Attempting to update balance for account ID: " + accountId + " by amount: " + amountToAdd);
+        if (amountToAdd == null) {
+            LOGGER.warning("Attempted to update balance with null amount for account ID: " + accountId);
+            return false;
+        }
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE_BALANCE_SQL)) {
+
+            pstmt.setBigDecimal(1, amountToAdd);
+            pstmt.setInt(2, accountId);
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                LOGGER.fine("Successfully updated balance for account ID: " + accountId);
+                return true;
+            } else {
+                LOGGER.warning("Failed to update balance, account ID not found?: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating balance for account ID: " + accountId, e);
+            return false;
+        }
+    }
+    // --- END NEW METHOD ---
+
+
 
     /**
      * Helper method to map a ResultSet row to an Account object.
@@ -173,6 +245,7 @@ public class AccountDAO {
                 .isAdmin(rs.getBoolean("is_admin")) // Corrected column name
                 .createdAt(rs.getTimestamp("created_at")) // Corrected column name
                 .lastLoginAt(rs.getTimestamp("last_login_at")) // Corrected column name
+                .lastWofSpinAt(rs.getTimestamp("last_wof_spin_at")) // <-- MAP NEW COLUMN
                 .build();
     }
 }
