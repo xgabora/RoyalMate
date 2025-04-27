@@ -505,7 +505,6 @@ public class AddGameController {
             for (int i = 0; i < MAX_SYMBOLS; i++) {
                 ImageDataHolder symbolHolder = symbolImageDataMap.get(i).get();
                 if (symbolHolder != null) {
-                    // TODO: Get payout multiplier from UI input per symbol!
                     BigDecimal payoutMultiplier = BigDecimal.ONE; // Placeholder!
 
                     symbols.add(GameAsset.builder()

@@ -99,32 +99,22 @@ public class ChatController {
         }
     }
 
+    // Using the simplified sequential fetch for clarity now
     private void refreshChat(boolean isInitial) {
-        LOGGER.fine("Refreshing chat data...");
-        Task<Void> refreshTask = new Task<>() {
-            Optional<ChatMessage> pinnedMsgOpt = Optional.empty();
-            List<ChatMessage> recentMsgs = List.of();
+        LOGGER.fine("Refreshing chat data (simplified)...");
+        try {
+            Optional<ChatMessage> pinnedOpt = chatService.getPinnedMessage();
+            List<ChatMessage> recentMsgs = chatService.getRecentMessages(); // Gets newest first
 
-            @Override
-            protected Void call() throws Exception {
-                pinnedMsgOpt = chatService.getPinnedMessage();
-                recentMsgs = chatService.getRecentMessages(); // DAO gets newest first
-                return null;
-            }
-
-            @Override
-            protected void succeeded() {
-                updatePinnedMessageUI(pinnedMsgOpt);
-                updateRecentMessagesUI(recentMsgs, isInitial); // Use updated method
+            Platform.runLater(() -> {
+                updatePinnedMessageUI(pinnedOpt);
+                updateRecentMessagesUI(recentMsgs, isInitial);
                 LOGGER.fine("Chat refresh UI update complete.");
-            }
-
-            @Override
-            protected void failed() {
-                LOGGER.log(Level.SEVERE, "Failed to refresh chat data.", getException());
-            }
-        };
-        new Thread(refreshTask).start();
+            });
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error during synchronous chat refresh", e);
+            // Consider showing error
+        }
     }
 
     private void updatePinnedMessageUI(Optional<ChatMessage> pinnedOpt) {
@@ -133,31 +123,35 @@ public class ChatController {
         pinnedOpt.ifPresent(msg -> pinnedMessageLabel.setText(msg.getMessageText()));
     }
 
-    /** Updates UI for recent messages (adds newest to TOP) */
+    /** Updates UI for recent messages (adds newest to TOP), scrolls top ONLY initially */
     private void updateRecentMessagesUI(List<ChatMessage> messages, boolean isInitial) {
+        // --- Preserve scroll position ---
+        double currentScrollPos = scrollPane.getVvalue();
+        // --------------------------------
+
         messageContainer.getChildren().clear();
 
         if (messages.isEmpty() && isInitial) {
             LOGGER.info("No recent chat messages found.");
         } else {
-            // --- ADD MESSAGES NEWEST FIRST ---
             messages.forEach(msg -> {
                 Node messageNode = createMessageNode(msg);
-                // Add to the beginning of the VBox children list
-                messageContainer.getChildren().add(0, messageNode);
+                messageContainer.getChildren().add(0, messageNode); // Add newest to top
             });
-            // ---------------------------------
         }
 
-        if (isInitial || !messages.isEmpty()) {
-            // --- SCROLL TO TOP ---
-            // Scroll to TOP after adding messages if newest are at the top
+        // --- Conditional Scrolling ---
+        if (isInitial && !messages.isEmpty()) {
+            // Scroll to TOP only on the very first load that has messages
             Platform.runLater(this::scrollToTop);
-            // ---------------------
-        }
-        if (isInitial) {
             initialLoadComplete = true;
+        } else if (!isInitial) {
+            // For subsequent refreshes, try to restore previous scroll position
+            // This might still cause a slight jump if content size changed significantly near the top
+            // but prevents jumping *always* to the top.
+            Platform.runLater(() -> scrollPane.setVvalue(currentScrollPos));
         }
+        // ---------------------------
     }
 
     /** Creates the UI Node for a single chat message */
@@ -182,19 +176,13 @@ public class ChatController {
         Label timeLabel = new Label();
         if (message.getSentAt() != null) {
             try {
-                // 1. Convert Timestamp to LocalDateTime in System Default Zone
                 LocalDateTime originalLocalTime = message.getSentAt().toInstant()
                         .atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-                // 2. Subtract 2 hours directly from the LocalDateTime
                 LocalDateTime adjustedLocalTime = originalLocalTime.minusHours(2);
-
-                // 3. Format the adjusted time
                 timeLabel.setText(adjustedLocalTime.format(TIME_FORMATTER));
-
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error adjusting or formatting timestamp: " + message.getSentAt(), e);
-                timeLabel.setText("--:--"); // Fallback on error
+                timeLabel.setText("--:--");
             }
         } else {
             timeLabel.setText("--:--");
@@ -219,39 +207,27 @@ public class ChatController {
     void handleSendMessage() {
         String text = messageInputField.getText().trim();
         if (text.isEmpty() || !SessionManager.isLoggedIn()) {
-            return; // Don't send empty or if not logged in
+            return;
         }
-
         sendButton.setDisable(true);
         messageInputField.setDisable(true);
 
-        // Send in background task
         Task<Boolean> sendTask = new Task<>() {
-            @Override
-            protected Boolean call() throws Exception {
-                return chatService.sendMessage(text);
-            }
+            @Override protected Boolean call() throws Exception { return chatService.sendMessage(text); }
         };
-
         sendTask.setOnSucceeded(e -> {
             boolean success = sendTask.getValue();
             if (success) {
-                LOGGER.fine("Message sent successfully.");
                 messageInputField.clear();
-                refreshChat(false); // Refresh immediately
-            } else {
-                LOGGER.warning("Failed to send message (backend).");
-                showSendErrorAlert();
-            }
+                refreshChat(false); // Refresh immediately after sending
+            } else { showSendErrorAlert(); }
             reenableInput();
         });
-
         sendTask.setOnFailed(e -> {
             LOGGER.log(Level.SEVERE, "Failed to send message (exception).", sendTask.getException());
             showSendErrorAlert();
             reenableInput();
         });
-
         new Thread(sendTask).start();
     }
 
@@ -270,14 +246,8 @@ public class ChatController {
         });
     }
 
-    /** Scrolls the chat ScrollPane to the bottom */
-    private void scrollToBottom() {
-        // Needs to run after layout has potentially changed
-        Platform.runLater(() -> scrollPane.setVvalue(1.0));
-    }
-
     /** Scrolls the chat ScrollPane to the top */
     private void scrollToTop() {
-        Platform.runLater(() -> scrollPane.setVvalue(0.0));
+        Platform.runLater(() -> scrollPane.setVvalue(0.0)); // 0.0 scrolls to the top
     }
 }

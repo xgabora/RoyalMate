@@ -2,6 +2,7 @@ package sk.vava.royalmate.controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.beans.value.ChangeListener; // Import ChangeListener
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor; // Import Cursor
@@ -58,46 +59,71 @@ public class NavbarController {
     @FXML private Hyperlink serverLink; // Inject server link
     @FXML private Label serverSeparator; // Inject separator
 
-
+    private ChangeListener<Account> sessionAccountListener;
 
     @FXML
     public void initialize() {
-        loadUserData();
+        // Initial load
+        loadUserData(); // Load data based on current session state at init time
+
+        // --- Add Listener for Session Changes ---
+        sessionAccountListener = (observable, oldAccount, newAccount) -> {
+            LOGGER.fine("SessionManager account changed. Old: " + (oldAccount != null ? oldAccount.getUsername() : "null") + ", New: " + (newAccount != null ? newAccount.getUsername() : "null") + ". Refreshing navbar UI.");
+            // Run UI updates on the JavaFX Application Thread
+            Platform.runLater(this::loadUserData); // Reload all user data display
+            Platform.runLater(this::setupAdminFeatures); // Reload admin features too
+        };
+        SessionManager.currentAccountProperty().addListener(sessionAccountListener);
+        // -----------------------------------------
+
+        // Existing setup calls
         checkWofEligibilityAndUpdateUI();
         addNavigationClickHandlers();
-        setupAdminFeatures(); // NEW call
-        LOGGER.info("Navbar initialized for locale: " + LocaleManager.getCurrentLocale().toLanguageTag());
+        setupAdminFeatures(); // Initial setup for admin features
 
-        // Make alert bar clickable
-        wofAlertBar.setCursor(Cursor.HAND);
+        LOGGER.info("Navbar initialized and listener added for session changes.");
     }
 
+    // Optional: Method to clean up listener if navbar can be destroyed before app exit
+    // Usually not needed for a main persistent navbar.
+    public void cleanupListener() {
+        if (sessionAccountListener != null) {
+            SessionManager.currentAccountProperty().removeListener(sessionAccountListener);
+            LOGGER.info("Navbar session listener removed.");
+        }
+    }
+
+    /** Updated loadUserData to show balance as plain number + € */
     private void loadUserData() {
-        Account currentUser = SessionManager.getCurrentAccount();
+        Account currentUser = SessionManager.getCurrentAccount(); // Get current value from session
         if (currentUser != null) {
             usernameLabel.setText(currentUser.getUsername());
 
-            // --- Simplified Balance Formatting ---
+            // --- Plain Balance Formatting ---
             // 1. Get the balance, defaulting to zero if null
             BigDecimal balance = currentUser.getBalance() != null ? currentUser.getBalance() : BigDecimal.ZERO;
 
-            // 2. Format the BigDecimal to 2 decimal places using String.format
-            //    Use Locale.US to ensure '.' is used as the decimal separator, regardless of system locale.
-            String formattedBalance = String.format(Locale.US, "%.2f", balance);
+            // 2. Convert BigDecimal to plain string (may have variable decimal places)
+            // Use toPlainString() to avoid potential scientific notation for very large/small numbers.
+            String balanceString = balance.toPlainString();
 
-            // 3. Combine the localized "Balance:" text with the formatted amount and the euro symbol
-            String balanceText = LocaleManager.getString("navbar.balance") + " " + formattedBalance + " €";
+            // 3. Combine the localized "Balance:" text, the plain number string, and the euro symbol
+            String balanceText = LocaleManager.getString("navbar.balance") + " " + balanceString + " €";
             balanceLabel.setText(balanceText);
-            // --- End of Simplified Formatting ---
+            // --- End of Plain Formatting ---
 
             setNavLinksEnabled(true);
             logoutButton.setVisible(true);
+            setupAdminFeatures(); // Ensure admin features are correctly shown/hidden on refresh
+
         } else {
-            usernameLabel.setText("Guest");
-            balanceLabel.setText(""); // Keep balance empty for guests
+            // Handle logged out state
+            usernameLabel.setText("Guest"); // Consider localizing "Guest"
+            balanceLabel.setText(""); // Clear balance text
             setNavLinksEnabled(false);
             logoutButton.setVisible(false);
-            LOGGER.warning("Navbar loaded but no user session found!");
+            setupAdminFeatures(); // Ensure admin features are hidden on logout
+            // Don't log warning here, as listener handles expected logout state
         }
     }
 

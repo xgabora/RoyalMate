@@ -34,7 +34,8 @@ public class WheelController {
     private static final Logger LOGGER = Logger.getLogger(WheelController.class.getName());
     // Prizes remain the same, even if not visually represented by segments anymore
     private static final List<BigDecimal> PRIZES = List.of(
-            new BigDecimal("1.00"), new BigDecimal("2.00"), new BigDecimal("5.00"),
+            new BigDecimal("1.00"), new BigDecimal("1.00"), new BigDecimal("1.00"),
+            new BigDecimal("2.00"), new BigDecimal("2.00"), new BigDecimal("5.00"),
             new BigDecimal("10.00"), new BigDecimal("20.00"), new BigDecimal("50.00")
     );
     // Number of segments is still relevant for prize selection if prize list is tied to it
@@ -158,7 +159,6 @@ public class WheelController {
                 spinCompleted = true;
                 updateButtonState(SessionManager.getCurrentAccount()); // Update button to "BACK"
                 LOGGER.info("Spin successful (backend update) for user: " + currentUser.getUsername() + ", prize: " + prize);
-                // TODO: Refresh Navbar balance display
             } else {
                 showResult(LocaleManager.getString("wof.error.spin"), true);
                 // Keep button disabled until navigation
