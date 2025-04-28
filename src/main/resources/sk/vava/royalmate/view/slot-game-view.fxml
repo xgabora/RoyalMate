@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.SlotGameController">
+    <top>
+        <fx:include source="navbar-view.fxml" />
+    </top>
+    <center>
+        <StackPane fx:id="centerStackPane" BorderPane.alignment="CENTER">
+            <children>
+                <!-- Background -->
+                <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.15" pickOnBounds="true" preserveRatio="false">
+                    <image>
+                        <Image url="@../../../../images/background.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <!-- HBox splitting Game Column and Leaderboard Column -->
+                <!-- Align columns to the TOP by default -->
+                <HBox spacing="10.0" alignment="TOP_CENTER" maxWidth="1000.0"> <!-- Changed alignment to TOP_CENTER -->
+                    <padding>
+                        <Insets bottom="2.0" left="30.0" right="30.0" top="10.0" />
+                    </padding>
+                    <children>
+                        <!-- === Column 1: Game Content === -->
+                        <!-- Set spacing to 0 -->
+                        <VBox fx:id="gameContentColumn" spacing="0.0" alignment="TOP_LEFT" HBox.hgrow="ALWAYS">
+                            <children>
+                                <!-- Row 1: Title -->
+                                <Label fx:id="gameTitleLabel" styleClass="page-title" text="SLOT GAME TITLE" textFill="#F1DA2C" alignment="CENTER_LEFT">
+                                    <!-- Add bottom padding INSTEAD of margin -->
+                                    <padding>
+                                        <Insets bottom="2.0" />
+                                    </padding>
+                                </Label>
+
+                                <!-- Row 2: Game Area -->
+                                <!-- Removed VBox.margin -->
+                                <VBox fx:id="gameAreaVBox" spacing="10.0" alignment="CENTER" styleClass="game-area-box">
+                                    <StackPane>
+                                        <children>
+                                            <Rectangle fx:id="gameBackgroundRect" arcHeight="20.0" arcWidth="20.0" styleClass="slot-background-rect" StackPane.alignment="CENTER"/>
+                                            <VBox fx:id="slotGridContainer" styleClass="slot-grid-container" spacing="15.0">
+                                                <GridPane fx:id="slotGrid" styleClass="slot-grid">
+                                                    <columnConstraints><ColumnConstraints hgrow="SOMETIMES" prefWidth="100.0" /><ColumnConstraints hgrow="SOMETIMES" prefWidth="100.0" /><ColumnConstraints hgrow="SOMETIMES" prefWidth="100.0" /></columnConstraints>
+                                                    <rowConstraints><RowConstraints prefHeight="100.0" vgrow="SOMETIMES" /><RowConstraints prefHeight="100.0" vgrow="SOMETIMES" /><RowConstraints prefHeight="100.0" vgrow="SOMETIMES" /></rowConstraints>
+                                                </GridPane>
+                                                <HBox fx:id="betControlsBox" styleClass="bet-controls-box">
+                                                    <children><VBox styleClass="stake-info-box"><Label fx:id="recentWinLossLabel" styleClass="win-loss-info-label" text="+10.50 €"/></VBox><VBox styleClass="stake-info-box"><Label fx:id="currentStakeLabel" styleClass="stake-info-label" text="Stake: 1.00 €" /></VBox><Region HBox.hgrow="ALWAYS"/><Button fx:id="decreaseStakeButton" onAction="#handleDecreaseStake" styleClass="stake-change-button" text="-"/><Button fx:id="increaseStakeButton" onAction="#handleIncreaseStake" styleClass="stake-change-button" text="+"/><Button fx:id="spinButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleSpin" styleClass="spin-button"><graphic><ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true"><image><Image url="@../../../../images/spin_symbol.png" /></image></ImageView></graphic></Button></children>
+                                                </HBox>
+                                            </VBox>
+                                        </children>
+                                    </StackPane>
+                                </VBox>
+
+                                <!-- Row 3: Info Area -->
+                                <!-- Removed VBox.margin, add padding to the top of this VBox instead -->
+                                <VBox fx:id="gameInfoPane" spacing="10.0" styleClass="game-info-pane" alignment="TOP_LEFT">
+                                    <padding>
+                                        <Insets top="2.0"/> <!-- Padding at the top of the info box -->
+                                    </padding>
+                                    <children>
+                                        <HBox spacing="20.0" alignment="CENTER_LEFT" styleClass="game-info-details-pane">
+                                            <padding> <Insets top="3.0" bottom="10.0" left="15.0" right="15.0" /> </padding>
+                                            <children>
+                                                <Label fx:id="minStakeLabel" styleClass="game-info-detail" text="Min Stake: 0.10 €"/>
+                                                <Label fx:id="maxStakeLabel" styleClass="game-info-detail" text="Max Stake: 1000.00 €"/>
+                                                <Label fx:id="volatilityLabel" styleClass="game-info-detail" text="Volatility: 3/5"/>
+                                            </children>
+                                        </HBox>
+                                        <Label fx:id="descriptionLabel" text="Game Description Here..." wrapText="true" styleClass="game-info-description" alignment="TOP_LEFT"/>
+                                    </children>
+                                </VBox>
+
+                            </children> <!-- End of Game Content Column VBox -->
+                        </VBox>
+
+                        <!-- === Column 2: Leaderboard === -->
+                        <!-- Parent HBox alignment=TOP_CENTER keeps it aligned with top of game column -->
+                        <!-- Set Pref Height to allow shrinking, Max Height to limit -->
+                        <VBox fx:id="leaderboardArea" spacing="10.0" alignment="TOP_CENTER" styleClass="leaderboard-area-box" prefHeight="660.0" maxHeight="660.0">
+                            <children>
+                                <Label styleClass="leaderboard-title" text="%slot.label.leaderboard"/>
+                                <VBox fx:id="leaderboardContent" spacing="8.0" VBox.vgrow="NEVER" styleClass="leaderboard-content-vbox"/>
+                                <!-- Spacer pushes button to bottom -->
+                                <Region VBox.vgrow="ALWAYS" minHeight="10.0"/> <!-- Min height ensures spacer works -->
+                                <Button fx:id="leaderboardButton" onAction="#handleLeaderboardButton" styleClass="button-secondary-small" text="%slot.leaderboard.button"/>
+                            </children>
+                        </VBox>
+
+                    </children> <!-- End of Main HBox -->
+                </HBox>
+            </children> <!-- End of Center StackPane -->
+        </StackPane>
+    </center>
+</BorderPane>

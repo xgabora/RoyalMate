@@ -748,3 +748,166 @@
 }
 .chat-bubble-user-new .chat-time-label-new { -fx-text-fill: #555555; }
 .chat-bubble-other-new .chat-time-label-new { -fx-text-fill: #B0BEC5; }
+
+/* --- Slot Game Screen --- */
+
+/* Main column holding game elements */
+.game-content-column {
+    /* Spacing controlled by VBox in FXML */
+    -fx-alignment: top-left;
+}
+
+/* Box containing grid and controls */
+.game-area-box {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 10;
+    -fx-padding: 15px; /* Adjusted padding */
+    -fx-alignment: center;
+}
+
+/* Colored rectangle behind grid/controls */
+.slot-background-rect {
+    -fx-fill: rgba(0, 0, 0, 0.5); /* Default */
+    -fx-stroke: null;
+    -fx-arc-height: 20;
+    -fx-arc-width: 20;
+    -fx-effect: innershadow(gaussian, rgba(255,255,255,0.1), 10, 0.1, 0, 0);
+}
+
+/* VBox holding the grid and controls */
+.slot-grid-container {
+    -fx-alignment: center;
+    -fx-padding: 10px;
+}
+
+/* The 3x3 GridPane */
+.slot-grid {
+    -fx-hgap: 5px;
+    -fx-vgap: 5px;
+    -fx-alignment: center;
+    -fx-padding: 5px;
+}
+
+/* Background for each symbol cell */
+.slot-symbol-background {
+    -fx-fill: rgba(255, 255, 255, 0.16);
+    -fx-arc-height: 10;
+    -fx-arc-width: 10;
+    -fx-stroke: rgba(255, 255, 255, 0.3);
+    -fx-stroke-type: inside;
+    -fx-stroke-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0.0, 1, 1);
+}
+
+/* Winning cell highlight styles */
+.slot-symbol-background-win-gold {
+    -fx-fill: rgba(241, 218, 44, 0.6);
+    -fx-arc-height: 10; -fx-arc-width: 10; -fx-stroke: rgba(255, 255, 255, 0.3); -fx-stroke-type: inside; -fx-stroke-width: 1;
+    -fx-effect: dropshadow(gaussian, #F1DA2C, 15, 0.3, 0, 0);
+}
+.slot-symbol-background-win-white {
+    -fx-fill: rgba(255, 255, 255, 0.6);
+    -fx-arc-height: 10; -fx-arc-width: 10; -fx-stroke: rgba(255, 255, 255, 0.3); -fx-stroke-type: inside; -fx-stroke-width: 1;
+    -fx-effect: dropshadow(gaussian, white, 15, 0.3, 0, 0);
+}
+
+/* White box around stake/win labels */
+.stake-info-box {
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-background-radius: 8;
+    -fx-padding: 5px 10px;
+    -fx-alignment: center-left;
+    -fx-min-width: 150px; /* Keep min-width */
+}
+
+/* Label "Stake: X €" */
+.stake-info-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+}
+
+/* Label "You Won Y €" / "Try Again" */
+.win-loss-info-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    /* Text fill set dynamically */
+}
+
+/* Container HBox for bet controls */
+.bet-controls-box {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 20;
+    -fx-padding: 8px 15px;
+    -fx-alignment: center;
+    -fx-spacing: 15px;
+}
+
+/* +/- Stake Buttons */
+.stake-change-button {
+    -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-text-fill: white; -fx-background-radius: 50%; -fx-padding: 5px;
+    -fx-min-width: 35px; -fx-min-height: 35px; -fx-max-width: 35px; -fx-max-height: 35px;
+    -fx-cursor: hand;
+}
+.stake-change-button:hover { -fx-background-color: rgba(255, 255, 255, 0.4); }
+
+/* Spin Button */
+.spin-button {
+    -fx-background-color: white; -fx-background-radius: 50%; -fx-padding: 5px;
+    -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0.0, 0, 2);
+}
+.spin-button:hover { -fx-background-color: #f0f0f0; -fx-effect: dropshadow(gaussian, -fx-gold-color, 15, 0.3, 0, 0); }
+.spin-button:disabled { -fx-opacity: 0.5; }
+
+/* --- Leaderboard Area --- */
+.leaderboard-area-box {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 15px;
+    -fx-min-width: 280px; -fx-pref-width: 280px; -fx-max-width: 280px;
+    -fx-alignment: top-center; /* Align content top */
+}
+.leaderboard-title {
+    -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -fx-gold-color;
+    -fx-padding: 0 0 10px 0;
+    -fx-effect: dropshadow(gaussian, #F1DA2C, 5, 0.2, 0, 0);
+}
+.leaderboard-content-vbox { /* Style the VBox holding the cards */
+    -fx-spacing: 12px;
+}
+
+.leaderboard-card {
+    -fx-background-color: rgba(255, 255, 255, 0.16); -fx-background-radius: 6;
+    -fx-padding: 10px 12px; -fx-spacing: 6px; -fx-alignment: center-left;
+}
+.leaderboard-username { -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: white; }
+.leaderboard-amount {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: lightgreen;
+    -fx-effect: dropshadow(gaussian, lightgreen, 3, 0.0, 0, 0);
+}
+.leaderboard-entry-label { /* Style for empty message */
+    -fx-font-size: 13px; -fx-text-fill: #CCCCCC; -fx-padding: 10px; -fx-alignment: center;
+}
+
+/* --- Game Info Area --- */
+.game-info-pane {
+    -fx-background-color: rgba(0, 0, 0, 0.16); -fx-background-radius: 8;
+    -fx-padding: 15px; -fx-max-width: 700px; /* Keep constrained */
+    -fx-alignment: top-left; /* Align content left */
+}
+.game-info-details-pane { /* Box around stake/volatility */
+    -fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 5;
+    -fx-border-color: rgba(255, 255, 255, 0.2); -fx-border-radius: 5; -fx-border-width: 1;
+    -fx-padding: 10px 15px; /* Padding inside this box */
+    -fx-alignment: center-left;
+}
+.game-info-detail { /* Stake/Volatility text */
+    -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FEFEFE;
+}
+.game-info-description { /* Description text */
+    -fx-font-size: 14px; -fx-text-fill: #E0E0E0; -fx-wrap-text: true;
+    -fx-alignment: top-left; -fx-padding: 5px 0 0 0; /* Padding above description */
+}

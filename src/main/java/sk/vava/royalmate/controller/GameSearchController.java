@@ -4,15 +4,20 @@ import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import sk.vava.royalmate.model.AssetType;
 import sk.vava.royalmate.model.Game;
+import sk.vava.royalmate.model.GameAsset;
 import sk.vava.royalmate.model.GameType;
 import sk.vava.royalmate.service.GameService;
 import sk.vava.royalmate.util.ImageUtil;
@@ -223,15 +228,81 @@ public class GameSearchController {
         return cellPane;
     }
 
-    /** Placeholder action when a game card is clicked */
+    /** Action when a game card is clicked */
     private void handleGameClick(Game game, MouseEvent event) {
-        LOGGER.info("Game card clicked: " + game.getName() + " (ID: " + game.getId() + ") - Placeholder Action");
-        // TODO: Navigate to the specific game play screen for 'game'
-        // navigateToGamePlay(game.getId());
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Navigate to game: " + game.getName());
-        alert.showAndWait();
+        LOGGER.info("Game card clicked: " + game.getName() + " (ID: " + game.getId() + ")");
+        navigateToGame(game); // Navigate to the specific game screen
     }
 
+    /** Navigates to the appropriate game screen based on GameType */
+    private void navigateToGame(Game game) {
+        if (game == null) return;
+
+        String fxmlPath;
+        switch (game.getGameType()) {
+            case SLOT:
+                fxmlPath = "/sk/vava/royalmate/view/slot-game-view.fxml";
+                break;
+            case ROULETTE:
+                // fxmlPath = "/sk/vava/royalmate/view/roulette-game-view.fxml"; // Future
+                LOGGER.warning("Roulette screen not implemented yet.");
+                new Alert(Alert.AlertType.INFORMATION, "Roulette coming soon!").showAndWait();
+                return; // Don't navigate yet
+            case COINFLIP:
+                // fxmlPath = "/sk/vava/royalmate/view/coinflip-game-view.fxml"; // Future
+                LOGGER.warning("Coinflip screen not implemented yet.");
+                new Alert(Alert.AlertType.INFORMATION, "Coinflip coming soon!").showAndWait();
+                return; // Don't navigate yet
+            default:
+                LOGGER.severe("Unknown game type for navigation: " + game.getGameType());
+                return;
+        }
+
+        // --- Fetch required data BEFORE loading FXML ---
+        // In background task if loading assets takes time? For now, synchronous.
+        List<GameAsset> assets;
+        if(game.getGameType() == GameType.SLOT) {
+            assets = gameService.getGameAssets(game.getId(), AssetType.SYMBOL);
+            if (assets.isEmpty()) {
+                LOGGER.severe("Cannot load game " + game.getName() + ": No SYMBOL assets found.");
+                new Alert(Alert.AlertType.ERROR, "Failed to load game assets.").showAndWait();
+                return;
+            }
+        } else {
+            // Fetch TABLE assets for Roulette/Coinflip later if needed
+            assets = Collections.emptyList();
+        }
+        // ---------------------------------------------
+
+
+        try {
+            Scene scene = rootPane.getScene(); // Use rootPane from this controller
+            if (scene == null) { LOGGER.severe("Cannot get scene."); return; }
+
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(
+                    getClass().getResource(fxmlPath)), LocaleManager.getBundle());
+            Parent gameRoot = loader.load();
+
+            // Get controller and pass data using initData method
+            Object controller = loader.getController();
+            if (controller instanceof SlotGameController slotController && game.getGameType() == GameType.SLOT) {
+                slotController.initData(game, assets); // Pass game and symbols
+            }
+            // else if (controller instanceof RouletteGameController ...) { /* ... */ }
+            // else if (controller instanceof CoinflipGameController ...) { /* ... */ }
+            else {
+                LOGGER.severe("Loaded FXML but controller type mismatch or null: " + controller);
+                return;
+            }
+
+            scene.setRoot(gameRoot);
+            LOGGER.info("Navigated to game: " + game.getName());
+
+        } catch (IOException | NullPointerException e) {
+            LOGGER.log(Level.SEVERE, "Failed to load game FXML: " + fxmlPath, e);
+            new Alert(Alert.AlertType.ERROR, "Error loading game screen.").showAndWait();
+        }
+    }
     // --- Navigation (Consider utility class) ---
     private void navigateTo(ActionEvent event, String fxmlPath) { /* ... existing helper ... */ }
     // Add navigateTo for MouseEvent if needed, or refactor to use Node source
