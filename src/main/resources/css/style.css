@@ -911,3 +911,21 @@
     -fx-font-size: 14px; -fx-text-fill: #E0E0E0; -fx-wrap-text: true;
     -fx-alignment: top-left; -fx-padding: 5px 0 0 0; /* Padding above description */
 }
+
+/* --- Roulette Specific --- */
+.roulette-result-circle {
+    /* Style applied via code (setFill) but can add base stroke etc. here */
+    -fx-stroke: #F1DA2C; /* Gold border */
+    -fx-stroke-width: 2px;
+    -fx-effect: dropshadow(gaussian, #F1DA2C, 15, 0.3, 0, 0); /* Gold glow */
+}
+
+.roulette-result-number {
+    -fx-font-size: 44px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* Reuse filter toggle button style for bet selection */
+/* .filter-toggle-button { ... } */
+/* .filter-toggle-button:selected { ... } */

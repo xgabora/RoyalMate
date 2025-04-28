@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Rectangle?> <!-- Added back Rectangle import -->
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.RouletteGameController">
+    <top>
+        <fx:include source="navbar-view.fxml" />
+    </top>
+    <center>
+        <StackPane fx:id="centerStackPane" BorderPane.alignment="CENTER">
+            <children>
+                <!-- Background Image -->
+                <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.15" pickOnBounds="true" preserveRatio="false">
+                    <image>
+                        <Image url="@../../../../images/background.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <!-- Main Content HBox (Splits Game and Leaderboard) -->
+                <HBox spacing="10.0" alignment="TOP_CENTER" maxWidth="1000.0">
+                    <padding>
+                        <Insets bottom="2.0" left="30.0" right="30.0" top="10.0" />
+                    </padding>
+                    <children>
+                        <!-- === Column 1: Game Content === -->
+                        <VBox fx:id="gameContentColumn" spacing="0.0" alignment="TOP_LEFT" HBox.hgrow="NEVER" maxWidth="650.0">
+                            <children>
+                                <!-- Row 1: Title -->
+                                <Label fx:id="gameTitleLabel" styleClass="page-title" text="ROULETTE TITLE" textFill="#F1DA2C" alignment="CENTER_LEFT">
+                                    <padding>
+                                        <Insets bottom="2.0" />
+                                    </padding>
+                                </Label>
+
+                                <!-- Row 2: Game Area StackPane (Allows layering background) -->
+                                <StackPane styleClass="game-area-box"> <!-- Apply style to StackPane -->
+                                    <children>
+                                        <!-- Background Rectangle - RE-ADDED -->
+                                        <!-- Set managed="false" so it doesn't affect VBox layout much -->
+                                        <!-- Size will be set by controller based on gameAreaVBox bounds -->
+                                        <Rectangle fx:id="gameBackgroundRect" arcHeight="20.0" arcWidth="20.0" styleClass="slot-background-rect" managed="false" />
+
+                                        <!-- VBox holding the actual game content (wheel, bets, controls) -->
+                                        <VBox fx:id="gameAreaVBox" alignment="CENTER" spacing="15.0" StackPane.alignment="CENTER">
+                                            <children>
+                                                <!-- HBox for Wheel (Left) and Bet Selection (Right) -->
+                                                <HBox alignment="CENTER" spacing="30.0" VBox.vgrow="NEVER"> <!-- Changed vgrow to NEVER -->
+                                                    <children>
+                                                        <!-- Left: Wheel StackPane -->
+                                                        <StackPane alignment="CENTER" prefHeight="320.0" prefWidth="320.0">
+                                                            <children>
+                                                                <ImageView fx:id="rouletteWheelImageView" fitHeight="320.0" fitWidth="320.0" pickOnBounds="true" preserveRatio="true">
+                                                                    <image><Image url="@../../../../images/roulette_wheel.png" /></image>
+                                                                </ImageView>
+                                                                <StackPane fx:id="resultDisplayPane" prefHeight="80.0" prefWidth="80.0" visible="false">
+                                                                    <children>
+                                                                        <Circle fx:id="resultCircle" radius="60.0" styleClass="roulette-result-circle">
+                                                                            <fill><Color red="0.2627" green="0.2627" blue="0.2627" /></fill>
+                                                                        </Circle>
+                                                                        <Label fx:id="resultNumberLabel" styleClass="roulette-result-number" text="00"/>
+                                                                    </children>
+                                                                </StackPane>
+                                                            </children>
+                                                        </StackPane>
+
+                                                        <!-- Right: Bet Selection VBox -->
+                                                        <VBox alignment="CENTER_LEFT" spacing="8.0">
+                                                            <Label styleClass="form-label" text="%roulette.label.selectbets" textFill="WHITE"/>
+                                                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                                <children>
+                                                                    <ToggleButton fx:id="greenBetButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%roulette.bet.green" />
+                                                                </children>
+                                                            </HBox>
+                                                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                                <children>
+                                                                    <ToggleButton fx:id="redBetButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%roulette.bet.red" />
+                                                                    <ToggleButton fx:id="blackBetButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%roulette.bet.black" />
+                                                                </children>
+                                                            </HBox>
+                                                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                                <children>
+                                                                    <ToggleButton fx:id="range1BetButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%roulette.bet.range1" />
+                                                                    <ToggleButton fx:id="range2BetButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%roulette.bet.range2" />
+                                                                </children>
+                                                            </HBox>
+                                                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                                <children>
+                                                                    <ToggleButton fx:id="range3BetButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%roulette.bet.range3" />
+                                                                    <ToggleButton fx:id="range4BetButton" mnemonicParsing="false" styleClass="filter-toggle-button" text="%roulette.bet.range4" />
+                                                                </children>
+                                                            </HBox>
+                                                        </VBox>
+                                                    </children> <!-- End HBox Wheel+Bets -->
+                                                </HBox>
+
+                                                <!-- Bet Controls Bar (INSIDE gameAreaVBox) -->
+                                                <HBox fx:id="betControlsBox" styleClass="bet-controls-box">
+                                                    <children>
+                                                        <VBox styleClass="stake-info-box"><Label fx:id="recentWinLossLabel" styleClass="win-loss-info-label" text=""/></VBox>
+                                                        <VBox styleClass="stake-info-box"><Label fx:id="currentStakeLabel" styleClass="stake-info-label" text="Stake: 1.00 €" /></VBox>
+                                                        <Region HBox.hgrow="ALWAYS"/>
+                                                        <Button fx:id="decreaseStakeButton" onAction="#handleDecreaseStake" styleClass="stake-change-button" text="-"/>
+                                                        <Button fx:id="increaseStakeButton" onAction="#handleIncreaseStake" styleClass="stake-change-button" text="+"/>
+                                                        <Button fx:id="actionButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleSpin" styleClass="spin-button">
+                                                            <graphic><ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true"><image><Image url="@../../../../images/spin_symbol.png" /></image></ImageView></graphic>
+                                                        </Button>
+                                                    </children>
+                                                </HBox> <!-- End Bet Controls HBox -->
+                                            </children> <!-- End Children of gameAreaVBox -->
+                                        </VBox> <!-- End gameAreaVBox -->
+                                    </children> <!-- End Children of Game Area StackPane -->
+                                </StackPane> <!-- End Game Area StackPane -->
+
+                                <!-- Row 3: Info Area (Still outside the gameAreaVBox/StackPane) -->
+                                <VBox fx:id="gameInfoPane" spacing="10.0" styleClass="game-info-pane" alignment="TOP_LEFT">
+                                    <padding>
+                                        <Insets top="2.0"/>
+                                    </padding>
+                                    <children>
+                                        <HBox spacing="20.0" alignment="CENTER_LEFT" styleClass="game-info-details-pane">
+                                            <padding> <Insets top="3.0" bottom="10.0" left="15.0" right="15.0" /> </padding>
+                                            <children>
+                                                <Label fx:id="minStakeLabel" styleClass="game-info-detail" text="Min Stake: 0.10 €"/>
+                                                <Label fx:id="maxStakeLabel" styleClass="game-info-detail" text="Max Stake: 1000.00 €"/>
+                                                <Label fx:id="volatilityLabel" styleClass="game-info-detail" text="Volatility: 3/5"/>
+                                            </children>
+                                        </HBox>
+                                        <Label fx:id="descriptionLabel" text="Game Description Here..." wrapText="true" styleClass="game-info-description" alignment="TOP_LEFT"/>
+                                    </children>
+                                </VBox> <!-- End gameInfoPane -->
+                            </children> <!-- End gameContentColumn VBox -->
+                        </VBox>
+
+                        <!-- === Column 2: Leaderboard === -->
+                        <VBox fx:id="leaderboardArea" spacing="10.0" alignment="TOP_CENTER" styleClass="leaderboard-area-box" prefHeight="660.0" maxHeight="660.0">
+                            <children>
+                                <Label styleClass="leaderboard-title" text="%roulette.leaderboard.title"/>
+                                <VBox fx:id="leaderboardContent" spacing="8.0" VBox.vgrow="NEVER" styleClass="leaderboard-content-vbox"/>
+                                <Region VBox.vgrow="ALWAYS" minHeight="10.0"/>
+                                <Button fx:id="leaderboardButton" onAction="#handleLeaderboardButton" styleClass="button-secondary-small" text="%roulette.leaderboard.button"/>
+                            </children>
+                        </VBox>
+
+                    </children> <!-- End of Main HBox -->
+                </HBox>
+            </children> <!-- End of Center StackPane -->
+        </StackPane>
+    </center>
+</BorderPane>

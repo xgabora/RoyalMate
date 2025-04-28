@@ -239,15 +239,15 @@ public class GameSearchController {
         if (game == null) return;
 
         String fxmlPath;
+        Object controllerInstance; // To hold the specific controller instance
+
         switch (game.getGameType()) {
             case SLOT:
                 fxmlPath = "/sk/vava/royalmate/view/slot-game-view.fxml";
                 break;
             case ROULETTE:
-                // fxmlPath = "/sk/vava/royalmate/view/roulette-game-view.fxml"; // Future
-                LOGGER.warning("Roulette screen not implemented yet.");
-                new Alert(Alert.AlertType.INFORMATION, "Roulette coming soon!").showAndWait();
-                return; // Don't navigate yet
+                fxmlPath = "/sk/vava/royalmate/view/roulette-game-view.fxml"; // <-- ADD ROULETTE PATH
+                break;
             case COINFLIP:
                 // fxmlPath = "/sk/vava/royalmate/view/coinflip-game-view.fxml"; // Future
                 LOGGER.warning("Coinflip screen not implemented yet.");
@@ -258,9 +258,8 @@ public class GameSearchController {
                 return;
         }
 
-        // --- Fetch required data BEFORE loading FXML ---
-        // In background task if loading assets takes time? For now, synchronous.
-        List<GameAsset> assets;
+        // Fetch required assets (only needed for slots currently)
+        List<GameAsset> assets = Collections.emptyList();
         if(game.getGameType() == GameType.SLOT) {
             assets = gameService.getGameAssets(game.getId(), AssetType.SYMBOL);
             if (assets.isEmpty()) {
@@ -268,15 +267,11 @@ public class GameSearchController {
                 new Alert(Alert.AlertType.ERROR, "Failed to load game assets.").showAndWait();
                 return;
             }
-        } else {
-            // Fetch TABLE assets for Roulette/Coinflip later if needed
-            assets = Collections.emptyList();
         }
-        // ---------------------------------------------
-
+        // --- End Asset Fetching ---
 
         try {
-            Scene scene = rootPane.getScene(); // Use rootPane from this controller
+            Scene scene = rootPane.getScene();
             if (scene == null) { LOGGER.severe("Cannot get scene."); return; }
 
             FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(
@@ -284,14 +279,17 @@ public class GameSearchController {
             Parent gameRoot = loader.load();
 
             // Get controller and pass data using initData method
-            Object controller = loader.getController();
-            if (controller instanceof SlotGameController slotController && game.getGameType() == GameType.SLOT) {
+            controllerInstance = loader.getController(); // Get the generic controller
+
+            // Call the appropriate initData method based on the controller type
+            if (controllerInstance instanceof SlotGameController slotController && game.getGameType() == GameType.SLOT) {
                 slotController.initData(game, assets); // Pass game and symbols
+            } else if (controllerInstance instanceof RouletteGameController rouletteController && game.getGameType() == GameType.ROULETTE) {
+                rouletteController.initData(game); // Pass just the game object <-- CALL ROULETTE INIT
             }
-            // else if (controller instanceof RouletteGameController ...) { /* ... */ }
-            // else if (controller instanceof CoinflipGameController ...) { /* ... */ }
+            // else if (controllerInstance instanceof CoinflipGameController ...) { /* ... */ }
             else {
-                LOGGER.severe("Loaded FXML but controller type mismatch or null: " + controller);
+                LOGGER.severe("Loaded FXML but controller type mismatch or null: " + controllerInstance);
                 return;
             }
 
@@ -303,6 +301,7 @@ public class GameSearchController {
             new Alert(Alert.AlertType.ERROR, "Error loading game screen.").showAndWait();
         }
     }
+
     // --- Navigation (Consider utility class) ---
     private void navigateTo(ActionEvent event, String fxmlPath) { /* ... existing helper ... */ }
     // Add navigateTo for MouseEvent if needed, or refactor to use Node source
