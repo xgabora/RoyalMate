@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public class HomepageService {
 
     private static final Logger LOGGER = Logger.getLogger(HomepageService.class.getName());
-    private static final int DEFAULT_TOP_GAMES_LIMIT = 9; // For 3x3 grid
+    private static final int DEFAULT_TOP_GAMES_LIMIT = 16; // For 4x4 grid
 
     private final HomepageBannerDAO bannerDAO;
     private final GameDAO gameDAO;

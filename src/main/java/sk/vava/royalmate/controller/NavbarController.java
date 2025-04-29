@@ -239,7 +239,11 @@ public class NavbarController {
         navigateTo(event, "/sk/vava/royalmate/view/chat-view.fxml"); // Correct path
     }
 
-    @FXML private void handleTopWins(ActionEvent event) { LOGGER.info("Navigate to Top Wins (Placeholder)"); }
+    @FXML
+    private void handleTopWins(ActionEvent event) {
+        LOGGER.info("Navigate to Leaderboards");
+        navigateTo(event, "/sk/vava/royalmate/view/leaderboard-view.fxml"); // Navigate to leaderboard view
+    }
 
     @FXML
     private void handleLogout(ActionEvent event) {

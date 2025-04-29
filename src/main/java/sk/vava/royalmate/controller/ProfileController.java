@@ -17,6 +17,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import sk.vava.royalmate.model.Account;
+import sk.vava.royalmate.model.UserStatistics;
 import sk.vava.royalmate.service.AuthService; // Using AuthService for now
 import sk.vava.royalmate.util.LocaleManager;
 import sk.vava.royalmate.util.SessionManager;
@@ -30,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,10 +63,10 @@ public class ProfileController {
     @FXML private Button withdrawButton;
     @FXML private Label balanceMessageLabel;
 
-    // Stats Tab
-    @FXML private Label totalSpinsLabel;
-    @FXML private Label totalWinsLabel;
-    @FXML private Label gamesPlayedLabel;
+    @FXML private Label totalSpinsValueLabel; // Inject value labels only
+    @FXML private Label totalWageredValueLabel; // New value label
+    @FXML private Label totalWinsValueLabel;
+    @FXML private Label gamesPlayedValueLabel;
 
     // Settings Tab
     @FXML private Button enButton;
@@ -89,18 +91,17 @@ public class ProfileController {
         currentUser = SessionManager.getCurrentAccount();
         if (currentUser == null) {
             LOGGER.severe("Profile screen loaded without user session. Redirecting to login.");
-            // Ideally, prevent loading this screen if not logged in,
-            // but add a fallback navigation.
-            Platform.runLater(() -> navigateToLogin());
+            Platform.runLater(this::navigateToLogin);
             return;
         }
-
         setupTabs();
         loadProfileHeader();
-        loadBalanceTab(); // Load initial tab
-        loadStatsTab();   // Load stats data (placeholder)
-        loadSettingsTab(); // Update locale buttons
-
+        loadBalanceTab();
+        // Load stats tab content when the tab is selected (or initially if it's default)
+        if (statsTabButton.isSelected()) {
+            loadStatsTab();
+        }
+        loadSettingsTab();
         LOGGER.info("ProfileController initialized for user: " + currentUser.getUsername());
     }
 
@@ -110,32 +111,25 @@ public class ProfileController {
         statsTabButton.setToggleGroup(tabGroup);
         settingsTabButton.setToggleGroup(tabGroup);
 
-        // Listener to switch content panes
         tabGroup.selectedToggleProperty().addListener((observable, oldToggle, newToggle) -> {
             if (newToggle == null) {
-                // Prevent deselection if needed, reselect old or default
                 tabGroup.selectToggle(oldToggle != null ? oldToggle : balanceTabButton);
             } else {
                 hideAllTabContent();
-                clearMessages(); // Clear messages when switching tabs
+                clearMessages();
                 if (newToggle == balanceTabButton) {
-                    balanceContent.setVisible(true);
-                    balanceContent.setManaged(true);
-                    loadBalanceTab(); // Refresh balance display
+                    balanceContent.setVisible(true); balanceContent.setManaged(true);
+                    loadBalanceTab();
                 } else if (newToggle == statsTabButton) {
-                    statsContent.setVisible(true);
-                    statsContent.setManaged(true);
-                    loadStatsTab(); // Refresh stats display
+                    statsContent.setVisible(true); statsContent.setManaged(true);
+                    loadStatsTab(); // Load stats when tab becomes visible
                 } else if (newToggle == settingsTabButton) {
-                    settingsContent.setVisible(true);
-                    settingsContent.setManaged(true);
-                    loadSettingsTab(); // Refresh settings state
+                    settingsContent.setVisible(true); settingsContent.setManaged(true);
+                    loadSettingsTab();
                 }
             }
         });
-
-        // Select default tab
-        balanceTabButton.setSelected(true);
+        balanceTabButton.setSelected(true); // Default tab
     }
 
     private void hideAllTabContent() {
@@ -188,15 +182,51 @@ public class ProfileController {
         withdrawAmountField.clear();
     }
 
+    // --- UPDATED loadStatsTab Method ---
     private void loadStatsTab() {
-        Map<String, Long> stats = authService.getUserStatistics(currentUser.getId());
-        totalSpinsLabel.setText(LocaleManager.getString("profile.label.totalspins") + " " + stats.getOrDefault("totalSpins", 0L));
-        // Format currency for wins if needed, assuming wins are stored correctly
-        NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LocaleManager.getCurrentLocale());
-        currencyFormatter.setMinimumFractionDigits(2);
-        currencyFormatter.setMaximumFractionDigits(2);
-        totalWinsLabel.setText(LocaleManager.getString("profile.label.totalwins") + " " + currencyFormatter.format(stats.getOrDefault("totalWins", 0L)) + " €");
-        gamesPlayedLabel.setText(LocaleManager.getString("profile.label.gamesplayed") + " " + stats.getOrDefault("gamesPlayed", 0L));
+        if (currentUser == null) return; // Should not happen if initialized correctly
+        LOGGER.fine("Loading statistics tab for user ID: " + currentUser.getId());
+
+        // Reset labels to avoid showing old data during load
+        totalSpinsValueLabel.setText("...");
+        totalWageredValueLabel.setText("...");
+        totalWinsValueLabel.setText("...");
+        gamesPlayedValueLabel.setText("...");
+
+        // Fetch stats using the service (Consider background task if slow)
+        Optional<UserStatistics> statsOpt = authService.getUserStatistics(currentUser.getId());
+
+        Platform.runLater(() -> { // Ensure UI updates happen on the FX thread
+            if (statsOpt.isPresent()) {
+                UserStatistics stats = statsOpt.get();
+                LOGGER.fine("Statistics data received: " + stats);
+
+                // Update value labels with fetched data
+                totalSpinsValueLabel.setText(String.valueOf(stats.getTotalSpins()));
+
+                NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LocaleManager.getCurrentLocale());
+                currencyFormatter.setMinimumFractionDigits(2);
+                currencyFormatter.setMaximumFractionDigits(2);
+
+                // Set Total Wagered Value
+                totalWageredValueLabel.setText(currencyFormatter.format(stats.getTotalWagered()) + " €");
+
+                // Set Total Won Value
+                totalWinsValueLabel.setText(currencyFormatter.format(stats.getTotalWon()) + " €");
+
+                // Set Games Played Value
+                gamesPlayedValueLabel.setText(String.valueOf(stats.getDistinctGamesPlayed()));
+
+            } else {
+                // Handle case where statistics couldn't be loaded
+                LOGGER.warning("Could not load statistics for user ID: " + currentUser.getId());
+                String errorMsg = "Error"; // Short error message
+                totalSpinsValueLabel.setText(errorMsg);
+                totalWageredValueLabel.setText(errorMsg);
+                totalWinsValueLabel.setText(errorMsg);
+                gamesPlayedValueLabel.setText(errorMsg);
+            }
+        });
     }
 
     private void loadSettingsTab() {

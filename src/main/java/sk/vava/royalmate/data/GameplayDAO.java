@@ -1,11 +1,15 @@
 package sk.vava.royalmate.data;
 
+import sk.vava.royalmate.model.GameType;
 import sk.vava.royalmate.model.Gameplay;
+import sk.vava.royalmate.model.UserStatistics; // Import UserStatistics
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +18,10 @@ public class GameplayDAO {
     private static final Logger LOGGER = Logger.getLogger(GameplayDAO.class.getName());
     private static final String TABLE_NAME = "game_plays";
     private static final String ACCOUNT_TABLE_NAME = "accounts";
+    private static final String GAME_TABLE_NAME = "games"; // <-- ADDED
+    private static final String ASSET_TABLE_NAME = "game_assets"; // <-- ADDED
+
+
 
     // SQL using column names from your schema
     private static final String INSERT_INITIAL_PLAY_SQL = "INSERT INTO " + TABLE_NAME +
@@ -27,6 +35,48 @@ public class GameplayDAO {
             "FROM " + TABLE_NAME + " gp JOIN " + ACCOUNT_TABLE_NAME + " a ON gp.account_id = a.id " +
             "WHERE gp.game_id = ? AND gp.payout_amount > 0 " +
             "ORDER BY gp.timestamp DESC LIMIT ?";
+
+    // --- NEW SQL ---
+    // Query to calculate all required statistics for a user in one go
+    private static final String GET_USER_STATS_SQL =
+            "SELECT " +
+                    "COUNT(id) as total_spins, " +
+                    "COALESCE(SUM(stake_amount), 0) as total_wagered, " + // Use COALESCE to handle NULL if no plays
+                    "COALESCE(SUM(payout_amount), 0) as total_won, " +
+                    "COUNT(DISTINCT game_id) as distinct_games_played " +
+                    "FROM " +
+                    TABLE_NAME + " " +
+                    "WHERE " +
+                    "account_id = ?";
+
+    // --- REVISED FIND_TOP_PLAYS_SQL_TEMPLATE ---
+    // Added JOIN for game_assets to get cover image
+    private static final String FIND_TOP_PLAYS_SQL_TEMPLATE =
+            "SELECT " +
+                    "gp.id, gp.account_id, gp.game_id, gp.stake_amount, gp.outcome, gp.payout_amount, gp.timestamp, " +
+                    "a.username, " +
+                    "g.name as game_name, " +
+                    "ga.image_data as cover_image, " + // <-- SELECT cover image
+                    "CASE " +
+                    "WHEN gp.stake_amount IS NULL OR gp.stake_amount = 0 THEN 0.00 " +
+                    "ELSE gp.payout_amount / gp.stake_amount " +
+                    "END as multiplier " +
+                    "FROM " +
+                    TABLE_NAME + " gp " +
+                    "JOIN " +
+                    ACCOUNT_TABLE_NAME + " a ON gp.account_id = a.id " +
+                    "JOIN " +
+                    GAME_TABLE_NAME + " g ON gp.game_id = g.id " +
+                    "LEFT JOIN " + // <-- LEFT JOIN to still show plays if game has no cover
+                    ASSET_TABLE_NAME + " ga ON g.id = ga.game_id AND ga.asset_type = 'COVER' " +
+                    "WHERE " +
+                    "g.game_type = ? " +
+                    "AND gp.payout_amount > 0 " +
+                    "ORDER BY " +
+                    "{orderByClause} DESC, gp.timestamp DESC " +
+                    "LIMIT ?";
+
+
 
     /**
      * Saves the initial state of a gameplay record (when the bet is placed).
@@ -133,7 +183,47 @@ public class GameplayDAO {
         return wins;
     }
 
-    /** Helper method to map ResultSet to Gameplay object */
+    public List<Gameplay> findTopPlays(GameType gameType, String orderByColumn, int limit) {
+        String orderByClause;
+        // Validate orderByColumn and map to SQL equivalent
+        if ("multiplier".equalsIgnoreCase(orderByColumn)) {
+            // ORDER BY the calculated alias 'multiplier'
+            orderByClause = "multiplier";
+        } else { // Default to payout_amount
+            orderByClause = "gp.payout_amount"; // Use alias gp.
+        }
+
+        LOGGER.fine("Finding top " + limit + " plays for type " + gameType + ", ordered by " + orderByClause);
+        List<Gameplay> topPlays = new ArrayList<>();
+        // Safely replace placeholder in the template
+        String finalSQL = FIND_TOP_PLAYS_SQL_TEMPLATE.replace("{orderByClause}", orderByClause);
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(finalSQL)) {
+
+            pstmt.setString(1, gameType.name());
+            pstmt.setInt(2, limit);
+
+            long startTime = System.currentTimeMillis(); // Start timer
+            try (ResultSet rs = pstmt.executeQuery()) {
+                long queryEndTime = System.currentTimeMillis();
+                LOGGER.fine("SQL query execution time: " + (queryEndTime - startTime) + " ms");
+
+                while (rs.next()) {
+                    topPlays.add(mapResultSetToGameplay(rs)); // Use updated mapper
+                }
+                long mapEndTime = System.currentTimeMillis();
+                LOGGER.fine("Result set mapping time: " + (mapEndTime - queryEndTime) + " ms");
+            }
+            LOGGER.info("Found " + topPlays.size() + " top plays for type " + gameType + " ordered by " + orderByClause); // Changed level to INFO
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding top plays for type " + gameType + " ordered by " + orderByClause, e);
+        }
+        return topPlays;
+    }
+
+    /** Helper method to map ResultSet to Gameplay object (MODIFIED) */
     private Gameplay mapResultSetToGameplay(ResultSet rs) throws SQLException {
         Gameplay play = Gameplay.builder()
                 .id(rs.getLong("id"))
@@ -144,12 +234,74 @@ public class GameplayDAO {
                 .payoutAmount(rs.getBigDecimal("payout_amount"))
                 .timestamp(rs.getTimestamp("timestamp"))
                 .build();
-        // Map joined username if present
-        if (hasColumn(rs, "username")) {
-            play.setUsername(rs.getString("username"));
+
+        if (hasColumn(rs, "username")) { play.setUsername(rs.getString("username")); }
+        if (hasColumn(rs, "game_name")) { play.setGameName(rs.getString("game_name")); }
+        if (hasColumn(rs, "multiplier")) {
+            play.setMultiplier(rs.getBigDecimal("multiplier").setScale(2, RoundingMode.HALF_UP));
+        } else { /* Calculate fallback */ }
+
+        // --- ADDED: Map Cover Image ---
+        if (hasColumn(rs, "cover_image")) {
+            Blob coverBlob = rs.getBlob("cover_image");
+            if (coverBlob != null) {
+                try {
+                    play.setCoverImageData(coverBlob.getBytes(1, (int) coverBlob.length()));
+                } finally {
+                    coverBlob.free(); // Release resources
+                }
+            }
         }
+        // ------------------------------
+
         return play;
     }
+
+    // --- NEW METHOD ---
+    /**
+     * Calculates aggregate statistics for a specific user account.
+     *
+     * @param accountId The ID of the user.
+     * @return An Optional containing UserStatistics if successful, empty otherwise.
+     */
+    public Optional<UserStatistics> getUserStatistics(int accountId) {
+        LOGGER.fine("Calculating statistics for account ID: " + accountId);
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(GET_USER_STATS_SQL)) {
+
+            pstmt.setInt(1, accountId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Build the statistics object directly from the result set
+                    UserStatistics stats = UserStatistics.builder()
+                            .totalSpins(rs.getLong("total_spins"))
+                            .totalWagered(rs.getBigDecimal("total_wagered"))
+                            .totalWon(rs.getBigDecimal("total_won"))
+                            .distinctGamesPlayed(rs.getLong("distinct_games_played"))
+                            .build();
+                    LOGGER.fine("Statistics calculated successfully for account ID: " + accountId);
+                    return Optional.of(stats);
+                } else {
+                    // This case should ideally not happen with aggregate functions unless the user truly has 0 plays,
+                    // but COALESCE handles NULL SUMs. If the query somehow returns no rows, return empty stats.
+                    LOGGER.warning("Query for user statistics returned no rows for account ID: " + accountId + ". Returning empty stats.");
+                    // Return default zero stats if no rows found (or user has 0 plays)
+                    return Optional.of(UserStatistics.builder()
+                            .totalSpins(0L)
+                            .totalWagered(BigDecimal.ZERO)
+                            .totalWon(BigDecimal.ZERO)
+                            .distinctGamesPlayed(0L)
+                            .build());
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error calculating statistics for account ID: " + accountId, e);
+            return Optional.empty(); // Return empty on SQL error
+        }
+    }
+    // --- END NEW METHOD --
+
 
     /** Utility to check if a column exists in the ResultSet metadata */
     private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {

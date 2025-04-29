@@ -239,26 +239,24 @@ public class GameSearchController {
         if (game == null) return;
 
         String fxmlPath;
-        Object controllerInstance; // To hold the specific controller instance
+        Object controllerInstance;
 
         switch (game.getGameType()) {
             case SLOT:
                 fxmlPath = "/sk/vava/royalmate/view/slot-game-view.fxml";
                 break;
             case ROULETTE:
-                fxmlPath = "/sk/vava/royalmate/view/roulette-game-view.fxml"; // <-- ADD ROULETTE PATH
+                fxmlPath = "/sk/vava/royalmate/view/roulette-game-view.fxml";
                 break;
             case COINFLIP:
-                // fxmlPath = "/sk/vava/royalmate/view/coinflip-game-view.fxml"; // Future
-                LOGGER.warning("Coinflip screen not implemented yet.");
-                new Alert(Alert.AlertType.INFORMATION, "Coinflip coming soon!").showAndWait();
-                return; // Don't navigate yet
+                fxmlPath = "/sk/vava/royalmate/view/coinflip-game-view.fxml"; // <-- Use correct path
+                break;
             default:
                 LOGGER.severe("Unknown game type for navigation: " + game.getGameType());
                 return;
         }
 
-        // Fetch required assets (only needed for slots currently)
+        // Fetch assets only if needed (Slots)
         List<GameAsset> assets = Collections.emptyList();
         if(game.getGameType() == GameType.SLOT) {
             assets = gameService.getGameAssets(game.getId(), AssetType.SYMBOL);
@@ -268,7 +266,6 @@ public class GameSearchController {
                 return;
             }
         }
-        // --- End Asset Fetching ---
 
         try {
             Scene scene = rootPane.getScene();
@@ -278,18 +275,18 @@ public class GameSearchController {
                     getClass().getResource(fxmlPath)), LocaleManager.getBundle());
             Parent gameRoot = loader.load();
 
-            // Get controller and pass data using initData method
-            controllerInstance = loader.getController(); // Get the generic controller
+            controllerInstance = loader.getController();
 
-            // Call the appropriate initData method based on the controller type
+            // Call initData based on controller type
             if (controllerInstance instanceof SlotGameController slotController && game.getGameType() == GameType.SLOT) {
-                slotController.initData(game, assets); // Pass game and symbols
+                slotController.initData(game, assets);
             } else if (controllerInstance instanceof RouletteGameController rouletteController && game.getGameType() == GameType.ROULETTE) {
-                rouletteController.initData(game); // Pass just the game object <-- CALL ROULETTE INIT
+                rouletteController.initData(game);
+            } else if (controllerInstance instanceof CoinflipGameController coinflipController && game.getGameType() == GameType.COINFLIP) {
+                coinflipController.initData(game); // <-- CALL COINFLIP INIT
             }
-            // else if (controllerInstance instanceof CoinflipGameController ...) { /* ... */ }
             else {
-                LOGGER.severe("Loaded FXML but controller type mismatch or null: " + controllerInstance);
+                LOGGER.severe("Loaded FXML ("+fxmlPath+") but controller type mismatch or null: " + (controllerInstance != null ? controllerInstance.getClass().getName() : "null"));
                 return;
             }
 
@@ -301,6 +298,7 @@ public class GameSearchController {
             new Alert(Alert.AlertType.ERROR, "Error loading game screen.").showAndWait();
         }
     }
+
 
     // --- Navigation (Consider utility class) ---
     private void navigateTo(ActionEvent event, String fxmlPath) { /* ... existing helper ... */ }

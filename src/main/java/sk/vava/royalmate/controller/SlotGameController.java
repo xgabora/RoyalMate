@@ -90,8 +90,8 @@ public class SlotGameController {
 
     // Payout multipliers based on symbol index (0=common -> 5=max win)
     private final Map<Integer, BigDecimal> PAYOUT_MULTIPLIERS = Map.of(
-            0, new BigDecimal("1.5"), 1, new BigDecimal("2.0"), 2, new BigDecimal("3.0"), // Common
-            3, new BigDecimal("10.0"), 4, new BigDecimal("25.0"),                         // Rare
+            0, new BigDecimal("1.5"), 1, new BigDecimal("2.0"), 2, new BigDecimal("2.5"), // Common
+            3, new BigDecimal("8.0"), 4, new BigDecimal("15.0"),                         // Rare
             5, new BigDecimal("100.0")                                                    // Max Win
     );
 
@@ -770,9 +770,27 @@ public class SlotGameController {
 
     @FXML
     private void handleLeaderboardButton(ActionEvent event) {
-        LOGGER.info("Leaderboard button clicked - Placeholder");
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Full Leaderboard screen not implemented yet.");
-        alert.showAndWait();
+        LOGGER.info("Navigate to Leaderboards");
+        navigateTo(event, "/sk/vava/royalmate/view/leaderboard-view.fxml"); // Navigate to leaderboard view
+    }
+
+    private void navigateTo(ActionEvent event, String fxmlPath) {
+        Node source = (Node) event.getSource();
+        try {
+            Scene scene = source.getScene();
+            if (scene == null) {
+                scene = rootPane.getScene();
+                if (scene == null) { LOGGER.severe("Could not get current scene."); return; }
+            }
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource(fxmlPath)), LocaleManager.getBundle());
+            Parent nextRoot = loader.load();
+            scene.setRoot(nextRoot);
+            LOGGER.info("Successfully navigated to: " + fxmlPath);
+        } catch (IOException | NullPointerException e) {
+            LOGGER.log(Level.SEVERE, "Failed to load FXML: " + fxmlPath, e);
+        } catch (ClassCastException e) {
+            LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e);
+        }
     }
 
     // --- Utils ---

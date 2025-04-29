@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.CoinflipGameController">
+    <top>
+        <fx:include source="navbar-view.fxml" />
+    </top>
+    <center>
+        <StackPane fx:id="centerStackPane" BorderPane.alignment="CENTER">
+            <children>
+                <!-- Background Image -->
+                <ImageView fx:id="backgroundImageView" fitHeight="768.0" fitWidth="1080.0" opacity="0.15" pickOnBounds="true" preserveRatio="false">
+                    <image>
+                        <Image url="@../../../../images/background.png" backgroundLoading="true" />
+                    </image>
+                </ImageView>
+
+                <!-- Main Content HBox (Splits Game and Leaderboard) -->
+                <HBox spacing="10.0" alignment="TOP_CENTER" maxWidth="1000.0">
+                    <padding>
+                        <Insets bottom="2.0" left="30.0" right="30.0" top="10.0" />
+                    </padding>
+                    <children>
+                        <!-- === Column 1: Game Content === -->
+                        <VBox fx:id="gameContentColumn" spacing="0.0" alignment="TOP_LEFT" HBox.hgrow="NEVER" maxWidth="650.0">
+                            <children>
+                                <!-- Row 1: Title -->
+                                <Label fx:id="gameTitleLabel" styleClass="page-title" text="%coinflip.title" textFill="#F1DA2C" alignment="CENTER_LEFT">
+                                    <padding> <Insets bottom="2.0" /> </padding>
+                                </Label>
+
+                                <!-- Row 2: Game Area StackPane -->
+                                <StackPane styleClass="game-area-box">
+                                    <children>
+                                        <!-- Background Rect -->
+                                        <Rectangle fx:id="gameBackgroundRect" arcHeight="20.0" arcWidth="20.0" styleClass="slot-background-rect" managed="false" />
+                                        <!-- VBox holding actual game content -->
+                                        <VBox fx:id="gameAreaVBox" alignment="CENTER" spacing="20.0" StackPane.alignment="CENTER">
+                                            <children>
+                                                <!-- HBox for Coin (Left) and Bet Selection (Right) -->
+                                                <HBox alignment="CENTER" spacing="50.0" VBox.vgrow="NEVER">
+                                                    <children>
+                                                        <StackPane fx:id="coinPane" prefHeight="320.0" prefWidth="320.0" alignment="CENTER">
+                                                            <children>
+                                                                <Circle fx:id="coinCircle" radius="100.0" styleClass="coin-circle"/>
+                                                            </children>
+                                                        </StackPane>
+                                                        <VBox alignment="CENTER_LEFT" spacing="15.0">
+                                                            <ToggleButton fx:id="headsBetButton" mnemonicParsing="false" styleClass="filter-toggle-button, coinflip-bet-button" text="%coinflip.bet.heads" />
+                                                            <ToggleButton fx:id="tailsBetButton" mnemonicParsing="false" styleClass="filter-toggle-button, coinflip-bet-button" text="%coinflip.bet.tails" />
+                                                        </VBox>
+                                                    </children>
+                                                </HBox>
+                                                <!-- Bet Controls Bar -->
+                                                <HBox fx:id="betControlsBox" styleClass="bet-controls-box">
+                                                    <!-- Content same as before -->
+                                                    <children>
+                                                        <VBox styleClass="stake-info-box"><Label fx:id="recentWinLossLabel" styleClass="win-loss-info-label" text=""/></VBox>
+                                                        <VBox styleClass="stake-info-box"><Label fx:id="currentStakeLabel" styleClass="stake-info-label" text="Stake: 1.00 €" /></VBox>
+                                                        <Region HBox.hgrow="ALWAYS"/>
+                                                        <Button fx:id="decreaseStakeButton" onAction="#handleDecreaseStake" styleClass="stake-change-button" text="-"/>
+                                                        <Button fx:id="increaseStakeButton" onAction="#handleIncreaseStake" styleClass="stake-change-button" text="+"/>
+                                                        <Button fx:id="actionButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleFlip" styleClass="spin-button">
+                                                            <graphic><ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true"><image><Image url="@../../../../images/spin_symbol.png" /></image></ImageView></graphic>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </StackPane>
+
+                                <!-- Row 3: Info Area -->
+                                <VBox fx:id="gameInfoPane" spacing="10.0" styleClass="game-info-pane" alignment="TOP_LEFT">
+                                    <!-- **** INCREASED TOP MARGIN **** -->
+                                    <VBox.margin>
+                                        <Insets top="25.0" />
+                                    </VBox.margin>
+                                    <!-- **** **** **** **** **** -->
+                                    <padding> <Insets top="2.0"/> </padding>
+                                    <children>
+                                        <!-- Content same as before -->
+                                        <HBox spacing="20.0" alignment="CENTER_LEFT" styleClass="game-info-details-pane">
+                                            <padding> <Insets top="3.0" bottom="10.0" left="15.0" right="15.0" /> </padding>
+                                            <children>
+                                                <Label fx:id="minStakeLabel" styleClass="game-info-detail" text="Min Stake: 0.10 €"/>
+                                                <Label fx:id="maxStakeLabel" styleClass="game-info-detail" text="Max Stake: 1000.00 €"/>
+                                            </children>
+                                        </HBox>
+                                        <Label fx:id="descriptionLabel" text="Game Description Here..." wrapText="true" styleClass="game-info-description" alignment="TOP_LEFT"/>
+                                    </children>
+                                </VBox> <!-- End gameInfoPane -->
+                            </children> <!-- End gameContentColumn VBox -->
+                        </VBox>
+
+                        <!-- === Column 2: Leaderboard (Same as before) === -->
+                        <VBox fx:id="leaderboardArea" spacing="10.0" alignment="TOP_CENTER" styleClass="leaderboard-area-box" prefHeight="660.0" maxHeight="660.0">
+                            <!-- Content same as before -->
+                            <children>
+                                <Label styleClass="leaderboard-title" text="%coinflip.leaderboard.title"/>
+                                <VBox fx:id="leaderboardContent" spacing="8.0" VBox.vgrow="NEVER" styleClass="leaderboard-content-vbox"/>
+                                <Region VBox.vgrow="ALWAYS" minHeight="10.0"/>
+                                <Button fx:id="leaderboardButton" onAction="#handleLeaderboardButton" styleClass="button-secondary-small" text="%coinflip.leaderboard.button"/>
+                            </children>
+                        </VBox>
+
+                    </children> <!-- End of Main HBox -->
+                </HBox>
+            </children> <!-- End of Center StackPane -->
+        </StackPane>
+    </center>
+</BorderPane>

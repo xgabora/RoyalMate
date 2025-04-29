@@ -85,16 +85,40 @@
                                 </VBox>
 
                                 <!-- Statistics Content (Initially Hidden) -->
-                                <VBox fx:id="statsContent" alignment="TOP_LEFT" spacing="10.0" styleClass="tab-content-pane" visible="false" managed="false">
+                                <VBox fx:id="statsContent" alignment="TOP_LEFT" spacing="12.0" styleClass="tab-content-pane" visible="false" managed="false">
+                                    <padding> <Insets left="20.0" right="20.0" /> </padding> <!-- Added horizontal padding -->
                                     <children>
-                                        <Label fx:id="totalSpinsLabel" styleClass="stats-label" text="Total Spins: 0" textFill="#DDDDDD"/>
-                                        <Label fx:id="totalWinsLabel" styleClass="stats-label" text="Total Wins (€): 0" textFill="#DDDDDD"/>
-                                        <Label fx:id="gamesPlayedLabel" styleClass="stats-label" text="Games Played: 0" textFill="#DDDDDD"/>
+                                        <!-- Total Spins Row -->
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label styleClass="stats-label-key" text="%profile.label.totalspins" minWidth="150.0"/> <!-- Key Label -->
+                                                <Label fx:id="totalSpinsValueLabel" styleClass="stats-label-value" text="0" /> <!-- Value Label -->
+                                            </children>
+                                        </HBox>
+                                        <!-- Total Wagered Row -->
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label styleClass="stats-label-key" text="%profile.label.totalwagered" minWidth="150.0"/>
+                                                <Label fx:id="totalWageredValueLabel" styleClass="stats-label-value" text="0.00 €" /> <!-- Value Label -->
+                                            </children>
+                                        </HBox>
+                                        <!-- Total Won Row -->
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label styleClass="stats-label-key" text="%profile.label.totalwins" minWidth="150.0"/> <!-- Key Label -->
+                                                <Label fx:id="totalWinsValueLabel" styleClass="stats-label-value" text="0.00 €" /> <!-- Value Label -->
+                                            </children>
+                                        </HBox>
+                                        <!-- Games Played Row -->
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label styleClass="stats-label-key" text="%profile.label.gamesplayed" minWidth="150.0"/> <!-- Key Label -->
+                                                <Label fx:id="gamesPlayedValueLabel" styleClass="stats-label-value" text="0" /> <!-- Value Label -->
+                                            </children>
+                                        </HBox>
                                     </children>
-                                    <padding>
-                                        <Insets left="20.0" />
-                                    </padding>
                                 </VBox>
+
 
                                 <!-- Settings Content (Initially Hidden) -->
                                 <VBox fx:id="settingsContent" alignment="TOP_CENTER" spacing="15.0" styleClass="tab-content-pane" visible="false" managed="false">

@@ -559,6 +559,11 @@
     -fx-background-radius: 8; /* Match cell radius */
 }
 
+.game-cover-image:hover {
+    -fx-border-color: -fx-gold-color;
+    -fx-effect: dropshadow(three-pass-box, -fx-gold-color, 15, 0.3, 0, 0); /* Gold glow on hover */
+}
+
 /* --- Game Search Page --- */
 .search-bar {
     -fx-background-color: white;
@@ -926,6 +931,107 @@
     -fx-text-fill: white;
 }
 
-/* Reuse filter toggle button style for bet selection */
-/* .filter-toggle-button { ... } */
-/* .filter-toggle-button:selected { ... } */
+/* --- Coinflip Bet Buttons --- */
+.coinflip-bet-button {
+    -fx-font-size: 16px;
+    -fx-padding: 8px 18px;
+    -fx-background-radius: 15;
+    -fx-border-color: #AAA;
+    -fx-border-radius: 15;
+    -fx-border-width: 1;
+    -fx-min-width: 120px; /* Keep width */
+    -fx-cursor: hand; /* Explicitly add cursor */
+}
+
+/* --- Coinflip Coin Circle --- */
+/* Base style for the coin circle */
+.coin-circle {
+    -fx-stroke: #555555; /* Dark border */
+    -fx-stroke-width: 2px;
+    /* Initial fill set by controller */
+    /* Base subtle shadow */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0.0, 1, 1);
+}
+
+/* --- Leaderboard Screen --- */
+.leaderboard-column {
+    /* Remove background color */
+    /* -fx-background-color: rgba(255, 255, 255, 0.05); */
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 8px; /* Reduced padding */
+    -fx-min-width: 280px; /* Wider minimum */
+    -fx-pref-width: 330px; /* Wider preference */
+    -fx-alignment: top-center;
+}
+
+.leaderboard-column-title {
+    -fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: F1DA2C;
+    -fx-padding: 0 0 15px 0; -fx-border-color: white; -fx-border-width: 0 0 1 0;
+    -fx-alignment: center; -fx-pref-width: 2000;
+    -fx-effect: dropshadow(gaussian, #F1DA2C, 15, 0.3, 0, 0); /* Gold glow */
+}
+
+/* Updated Card Style - Taller, Wider, No Labels Needed */
+.leaderboard-card-new {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+    -fx-background-radius: 6;
+    -fx-padding: 8px 12px; /* Adjusted padding */
+    -fx-pref-width: 2000; /* Takes column width */
+    -fx-min-height: 90px; /* Slightly taller card */
+    -fx-alignment: center-left;
+}
+
+/* Style for the cover image inside the card */
+.leaderboard-cover-image {
+    /* Add rounded corners if desired */
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+/* Smaller Player Name */
+.leaderboard-player-name-small {
+    -fx-font-size: 15px; /* Smaller */
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.leaderboard-date {
+    -fx-font-size: 11px;
+    -fx-text-fill: #AAAAAA;
+}
+
+/* Smaller Metric */
+.leaderboard-metric-small {
+    -fx-font-size: 15px; /* Smaller */
+    -fx-font-weight: bold;
+    -fx-text-fill: lightgreen;
+    -fx-effect: dropshadow(gaussian, lightgreen, 4, 0.15, 0, 0); /* Reduced glow */
+    -fx-alignment: center-right;
+}
+
+.leaderboard-nodata-label {
+    -fx-font-size: 14px; -fx-text-fill: #AAAAAA; -fx-padding: 20px; -fx-alignment: center;
+}
+
+/* --- Profile Statistics Tab --- */
+.stats-label-key {
+    -fx-font-size: 16px; /* Slightly larger */
+    -fx-font-weight: bold;
+    -fx-text-fill: #F1DA2C; /* Gold/Yellow */
+    -fx-min-width: 160px; /* Ensure keys align */
+    -fx-alignment: center-left;
+}
+
+.stats-label-value {
+    -fx-font-size: 16px; /* Slightly larger */
+    -fx-font-weight: normal; /* Normal weight for value */
+    -fx-text-fill: white; /* White text */
+    -fx-alignment: center-left;
+}
+
+/* Adjust padding/spacing on tab-content-pane if needed */
+.tab-content-pane {
+    -fx-padding: 20px 30px; /* Example padding */
+    /* -fx-max-width: 500px; */ /* Remove or adjust max-width if needed */
+}

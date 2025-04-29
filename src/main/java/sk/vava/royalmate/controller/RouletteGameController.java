@@ -665,9 +665,8 @@ public class RouletteGameController {
 
     @FXML
     private void handleLeaderboardButton(ActionEvent event) {
-        LOGGER.info("Leaderboard button clicked - Placeholder");
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Full Leaderboard screen not implemented yet.");
-        alert.showAndWait();
+        LOGGER.info("Navigate to Leaderboards");
+        navigateTo(event, "/sk/vava/royalmate/view/leaderboard-view.fxml"); // Navigate to leaderboard view
     }
 
     // --- Utils & Navigation ---

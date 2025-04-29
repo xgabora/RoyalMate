@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.sql.Blob; // Import Blob if directly using (though DAO handles it)
 import java.sql.Timestamp;
 
 @Data
@@ -13,14 +14,17 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Gameplay {
-    private long id; // Corresponds to BIGINT AUTO_INCREMENT PRIMARY KEY
+    private long id;
     private int accountId;
     private int gameId;
     private BigDecimal stakeAmount;
-    private String outcome; // Store result grid/symbols as String (e.g., JSON) or just descriptive text
+    private String outcome;
     private BigDecimal payoutAmount;
     private Timestamp timestamp;
 
-    // Transient field populated by JOIN for leaderboard display
+    // Transient fields populated by JOINs
     private transient String username;
+    private transient String gameName;
+    private transient BigDecimal multiplier;
+    private transient byte[] coverImageData; // <-- ADDED
 }

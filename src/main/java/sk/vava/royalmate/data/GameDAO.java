@@ -52,19 +52,21 @@ public class GameDAO {
 
     private static final String DELETE_GAME_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = ?";
 
+    // Find top N active games ordered by play count, joining for cover image and admin username
+    // Use ANY_VALUE() for non-aggregated columns not in GROUP BY
     private static final String FIND_TOP_GAMES_SQL =
             "SELECT g.id, g.name, g.description, g.game_type, g.min_stake, g.max_stake, g.volatility, g.background_color, g.created_by_admin_id, g.is_active, g.created_at, " +
-                    "a.username as admin_username, " +
-                    "ga.image_data as cover_image, " +
-                    "COUNT(gp.id) as spin_count " + // Count gameplays as spin_count
+                    "ANY_VALUE(a.username) as admin_username, " + // <-- Use ANY_VALUE()
+                    "ANY_VALUE(ga.image_data) as cover_image, " + // <-- Use ANY_VALUE()
+                    "COUNT(gp.id) as spin_count " +
                     "FROM " + TABLE_NAME + " g " +
                     "JOIN " + ACCOUNT_TABLE_NAME + " a ON g.created_by_admin_id = a.id " +
                     "LEFT JOIN " + ASSET_TABLE_NAME + " ga ON g.id = ga.game_id AND ga.asset_type = 'COVER' " +
-                    "LEFT JOIN " + GAMEPLAYS_TABLE_NAME + " gp ON g.id = gp.game_id " + // Join with gameplays
-                    "WHERE g.is_active = true " + // Only active games
-                    "GROUP BY g.id " + // Group by game to count plays
-                    "ORDER BY spin_count DESC " + // Order by the count
-                    "LIMIT ?"; // Limit results
+                    "LEFT JOIN " + GAMEPLAYS_TABLE_NAME + " gp ON g.id = gp.game_id " +
+                    "WHERE g.is_active = true " +
+                    "GROUP BY g.id " + // Group only by the primary key of the main table
+                    "ORDER BY spin_count DESC " +
+                    "LIMIT ?";
 
     // Find ALL ACTIVE games, joining for cover image and admin username (order can be added if needed)
     private static final String FIND_ALL_ACTIVE_WITH_COVERS_SQL =
