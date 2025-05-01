@@ -78,7 +78,6 @@ public class AuthService {
 
 
     public boolean withdrawFunds(int accountId, BigDecimal amount) throws IllegalArgumentException, IllegalStateException {
-        // ... keep existing implementation ...
         LOGGER.info("Withdrawal attempt for account ID: " + accountId + ", Amount: " + amount);
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) { throw new IllegalArgumentException("Withdrawal amount must be positive."); }
         Account currentAccount = accountDAO.findByUsername(SessionManager.getCurrentAccount().getUsername()).orElseThrow(() -> new IllegalStateException("Cannot retrieve current account data for withdrawal."));
@@ -91,7 +90,6 @@ public class AuthService {
 
 
     public boolean changePassword(int accountId, String oldPasswordPlain, String newPasswordPlain) throws IllegalArgumentException {
-        // ... keep existing implementation ...
         LOGGER.info("Password change attempt for account ID: " + accountId);
         if (newPasswordPlain == null || newPasswordPlain.isEmpty()) { throw new IllegalArgumentException("New password cannot be empty."); }
         Account currentAccount = SessionManager.getCurrentAccount();
@@ -103,15 +101,4 @@ public class AuthService {
         else { LOGGER.severe("Password change failed during database update for account ID: " + accountId); return false; }
     }
 
-
-    // --- THIS IS THE OLD PLACEHOLDER METHOD TO REMOVE ---
-    // public java.util.Map<String, Long> getUserStatistics(int accountId) {
-    //     LOGGER.fine("Fetching placeholder statistics for account ID: " + accountId);
-    //     return java.util.Map.of(
-    //             "totalSpins", 0L,
-    //             "totalWins", 0L,
-    //             "gamesPlayed", 0L
-    //     );
-    // }
-    // ------------------------------------------------------
 }
