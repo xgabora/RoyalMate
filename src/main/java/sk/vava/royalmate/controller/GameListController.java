@@ -23,27 +23,54 @@ import sk.vava.royalmate.service.AdminService;
 import sk.vava.royalmate.util.ImageUtil;
 import sk.vava.royalmate.util.LocaleManager;
 import sk.vava.royalmate.util.SessionManager;
+import javafx.stage.FileChooser; // Import FileChooser
+import javafx.stage.Window; // Import Window
+import org.w3c.dom.Document; // Import DOM Document
+import org.w3c.dom.Element; // Import DOM Element
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.MessageFormat; // For confirmation message formatting
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.parsers.DocumentBuilder; // Import DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory; // Import DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException; // Import ParserConfigurationException
+import javax.xml.transform.*; // Import Transformer classes
+import javax.xml.transform.dom.DOMSource; // Import DOMSource
+import javax.xml.transform.stream.StreamResult; // Import StreamResult
+import java.io.File; // Import File
+import java.io.FileOutputStream; // Import FileOutputStream
+import java.io.IOException;
+import java.io.OutputStreamWriter; // Import OutputStreamWriter
+import java.math.BigDecimal; // Import BigDecimal
+import java.nio.charset.StandardCharsets; // Import StandardCharsets
+import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter; // Import DateTimeFormatter for timestamp
+
+
 
 public class GameListController {
 
     private static final Logger LOGGER = Logger.getLogger(GameListController.class.getName());
+    private static final DateTimeFormatter XML_TIMESTAMP_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // ISO 8601 format
+
 
     @FXML private BorderPane rootPane;
     @FXML private Button addNewGameButton;
+    @FXML private Button exportDataButton; // <-- Inject new button
     @FXML private ScrollPane scrollPane;
     @FXML private VBox gameListContainer;
     @FXML private Label messageLabel;
 
     private final AdminService adminService;
+    private FileChooser xmlFileChooser;
+
 
     public GameListController() {
         this.adminService = new AdminService();
@@ -59,9 +86,20 @@ public class GameListController {
         }
         messageLabel.setVisible(false);
         messageLabel.setManaged(false);
+        setupFileChooser(); // Setup file chooser
         loadGameList();
         LOGGER.info("Game List Controller initialized.");
     }
+
+    private void setupFileChooser() {
+        xmlFileChooser = new FileChooser();
+        xmlFileChooser.setTitle(LocaleManager.getString("admin.export.title"));
+        xmlFileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("XML Files (*.xml)", "*.xml")
+        );
+        xmlFileChooser.setInitialFileName("royalmate_games_export.xml"); // Suggest a filename
+    }
+
 
     private void loadGameList() {
         LOGGER.fine("Loading game list...");
@@ -172,6 +210,154 @@ public class GameListController {
         LOGGER.info("Add New Game button clicked");
         navigateTo(event, "/sk/vava/royalmate/view/add-game-view.fxml");
     }
+
+    // --- NEW Export Handler ---
+    @FXML
+    private void handleExportData(ActionEvent event) {
+        hideMessage();
+        LOGGER.info("Export Data button clicked.");
+
+        // 1. Fetch Data (Use background task if potentially slow)
+        // For simplicity, doing it directly now. Wrap in Task if needed.
+        List<Game> gamesToExport;
+        try {
+            gamesToExport = adminService.getAllGamesWithStats(); // Get games with stats
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to fetch game data for export.", e);
+            showMessage(LocaleManager.getString("admin.export.error.fetch"), true);
+            return;
+        }
+
+        if (gamesToExport == null || gamesToExport.isEmpty()) {
+            LOGGER.info("No game data found to export.");
+            showMessage(LocaleManager.getString("admin.export.nodata"), false); // Not an error, just info
+            return;
+        }
+
+        // 2. Generate XML
+        Document xmlDoc;
+        try {
+            xmlDoc = createGamesXmlDocument(gamesToExport);
+        } catch (ParserConfigurationException e) {
+            LOGGER.log(Level.SEVERE, "Error creating XML document.", e);
+            showMessage(LocaleManager.getString("admin.export.error.generate"), true);
+            return;
+        }
+
+        // 3. Show File Chooser
+        Window window = rootPane.getScene().getWindow();
+        File selectedFile = xmlFileChooser.showSaveDialog(window);
+
+        if (selectedFile != null) {
+            // Ensure file has .xml extension
+            if (!selectedFile.getName().toLowerCase().endsWith(".xml")) {
+                selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".xml");
+            }
+
+            // 4. Write XML to File
+            if (writeXmlToFile(xmlDoc, selectedFile)) {
+                String successMsg = MessageFormat.format(LocaleManager.getString("admin.export.success"), selectedFile.getName());
+                showMessage(successMsg, false);
+                LOGGER.info("Successfully exported game data to: " + selectedFile.getAbsolutePath());
+            }
+            // Error message shown inside writeXmlToFile if it fails
+        } else {
+            LOGGER.info("XML Export cancelled by user.");
+        }
+    }
+
+    /** Generates the DOM Document for the game list */
+    private Document createGamesXmlDocument(List<Game> games) throws ParserConfigurationException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+
+        // Root element <games>
+        Element rootElement = doc.createElement("games");
+        doc.appendChild(rootElement);
+
+        for (Game game : games) {
+            // <game> element
+            Element gameElement = doc.createElement("game");
+            // Add attributes
+            gameElement.setAttribute("id", String.valueOf(game.getId()));
+            gameElement.setAttribute("name", game.getName() != null ? game.getName() : "");
+            gameElement.setAttribute("type", game.getGameType() != null ? game.getGameType().name() : "");
+            gameElement.setAttribute("active", String.valueOf(game.isActive()));
+            rootElement.appendChild(gameElement);
+
+            // Add child elements for details
+            appendChildElement(doc, gameElement, "description", game.getDescription());
+            appendChildElement(doc, gameElement, "minStake", formatBigDecimal(game.getMinStake()));
+            appendChildElement(doc, gameElement, "maxStake", formatBigDecimal(game.getMaxStake()));
+            appendChildElement(doc, gameElement, "volatility", String.valueOf(game.getVolatility()));
+            appendChildElement(doc, gameElement, "backgroundColor", game.getBackgroundColor());
+            appendChildElement(doc, gameElement, "createdByAdminUsername", game.getCreatedByAdminUsername()); // Using username
+            appendChildElement(doc, gameElement, "createdAt", formatTimestamp(game.getCreatedAt()));
+            // Stats
+            appendChildElement(doc, gameElement, "totalSpins", String.valueOf(game.getTotalSpins()));
+            appendChildElement(doc, gameElement, "maxPayout", formatBigDecimal(game.getMaxPayout()));
+        }
+        return doc;
+    }
+
+    /** Helper to append a child element with text content */
+    private void appendChildElement(Document doc, Element parent, String tagName, String textContent) {
+        if (textContent != null) { // Only add if not null
+            Element element = doc.createElement(tagName);
+            element.appendChild(doc.createTextNode(textContent));
+            parent.appendChild(element);
+        }
+    }
+
+    /** Formats BigDecimal for XML (plain string, 2 decimal places) */
+    private String formatBigDecimal(BigDecimal value) {
+        if (value == null) return "0.00";
+        return value.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString();
+    }
+
+    /** Formats Timestamp for XML (ISO 8601 format) */
+    private String formatTimestamp(Timestamp timestamp) {
+        if (timestamp == null) return null;
+        // Convert to ZonedDateTime and format
+        return timestamp.toInstant()
+                .atZone(ZoneId.systemDefault()) // Or use UTC ZoneId.of("UTC")
+                .format(XML_TIMESTAMP_FORMAT);
+    }
+
+    /** Writes the DOM Document to the specified file */
+    private boolean writeXmlToFile(Document xmlDoc, File file) {
+        try {
+            // Create Transformer
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            // Prevent XXE attacks (optional but good practice)
+            transformerFactory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            Transformer transformer = transformerFactory.newTransformer();
+
+            // Configure output properties (pretty print)
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); // Ensure UTF-8
+
+            DOMSource source = new DOMSource(xmlDoc);
+
+            // Write to file using UTF-8 encoding explicitly
+            try (FileOutputStream fos = new FileOutputStream(file);
+                 OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                StreamResult result = new StreamResult(writer);
+                transformer.transform(source, result);
+                return true;
+            }
+
+        } catch (TransformerException | IOException e) {
+            LOGGER.log(Level.SEVERE, "Error writing XML file: " + file.getAbsolutePath(), e);
+            String errorMsg = MessageFormat.format(LocaleManager.getString("admin.export.error.write"), e.getMessage());
+            showMessage(errorMsg, true);
+            return false;
+        }
+    }
+    // --- END Export Logic ---
 
 
     private void handleDeleteGame(Game game) {

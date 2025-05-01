@@ -26,6 +26,18 @@ import sk.vava.royalmate.util.ImageUtil; // Import ImageUtil helper
 import sk.vava.royalmate.util.LocaleManager;
 import sk.vava.royalmate.util.SessionManager;
 
+import javafx.stage.Window; // Import Window
+import javafx.util.StringConverter;
+import org.w3c.dom.Document; // Import DOM Document
+import org.w3c.dom.Element; // Import DOM Element
+import org.w3c.dom.NodeList; // Import NodeList
+import org.xml.sax.SAXException; // Import SAXException
+import javax.xml.XMLConstants; // Import XMLConstants
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -67,11 +79,13 @@ public class AddGameController {
     @FXML private Label symbolPromptLabel;
     @FXML private Label symbolErrorLabel;
     @FXML private Button actionButton; // Unified button
+    @FXML private Button importButton; // <-- Inject import button
     @FXML private Label generalMessageLabel;
 
     // --- Services and Helpers ---
     private final AdminService adminService;
     private final FileChooser imageFileChooser;
+    private FileChooser xmlImportFileChooser; // <-- File chooser for XML
     private ToggleGroup gameTypeGroup;
 
     // --- State ---
@@ -104,7 +118,9 @@ public class AddGameController {
     public AddGameController() {
         adminService = new AdminService();
         imageFileChooser = new FileChooser();
+        xmlImportFileChooser = new FileChooser(); // Initialize XML chooser
         setupFileChooser();
+        setupXmlImportFileChooser(); // Configure XML chooser
     }
 
     // --- Initialization ---
@@ -464,6 +480,141 @@ public class AddGameController {
             actionButton.setDisable(false); // Re-enable on exception
         }
     }
+
+    // --- NEW XML Import Logic ---
+
+    /** Configures the FileChooser for XML import */
+    private void setupXmlImportFileChooser() {
+        xmlImportFileChooser.setTitle(LocaleManager.getString("admin.import.title"));
+        xmlImportFileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("XML Files (*.xml)", "*.xml")
+        );
+    }
+
+    /** Handler for the "Import from XML" button */
+    @FXML
+    void handleImportXml(ActionEvent event) {
+        clearMessages();
+        LOGGER.info("Import from XML button clicked.");
+
+        Window window = rootPane.getScene().getWindow();
+        File selectedFile = xmlImportFileChooser.showOpenDialog(window);
+
+        if (selectedFile != null) {
+            LOGGER.info("Attempting to import game data from: " + selectedFile.getAbsolutePath());
+            parseAndLoadGameFromXml(selectedFile);
+        } else {
+            LOGGER.info("XML Import cancelled by user.");
+            showGeneralMessage(LocaleManager.getString("admin.import.error.select"), true);
+        }
+    }
+
+    /** Parses the selected XML file and populates the form */
+    private void parseAndLoadGameFromXml(File xmlFile) {
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+
+            // --- ADJUSTED SECURITY SETTINGS ---
+            // Keep secure processing enabled
+            dbFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            // Keep disallow doctype decl
+            dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            // Remove or comment out the problematic feature:
+            // dbFactory.setFeature("http://xml.apache.org/xml/features/nonvalidating/load-external-dtd", false); // <-- REMOVED/COMMENTED
+            // Keep these disabled
+            dbFactory.setXIncludeAware(false);
+            dbFactory.setExpandEntityReferences(false);
+            // ------------------------------------
+
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+            doc.getDocumentElement().normalize();
+
+            NodeList gameNodes = doc.getElementsByTagName("game");
+            if (gameNodes.getLength() > 0) {
+                Element gameElement = (Element) gameNodes.item(0);
+                populateFormFromXmlElement(gameElement);
+                // Switch to ADD mode visually
+                this.gameToEdit = null;
+                titleLabel.setText(LocaleManager.getString("admin.title.addgame"));
+                actionButton.setText(LocaleManager.getString("admin.button.addnewgame"));
+                actionButton.setOnAction(this::handleSaveGameAction);
+                showGeneralMessage(LocaleManager.getString("admin.import.success"), false);
+                LOGGER.info("Successfully loaded game data from XML into form.");
+            } else {
+                LOGGER.warning("No <game> elements found in the selected XML file.");
+                showGeneralMessage(LocaleManager.getString("admin.import.error.nodata"), true);
+            }
+
+        } catch (ParserConfigurationException | SAXException e) { // Catch SAXException too
+            LOGGER.log(Level.SEVERE, "Error parsing XML file: " + xmlFile.getName(), e);
+            showGeneralMessage(MessageFormat.format(LocaleManager.getString("admin.import.error.parse"), e.getMessage()), true);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error reading XML file: " + xmlFile.getName(), e);
+            showGeneralMessage(MessageFormat.format(LocaleManager.getString("admin.import.error.read"), e.getMessage()), true);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error processing data from XML element for file: " + xmlFile.getName(), e);
+            showGeneralMessage(e.getMessage(), true);
+        }
+    }
+
+    /** Populates form fields based on data from an XML <game> Element */
+    private void populateFormFromXmlElement(Element gameElement) throws Exception {
+        // --- Extract and Set Data ---
+        // Attributes
+        String gameName = gameElement.getAttribute("name");
+        String gameTypeStr = gameElement.getAttribute("type");
+
+        if (gameName.isEmpty() || gameTypeStr.isEmpty()) {
+            throw new Exception(LocaleManager.getString("admin.import.error.missing"));
+        }
+        gameNameField.setText(gameName);
+
+        // Set Game Type Toggle
+        try {
+            GameType type = GameType.valueOf(gameTypeStr.toUpperCase());
+            switch (type) {
+                case SLOT -> gameTypeGroup.selectToggle(slotToggleButton);
+                case ROULETTE -> gameTypeGroup.selectToggle(rouletteToggleButton);
+                case COINFLIP -> gameTypeGroup.selectToggle(coinflipToggleButton);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new Exception(MessageFormat.format(LocaleManager.getString("admin.import.error.invalidtype"), gameTypeStr));
+        }
+
+        // Child Elements
+        descriptionArea.setText(getElementTextContent(gameElement, "description"));
+
+        try {
+            minWagerComboBox.setValue(new BigDecimal(getElementTextContent(gameElement, "minStake")));
+            maxWagerComboBox.setValue(new BigDecimal(getElementTextContent(gameElement, "maxStake")));
+            volatilityComboBox.setValue(Integer.parseInt(getElementTextContent(gameElement, "volatility")));
+        } catch (NumberFormatException | NullPointerException e) {
+            throw new Exception(MessageFormat.format(LocaleManager.getString("admin.import.error.invalidnumber"),
+                    "stakes/volatility", e.getMessage()));
+        }
+
+        String bgColorHex = getElementTextContent(gameElement, "backgroundColor");
+        bgColorComboBox.setValue(findNamedColorByHex(bgColorHex));
+
+        // Clear existing assets - Import only sets definition data
+        coverImageData.set(null);
+        coverImageView.setImage(null);
+        coverPromptLabel.setText(LocaleManager.getString("admin.addgame.label.uploadcover"));
+        clearSymbolUploads();
+        showGeneralMessage(LocaleManager.getString("admin.import.assetnote"), false); // Inform user
+    }
+
+    /** Helper to get text content of a child element, returns empty string if not found */
+    private String getElementTextContent(Element parent, String childTagName) {
+        NodeList nl = parent.getElementsByTagName(childTagName);
+        if (nl != null && nl.getLength() > 0) {
+            return nl.item(0).getTextContent();
+        }
+        return ""; // Return empty instead of null
+    }
+
+    // --- END XML Import Logic ---
 
     /** Builds the core Game object from form inputs */
     private Game buildGameFromForm() {

@@ -19,14 +19,15 @@ public class Game {
     private GameType gameType;
     private BigDecimal minStake;
     private BigDecimal maxStake;
-    private int volatility; // Stored as TINYINT UNSIGNED (0-255), used as 1-5 in UI
-    private String backgroundColor; // Hex code
+    private int volatility;
+    private String backgroundColor;
     private int createdByAdminId;
     private boolean isActive;
     private Timestamp createdAt;
 
     // --- Fields populated by JOINs or separate queries ---
-    private String createdByAdminUsername; // From joining accounts table
-    private long totalSpins;             // From aggregating gameplays table (implement later)
-    private byte[] coverImageData;       // From joining game_assets table (convenience)
+    private String createdByAdminUsername;
+    private long totalSpins;
+    private byte[] coverImageData;
+    private BigDecimal maxPayout; // <-- ADDED
 }

@@ -30,11 +30,13 @@
                             </children>
                         </HBox>
 
-                        <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+                        <HBox alignment="CENTER_LEFT" spacing="20.0" VBox.vgrow="NEVER"> <!-- Added spacing -->
                             <children>
                                 <Button fx:id="addNewGameButton" mnemonicParsing="false" onAction="#handleAddGame" styleClass="button-secondary-small" text="%admin.button.addnewgame" />
+                                <Button fx:id="exportDataButton" mnemonicParsing="false" onAction="#handleExportData" styleClass="button-secondary-small" text="%admin.button.export" />
                             </children>
                         </HBox>
+
 
 
                         <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">

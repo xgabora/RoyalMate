@@ -91,10 +91,13 @@
                                                 <!-- Separator -->
                                                 <Separator />
 
-                                                <!-- Action Button -->
-                                                <HBox alignment="CENTER_LEFT" spacing="20.0"> <!-- Changed alignment -->
+                                                <!-- Action Buttons HBox -->
+                                                <HBox alignment="CENTER_LEFT" spacing="20.0">
                                                     <children>
+                                                        <!-- Existing Save/Update Button -->
                                                         <Button fx:id="actionButton" styleClass="splash-button, button-primary" text="%admin.button.addnewgame" onAction="#handleSaveGameAction"/>
+                                                        <!-- NEW Import Button -->
+                                                        <Button fx:id="importButton" mnemonicParsing="false" onAction="#handleImportXml" styleClass="splash-button, button-secondary" text="%admin.button.import" />
                                                     </children>
                                                     <VBox.margin>
                                                         <Insets top="10.0" />

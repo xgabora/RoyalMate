@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.math.BigDecimal; // Import BigDecimal
+import java.math.RoundingMode; // Import RoundingMode
+
 
 public class GameDAO {
 
@@ -82,6 +84,27 @@ public class GameDAO {
                     "WHERE g.is_active = true " + // Only active games
                     "ORDER BY g.name ASC"; // Default sort by name
 
+
+    // --- NEW SQL for Export ---
+    // Fetches ALL games (active or inactive) with aggregated stats and admin username
+    // Does NOT fetch cover image blob for export efficiency
+    private static final String FIND_ALL_WITH_STATS_SQL =
+            "SELECT g.id, g.name, g.description, g.game_type, g.min_stake, g.max_stake, g.volatility, g.background_color, g.created_by_admin_id, g.is_active, g.created_at, " +
+                    "a.username as admin_username, " +
+                    "COALESCE(gc.play_count, 0) as total_spins, " + // Use COALESCE
+                    "COALESCE(gc.max_payout, 0.00) as max_payout " +  // Use COALESCE
+                    "FROM " + TABLE_NAME + " g " +
+                    "JOIN " + ACCOUNT_TABLE_NAME + " a ON g.created_by_admin_id = a.id " +
+                    // Subquery to get stats per game_id
+                    "LEFT JOIN (" +
+                    "SELECT " +
+                    "game_id, " +
+                    "COUNT(id) as play_count, " +
+                    "MAX(payout_amount) as max_payout " +
+                    "FROM " + GAMEPLAYS_TABLE_NAME + " " +
+                    "GROUP BY game_id" +
+                    ") gc ON g.id = gc.game_id " +
+                    "ORDER BY g.id ASC"; // Order consistently for export
 
     /**
      * Saves a new game and returns its generated ID.
@@ -303,10 +326,42 @@ public class GameDAO {
     }
     // --- END NEW METHOD ---
 
+// --- NEW METHOD for Export ---
+    /**
+     * Retrieves ALL games with aggregated statistics (total spins, max payout)
+     * and creator username, suitable for export. Excludes BLOB data.
+     *
+     * @return List of Game objects with stats.
+     */
+    public List<Game> findAllWithStats() {
+        LOGGER.fine("Finding all games with stats for export.");
+        List<Game> games = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(FIND_ALL_WITH_STATS_SQL)) {
+
+            while (rs.next()) {
+                // Map using a flag to indicate stats should be included, but not cover image
+                games.add(mapResultSetToGame(rs, true, true)); // includeJoinData=true, includeStatsData=true
+            }
+            LOGGER.fine("Found " + games.size() + " games with stats.");
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding all games with stats", e);
+        }
+        return games;
+    }
+    // --- END NEW METHOD ---
 
 
-    /** Helper to map ResultSet to Game object (MODIFIED) */
+    /** Overloaded Helper to map ResultSet to Game object (MODIFIED) */
     private Game mapResultSetToGame(ResultSet rs, boolean includeJoinData) throws SQLException {
+        // Calls the new helper, excluding stats by default for existing calls
+        return mapResultSetToGame(rs, includeJoinData, false);
+    }
+
+    /** Main Helper to map ResultSet to Game object (NEW OVERLOAD) */
+    private Game mapResultSetToGame(ResultSet rs, boolean includeJoinData, boolean includeStatsData) throws SQLException {
         Game game = Game.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
@@ -321,33 +376,40 @@ public class GameDAO {
                 .createdAt(rs.getTimestamp("created_at"))
                 .build();
 
-        if(includeJoinData) {
-            // Check if joined columns exist before trying to read them
+        if (includeJoinData) {
             if (hasColumn(rs, "admin_username")) {
                 game.setCreatedByAdminUsername(rs.getString("admin_username"));
             }
-            if (hasColumn(rs, "cover_image")) {
+            // Only map cover if needed (not for stats export)
+            if (!includeStatsData && hasColumn(rs, "cover_image")) {
                 Blob coverBlob = rs.getBlob("cover_image");
-                if(coverBlob != null) {
-                    try {
-                        game.setCoverImageData(coverBlob.getBytes(1, (int) coverBlob.length()));
-                    } finally {
-                        coverBlob.free();
-                    }
+                if (coverBlob != null) {
+                    try { game.setCoverImageData(coverBlob.getBytes(1, (int) coverBlob.length())); }
+                    finally { coverBlob.free(); }
                 }
             }
-            // <<<--- ADDED MAPPING FOR SPIN COUNT ---<<<
-            if (hasColumn(rs, "spin_count")) {
-                game.setTotalSpins(rs.getLong("spin_count"));
-            }
-            // >>>------------------------------------>>>
         }
+
+        // Map stats if requested
+        if (includeStatsData) {
+            if (hasColumn(rs, "total_spins")) { // Use total_spins from new query
+                game.setTotalSpins(rs.getLong("total_spins"));
+            }
+            if (hasColumn(rs, "max_payout")) { // Map max_payout from new query
+                game.setMaxPayout(rs.getBigDecimal("max_payout"));
+            }
+        } else if (includeJoinData && hasColumn(rs, "spin_count")) {
+            // Compatibility for older calls that used spin_count alias in JOINs
+            game.setTotalSpins(rs.getLong("spin_count"));
+        }
+
+
         return game;
     }
 
+
     /** Utility to check if a column exists in the ResultSet metadata */
     private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
-        // ... (Keep existing implementation) ...
         ResultSetMetaData rsmd = rs.getMetaData();
         int columns = rsmd.getColumnCount();
         for (int x = 1; x <= columns; x++) {

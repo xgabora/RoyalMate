@@ -197,6 +197,12 @@ public class AdminService {
         return gameDAO.findAllSortedByDateDesc();
     }
 
+    // --- NEW METHOD for Export ---
+    public List<Game> getAllGamesWithStats() {
+        LOGGER.fine("Fetching all games with stats for export.");
+        return gameDAO.findAllWithStats(); // Call the new DAO method
+    }
+
     /**
      * Creates a new game along with its cover image and symbol assets.
      * NOTE: Does not use transactions with raw JDBC for simplicity. Partial creation possible on error.
