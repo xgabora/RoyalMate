@@ -16,13 +16,6 @@ public class ImageUtil {
 
     private static final Logger LOGGER = Logger.getLogger(ImageUtil.class.getName());
 
-    /**
-     * Converts a JavaFX Image object to a byte array.
-     *
-     * @param image The JavaFX Image.
-     * @param format The desired image format ("png", "jpg", etc.).
-     * @return Byte array, or null on error.
-     */
     public static byte[] imageToByteArray(Image image, String format) {
         if (image == null || format == null || format.isBlank()) {
             return null;
@@ -33,13 +26,13 @@ public class ImageUtil {
             return null;
         }
         try (ByteArrayOutputStream s = new ByteArrayOutputStream()) {
-            // Ensure format is valid for ImageIO
+
             String validFormat = format.toLowerCase();
             if (!List.of("png", "jpg", "jpeg", "gif", "bmp").contains(validFormat)) {
                 LOGGER.warning("Unsupported image format for saving: " + format + ". Defaulting to png.");
-                validFormat = "png"; // Default to PNG if format is weird
+                validFormat = "png";
             }
-            if ("jpg".equals(validFormat)) validFormat = "jpeg"; // ImageIO often prefers "jpeg"
+            if ("jpg".equals(validFormat)) validFormat = "jpeg";
 
             ImageIO.write(bImage, validFormat, s);
             return s.toByteArray();
@@ -49,13 +42,6 @@ public class ImageUtil {
         }
     }
 
-    /**
-     * Converts a byte array back to a JavaFX Image.
-     *
-     * @param imageData The image byte array.
-     * @return JavaFX Image, or null on error.
-     * @throws IOException if the byte array is invalid image data.
-     */
     public static Image byteArrayToImage(byte[] imageData) throws IOException {
         if (imageData == null || imageData.length == 0) {
             return null;
@@ -65,18 +51,12 @@ public class ImageUtil {
         }
     }
 
-    /**
-     * Extracts the file extension (lowercase) from a filename.
-     * @param filename The full filename (e.g., "image.PNG").
-     * @return The lowercase extension without the dot (e.g., "png"), or an empty string if no extension.
-     */
     public static String getFileExtension(String filename) {
         if (filename == null || filename.lastIndexOf('.') == -1) {
-            return ""; // No extension found
+            return "";
         }
         return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
     }
 
-    // Private constructor
     private ImageUtil() {}
 }

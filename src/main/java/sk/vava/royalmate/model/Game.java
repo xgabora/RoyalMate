@@ -25,9 +25,8 @@ public class Game {
     private boolean isActive;
     private Timestamp createdAt;
 
-    // --- Fields populated by JOINs or separate queries ---
     private String createdByAdminUsername;
     private long totalSpins;
     private byte[] coverImageData;
-    private BigDecimal maxPayout; // <-- ADDED
+    private BigDecimal maxPayout;
 }

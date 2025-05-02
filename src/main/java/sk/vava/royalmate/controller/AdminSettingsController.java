@@ -2,7 +2,7 @@ package sk.vava.royalmate.controller;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils; // Needed for Image -> BufferedImage
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,14 +18,14 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import sk.vava.royalmate.model.Account;
-import sk.vava.royalmate.model.ChatMessage; // Placeholder model
-import sk.vava.royalmate.model.HomepageBanner; // Placeholder model
+import sk.vava.royalmate.model.ChatMessage;
+import sk.vava.royalmate.model.HomepageBanner;
 import sk.vava.royalmate.service.AdminService;
 import sk.vava.royalmate.util.LocaleManager;
 import sk.vava.royalmate.util.SessionManager;
 
-import javax.imageio.ImageIO; // Needed for BufferedImage -> byte[]
-import java.awt.image.BufferedImage; // Needed for conversion
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -42,7 +42,7 @@ public class AdminSettingsController {
     private static final Logger LOGGER = Logger.getLogger(AdminSettingsController.class.getName());
 
     @FXML
-    private BorderPane rootPane; // <-- Must be BorderPane and have @FXML
+    private BorderPane rootPane;
     @FXML private ImageView bannerImageView;
     @FXML private Button uploadBannerButton;
     @FXML private Label bannerMessageLabel;
@@ -70,7 +70,7 @@ public class AdminSettingsController {
     public void initialize() {
         if (!SessionManager.isAdmin()) {
             LOGGER.severe("Non-admin attempting to access Admin Settings. Redirecting.");
-            // Redirect or block access - ideally handled before loading this view
+
             return;
         }
         configurePlayerComboBox();
@@ -88,7 +88,7 @@ public class AdminSettingsController {
 
             @Override
             public Account fromString(String string) {
-                // Not needed for selection-only ComboBox
+
                 return null;
             }
         });
@@ -107,26 +107,26 @@ public class AdminSettingsController {
     }
 
     private void loadBanner() {
-        Optional<HomepageBanner> bannerOpt = adminService.getMainBanner(); // Placeholder call
+        Optional<HomepageBanner> bannerOpt = adminService.getMainBanner();
         if (bannerOpt.isPresent() && bannerOpt.get().getImageData() != null) {
             byte[] imgBytes = bannerOpt.get().getImageData();
             try (ByteArrayInputStream bis = new ByteArrayInputStream(imgBytes)) {
                 Image image = new Image(bis);
                 bannerImageView.setImage(image);
-                showBannerMessage(LocaleManager.getString("admin.message.banner.select"), false); // Show default prompt
+                showBannerMessage(LocaleManager.getString("admin.message.banner.select"), false);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Error loading banner image from DB data.", e);
-                bannerImageView.setImage(null); // Clear image on error
+                bannerImageView.setImage(null);
                 showBannerMessage(LocaleManager.getString("admin.message.banner.error"), true);
             }
         } else {
-            bannerImageView.setImage(null); // Clear if no banner
+            bannerImageView.setImage(null);
             showBannerMessage(LocaleManager.getString("admin.message.banner.nodata"), false);
         }
     }
 
     private void loadPinnedMessage() {
-        Optional<ChatMessage> pinnedOpt = adminService.getPinnedMessage(); // Placeholder call
+        Optional<ChatMessage> pinnedOpt = adminService.getPinnedMessage();
         pinnedMessageArea.setText(pinnedOpt.map(ChatMessage::getMessageText).orElse(""));
     }
 
@@ -139,8 +139,6 @@ public class AdminSettingsController {
         );
     }
 
-    // --- Event Handlers ---
-
     @FXML
     void handleUploadBanner(ActionEvent event) {
         clearBannerMessage();
@@ -149,14 +147,14 @@ public class AdminSettingsController {
         if (selectedFile != null) {
             try {
                 Image image = new Image(selectedFile.toURI().toString());
-                // Convert JavaFX Image to byte[] for DB
+
                 byte[] imageData = imageToByteArray(image, selectedFile.getName().toLowerCase().endsWith("png") ? "png" : "jpg");
 
                 if (imageData != null) {
-                    // Use a default name or allow admin to set one? Using default for now.
-                    boolean success = adminService.updateMainBanner("main_banner", imageData); // Placeholder call
+
+                    boolean success = adminService.updateMainBanner("main_banner", imageData);
                     if (success) {
-                        bannerImageView.setImage(image); // Update UI immediately
+                        bannerImageView.setImage(image);
                         showBannerMessage(LocaleManager.getString("admin.message.banner.success"), false);
                     } else {
                         showBannerMessage(LocaleManager.getString("admin.message.banner.error"), true);
@@ -178,7 +176,7 @@ public class AdminSettingsController {
     void handleUpdatePinnedMessage(ActionEvent event) {
         clearChatMessage();
         String messageText = pinnedMessageArea.getText();
-        boolean success = adminService.updatePinnedMessage(messageText); // Placeholder call
+        boolean success = adminService.updatePinnedMessage(messageText);
         if(success) {
             showChatMessage(LocaleManager.getString("admin.message.chat.success"), false);
         } else {
@@ -202,9 +200,9 @@ public class AdminSettingsController {
 
     @FXML
     void handleMakeAdmin(ActionEvent event) {
-        executePlayerAction((account, amount) -> adminService.setPlayerAdminStatus(account.getId(), !account.isAdmin()), // Toggle status
+        executePlayerAction((account, amount) -> adminService.setPlayerAdminStatus(account.getId(), !account.isAdmin()),
                 LocaleManager.getString("admin.message.player.adminsetsuccess"),
-                LocaleManager.getString("admin.message.player.adminseterror"), false); // Amount not needed
+                LocaleManager.getString("admin.message.player.adminseterror"), false);
     }
 
     @FXML
@@ -215,7 +213,6 @@ public class AdminSettingsController {
             return;
         }
 
-        // Confirmation Dialog
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Confirm Account Removal");
         confirmation.setHeaderText("Remove Account: " + selectedAccount.getUsername());
@@ -223,17 +220,16 @@ public class AdminSettingsController {
 
         Optional<ButtonType> result = confirmation.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Proceed with deletion
+
             executePlayerAction((account, amount) -> adminService.deletePlayerAccount(account.getId()),
                     LocaleManager.getString("admin.message.player.removesuccess"),
-                    LocaleManager.getString("admin.message.player.removeerror"), false); // Amount not needed
-            loadPlayerList(); // Refresh list after deletion
+                    LocaleManager.getString("admin.message.player.removeerror"), false);
+            loadPlayerList();
         } else {
             LOGGER.info("Account removal cancelled by admin for user: " + selectedAccount.getUsername());
         }
     }
 
-    // --- Helper for Player Actions ---
     private void executePlayerAction(PlayerAction action, String successMsg, String errorMsg, boolean requiresAmount) {
         clearPlayerMessage();
         Account selectedAccount = playerComboBox.getValue();
@@ -262,12 +258,12 @@ public class AdminSettingsController {
             boolean success = action.execute(selectedAccount, amount);
             if (success) {
                 showPlayerMessage(successMsg, false);
-                amountField.clear(); // Clear amount field on success
-                // Optionally refresh specific player data if needed, or full list on delete
-                if (action.toString().contains("deletePlayerAccount")) { // Hacky check - better ways exist
+                amountField.clear();
+
+                if (action.toString().contains("deletePlayerAccount")) {
                     loadPlayerList();
                 } else {
-                    // Optionally refresh the selected player details or the whole list
+
                 }
 
             } else {
@@ -279,14 +275,10 @@ public class AdminSettingsController {
         }
     }
 
-    // Functional interface for player actions
     @FunctionalInterface
     interface PlayerAction {
         boolean execute(Account account, BigDecimal amount) throws Exception;
     }
-
-    // --- Placeholder Game Button Handlers ---
-// ... inside AdminSettingsController ...
 
     @FXML void handleGameList(ActionEvent event) {
         LOGGER.info("Open Game List clicked");
@@ -297,26 +289,23 @@ public class AdminSettingsController {
         navigateTo(event, "/sk/vava/royalmate/view/add-game-view.fxml");
     }
 
-    // --- Navigation Helper ---
     private void navigateTo(ActionEvent event, String fxmlPath) {
         Node source = (Node) event.getSource();
         try {
             Scene scene = source.getScene();
-            if (scene == null) { /* ... error handling ... */ return; }
+            if (scene == null) {  return; }
             FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource(fxmlPath)), LocaleManager.getBundle());
             Parent nextRoot = loader.load();
             scene.setRoot(nextRoot);
             LOGGER.info("Successfully navigated to: " + fxmlPath);
         } catch (IOException | NullPointerException e) {
             LOGGER.log(Level.SEVERE, "Failed to load FXML: " + fxmlPath, e);
-            showMessage(playerMessageLabel, "Error loading page.", true); // Show error on current screen
+            showMessage(playerMessageLabel, "Error loading page.", true);
         } catch (ClassCastException e) {
             LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e);
         }
     }
 
-
-    // --- Message Display Helpers ---
     private void clearAllMessages() {
         clearBannerMessage();
         clearChatMessage();
@@ -339,12 +328,11 @@ public class AdminSettingsController {
         });
     }
 
-    // --- Image Conversion Helper ---
     private byte[] imageToByteArray(Image image, String format) throws IOException {
         BufferedImage bImage = SwingFXUtils.fromFXImage(image, null);
         if (bImage == null) return null;
         try (ByteArrayOutputStream s = new ByteArrayOutputStream()) {
-            ImageIO.write(bImage, format, s); // format should be "png" or "jpg"
+            ImageIO.write(bImage, format, s);
             return s.toByteArray();
         }
     }

@@ -4,17 +4,17 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent; // Keep for handleSendMessage if needed via Enter key
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets; // Keep for padding if needed elsewhere
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView; // Keep for pinned icon
-import javafx.scene.input.MouseEvent; // Keep if any mouse events remain
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.FontWeight; // Keep for styling
+import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
 import sk.vava.royalmate.model.Account;
 import sk.vava.royalmate.model.ChatMessage;
@@ -26,18 +26,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects; // Keep for resource loading
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class ChatController {
 
     private static final Logger LOGGER = Logger.getLogger(ChatController.class.getName());
-    // --- UPDATED REFRESH INTERVAL ---
-    private static final Duration REFRESH_INTERVAL = Duration.seconds(2); // Refresh every 2s
-    // ----------------------------------
+
+    private static final Duration REFRESH_INTERVAL = Duration.seconds(2);
+
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final int MESSAGE_LIMIT = 100;
 
@@ -72,11 +71,9 @@ public class ChatController {
         pinnedMessageBar.setVisible(false);
         pinnedMessageBar.setManaged(false);
 
-        // No scroll listener needed for top-loading
-
         messageInputField.setOnAction(event -> handleSendMessage());
 
-        refreshChat(true); // True indicates initial load
+        refreshChat(true);
         startPolling();
 
         LOGGER.info("ChatController initialized.");
@@ -99,12 +96,11 @@ public class ChatController {
         }
     }
 
-    // Using the simplified sequential fetch for clarity now
     private void refreshChat(boolean isInitial) {
         LOGGER.fine("Refreshing chat data (simplified)...");
         try {
             Optional<ChatMessage> pinnedOpt = chatService.getPinnedMessage();
-            List<ChatMessage> recentMsgs = chatService.getRecentMessages(); // Gets newest first
+            List<ChatMessage> recentMsgs = chatService.getRecentMessages();
 
             Platform.runLater(() -> {
                 updatePinnedMessageUI(pinnedOpt);
@@ -113,7 +109,7 @@ public class ChatController {
             });
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error during synchronous chat refresh", e);
-            // Consider showing error
+
         }
     }
 
@@ -123,11 +119,9 @@ public class ChatController {
         pinnedOpt.ifPresent(msg -> pinnedMessageLabel.setText(msg.getMessageText()));
     }
 
-    /** Updates UI for recent messages (adds newest to TOP), scrolls top ONLY initially */
     private void updateRecentMessagesUI(List<ChatMessage> messages, boolean isInitial) {
-        // --- Preserve scroll position ---
+
         double currentScrollPos = scrollPane.getVvalue();
-        // --------------------------------
 
         messageContainer.getChildren().clear();
 
@@ -136,25 +130,21 @@ public class ChatController {
         } else {
             messages.forEach(msg -> {
                 Node messageNode = createMessageNode(msg);
-                messageContainer.getChildren().add(0, messageNode); // Add newest to top
+                messageContainer.getChildren().add(0, messageNode);
             });
         }
 
-        // --- Conditional Scrolling ---
         if (isInitial && !messages.isEmpty()) {
-            // Scroll to TOP only on the very first load that has messages
+
             Platform.runLater(this::scrollToTop);
             initialLoadComplete = true;
         } else if (!isInitial) {
-            // For subsequent refreshes, try to restore previous scroll position
-            // This might still cause a slight jump if content size changed significantly near the top
-            // but prevents jumping *always* to the top.
+
             Platform.runLater(() -> scrollPane.setVvalue(currentScrollPos));
         }
-        // ---------------------------
+
     }
 
-    /** Creates the UI Node for a single chat message */
     private Node createMessageNode(ChatMessage message) {
         HBox messageRow = new HBox();
         messageRow.setMaxWidth(Double.MAX_VALUE);
@@ -202,7 +192,6 @@ public class ChatController {
         return messageRow;
     }
 
-
     @FXML
     void handleSendMessage() {
         String text = messageInputField.getText().trim();
@@ -219,7 +208,7 @@ public class ChatController {
             boolean success = sendTask.getValue();
             if (success) {
                 messageInputField.clear();
-                refreshChat(false); // Refresh immediately after sending
+                refreshChat(false);
             } else { showSendErrorAlert(); }
             reenableInput();
         });
@@ -246,8 +235,7 @@ public class ChatController {
         });
     }
 
-    /** Scrolls the chat ScrollPane to the top */
     private void scrollToTop() {
-        Platform.runLater(() -> scrollPane.setVvalue(0.0)); // 0.0 scrolls to the top
+        Platform.runLater(() -> scrollPane.setVvalue(0.0));
     }
 }

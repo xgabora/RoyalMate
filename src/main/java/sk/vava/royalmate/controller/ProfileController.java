@@ -12,13 +12,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane; // Import Pane
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import sk.vava.royalmate.model.Account;
 import sk.vava.royalmate.model.UserStatistics;
-import sk.vava.royalmate.service.AuthService; // Using AuthService for now
+import sk.vava.royalmate.service.AuthService;
 import sk.vava.royalmate.util.LocaleManager;
 import sk.vava.royalmate.util.SessionManager;
 
@@ -35,17 +35,14 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class ProfileController {
 
     private static final Logger LOGGER = Logger.getLogger(ProfileController.class.getName());
-    // Date formatter - adjust pattern as needed
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-
-    // FXML Injections
     @FXML private BorderPane rootPane;
-    @FXML private NavbarController navbarComponentController; // Optional injection for navbar
+    @FXML private NavbarController navbarComponentController;
     @FXML private ImageView profileIconBig;
     @FXML private Label usernameLabel;
     @FXML private Label memberSinceLabel;
@@ -57,18 +54,16 @@ public class ProfileController {
     @FXML private VBox statsContent;
     @FXML private VBox settingsContent;
 
-    // Balance Tab
     @FXML private Label currentBalanceLabel;
     @FXML private TextField withdrawAmountField;
     @FXML private Button withdrawButton;
     @FXML private Label balanceMessageLabel;
 
-    @FXML private Label totalSpinsValueLabel; // Inject value labels only
-    @FXML private Label totalWageredValueLabel; // New value label
+    @FXML private Label totalSpinsValueLabel;
+    @FXML private Label totalWageredValueLabel;
     @FXML private Label totalWinsValueLabel;
     @FXML private Label gamesPlayedValueLabel;
 
-    // Settings Tab
     @FXML private Button enButton;
     @FXML private Button skButton;
     @FXML private PasswordField oldPasswordField;
@@ -78,9 +73,8 @@ public class ProfileController {
     @FXML private Label passwordMessageLabel;
 
     private ToggleGroup tabGroup;
-    private final AuthService authService; // Using AuthService for now
+    private final AuthService authService;
     private Account currentUser;
-
 
     public ProfileController() {
         this.authService = new AuthService();
@@ -97,7 +91,7 @@ public class ProfileController {
         setupTabs();
         loadProfileHeader();
         loadBalanceTab();
-        // Load stats tab content when the tab is selected (or initially if it's default)
+
         if (statsTabButton.isSelected()) {
             loadStatsTab();
         }
@@ -122,14 +116,14 @@ public class ProfileController {
                     loadBalanceTab();
                 } else if (newToggle == statsTabButton) {
                     statsContent.setVisible(true); statsContent.setManaged(true);
-                    loadStatsTab(); // Load stats when tab becomes visible
+                    loadStatsTab();
                 } else if (newToggle == settingsTabButton) {
                     settingsContent.setVisible(true); settingsContent.setManaged(true);
                     loadSettingsTab();
                 }
             }
         });
-        balanceTabButton.setSelected(true); // Default tab
+        balanceTabButton.setSelected(true);
     }
 
     private void hideAllTabContent() {
@@ -151,10 +145,10 @@ public class ProfileController {
     private void loadProfileHeader() {
         usernameLabel.setText(currentUser.getUsername());
         if (currentUser.getCreatedAt() != null) {
-            // Format the timestamp
+
             String formattedDate = currentUser.getCreatedAt()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault()) // Or specify a zone
+                    .atZone(ZoneId.systemDefault())
                     .toLocalDate()
                     .format(DATE_FORMATTER);
             memberSinceLabel.setText(LocaleManager.getString("profile.membersince") + " " + formattedDate);
@@ -163,64 +157,56 @@ public class ProfileController {
         }
     }
 
-    // --- Tab Loading Methods ---
     private void loadBalanceTab() {
-        // Re-fetch current user data to ensure balance is up-to-date
-        Account freshAccount = SessionManager.getCurrentAccount(); // Get potentially updated session data
-        if(freshAccount == null) return; // Should not happen if logged in
+
+        Account freshAccount = SessionManager.getCurrentAccount();
+        if(freshAccount == null) return;
 
         BigDecimal balance = freshAccount.getBalance() != null ? freshAccount.getBalance() : BigDecimal.ZERO;
-        NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LocaleManager.getCurrentLocale()); // Use number instance for flexibility
-        // currencyFormatter.setCurrency(java.util.Currency.getInstance("EUR")); // Set currency if needed
+        NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LocaleManager.getCurrentLocale());
+
         currencyFormatter.setMinimumFractionDigits(2);
         currencyFormatter.setMaximumFractionDigits(2);
 
         currentBalanceLabel.setText(
                 LocaleManager.getString("profile.label.currentbalance") + " " +
-                        currencyFormatter.format(balance) + " €" // Append currency symbol manually
+                        currencyFormatter.format(balance) + " €"
         );
         withdrawAmountField.clear();
     }
 
-    // --- UPDATED loadStatsTab Method ---
     private void loadStatsTab() {
-        if (currentUser == null) return; // Should not happen if initialized correctly
+        if (currentUser == null) return;
         LOGGER.fine("Loading statistics tab for user ID: " + currentUser.getId());
 
-        // Reset labels to avoid showing old data during load
         totalSpinsValueLabel.setText("...");
         totalWageredValueLabel.setText("...");
         totalWinsValueLabel.setText("...");
         gamesPlayedValueLabel.setText("...");
 
-        // Fetch stats using the service (Consider background task if slow)
         Optional<UserStatistics> statsOpt = authService.getUserStatistics(currentUser.getId());
 
-        Platform.runLater(() -> { // Ensure UI updates happen on the FX thread
+        Platform.runLater(() -> {
             if (statsOpt.isPresent()) {
                 UserStatistics stats = statsOpt.get();
                 LOGGER.fine("Statistics data received: " + stats);
 
-                // Update value labels with fetched data
                 totalSpinsValueLabel.setText(String.valueOf(stats.getTotalSpins()));
 
                 NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LocaleManager.getCurrentLocale());
                 currencyFormatter.setMinimumFractionDigits(2);
                 currencyFormatter.setMaximumFractionDigits(2);
 
-                // Set Total Wagered Value
                 totalWageredValueLabel.setText(currencyFormatter.format(stats.getTotalWagered()) + " €");
 
-                // Set Total Won Value
                 totalWinsValueLabel.setText(currencyFormatter.format(stats.getTotalWon()) + " €");
 
-                // Set Games Played Value
                 gamesPlayedValueLabel.setText(String.valueOf(stats.getDistinctGamesPlayed()));
 
             } else {
-                // Handle case where statistics couldn't be loaded
+
                 LOGGER.warning("Could not load statistics for user ID: " + currentUser.getId());
-                String errorMsg = "Error"; // Short error message
+                String errorMsg = "Error";
                 totalSpinsValueLabel.setText(errorMsg);
                 totalWageredValueLabel.setText(errorMsg);
                 totalWinsValueLabel.setText(errorMsg);
@@ -231,18 +217,16 @@ public class ProfileController {
 
     private void loadSettingsTab() {
         updateLocaleButtonStyles();
-        // Clear password fields
+
         oldPasswordField.clear();
         newPasswordField.clear();
         repeatPasswordField.clear();
     }
 
-
-    // --- Action Handlers ---
     @FXML
     private void handleWithdraw(ActionEvent event) {
         clearMessages();
-        String amountText = withdrawAmountField.getText().replace(',', '.'); // Allow comma as decimal sep
+        String amountText = withdrawAmountField.getText().replace(',', '.');
         BigDecimal amount;
 
         try {
@@ -253,15 +237,14 @@ public class ProfileController {
             boolean success = authService.withdrawFunds(currentUser.getId(), amount);
             if (success) {
                 showBalanceMessage(LocaleManager.getString("profile.message.withdraw.success"), false);
-                loadBalanceTab(); // Refresh balance display
-                // Refresh navbar balance too (requires communication or event bus ideally)
+                loadBalanceTab();
+
                 if (navbarComponentController != null) {
-                    // This assumes NavbarController has a public method to refresh its display
-                    // navbarComponentController.refreshUserDataDisplay();
+
                     LOGGER.info("Navbar refresh requested after withdrawal.");
                 }
             } else {
-                // Check session again, as balance might have changed just before clicking
+
                 if(SessionManager.getCurrentAccount().getBalance().compareTo(amount) < 0){
                     showBalanceMessage(LocaleManager.getString("profile.message.withdraw.insufficient"), true);
                 } else {
@@ -277,7 +260,6 @@ public class ProfileController {
         }
         withdrawAmountField.clear();
     }
-
 
     @FXML
     private void handleChangePassword(ActionEvent event) {
@@ -304,20 +286,19 @@ public class ProfileController {
                 newPasswordField.clear();
                 repeatPasswordField.clear();
             } else {
-                // Service returned false, likely incorrect old password
+
                 showPasswordMessage(LocaleManager.getString("profile.message.password.incorrectold"), true);
             }
         } catch (IllegalArgumentException e) {
-            // Should catch empty new password here too if service throws it
+
             showPasswordMessage(e.getMessage(), true);
         } catch (Exception e) {
-            // Catch potential DB errors or other issues
+
             LOGGER.log(Level.SEVERE, "Unexpected error changing password for user " + currentUser.getId(), e);
             showPasswordMessage(LocaleManager.getString("profile.message.password.error"), true);
         }
     }
 
-    // --- Locale Handlers ---
     @FXML
     private void handleSetLocaleEN(ActionEvent event) {
         setLocaleAndReload(LocaleManager.ENGLISH);
@@ -336,14 +317,11 @@ public class ProfileController {
                 reloadCurrentView();
             } else {
                 LOGGER.severe("Failed to set locale to: " + locale.toLanguageTag());
-                // Show error message?
+
             }
         }
     }
 
-    /**
-     * Reloads the profile-view.fxml into the current scene.
-     */
     private void reloadCurrentView() {
         try {
             Scene scene = rootPane.getScene();
@@ -363,8 +341,6 @@ public class ProfileController {
         }
     }
 
-
-    // --- UI Update Helpers ---
     private void showBalanceMessage(String message, boolean isError) {
         showMessage(balanceMessageLabel, message, isError);
     }
@@ -388,29 +364,27 @@ public class ProfileController {
     }
 
     private void styleLocaleButton(Button button, boolean isActive) {
-        // Reuse style from splash screen or define specific profile ones
+
         if (isActive) {
             button.setStyle("-fx-background-color: #F1DA2C; -fx-text-fill: black;");
             button.setDisable(true);
         } else {
-            button.setStyle(""); // Reset to default CSS .lang-button style
+            button.setStyle("");
             button.setDisable(false);
         }
     }
 
-
-    // --- Navigation ---
     private void navigateToLogin() {
-        // Need a node to get the scene, use rootPane if available
+
         if (rootPane == null || rootPane.getScene() == null) {
             LOGGER.severe("Cannot navigate to login, root pane or scene is null.");
-            // Possibly close the window or show critical error
+
             return;
         }
         try {
             FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(
                     getClass().getResource("/sk/vava/royalmate/view/login-view.fxml")),
-                    LocaleManager.getBundle() // Use current bundle
+                    LocaleManager.getBundle()
             );
             Parent nextRoot = loader.load();
             rootPane.getScene().setRoot(nextRoot);

@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public class LeaderboardService {
 
     private static final Logger LOGGER = Logger.getLogger(LeaderboardService.class.getName());
-    private static final int LEADERBOARD_LIMIT = 5; // Top 5 per category
+    private static final int LEADERBOARD_LIMIT = 5;
 
     private final GameplayDAO gameplayDAO;
 
@@ -20,17 +20,10 @@ public class LeaderboardService {
         this.gameplayDAO = new GameplayDAO();
     }
 
-    // Constructor for testing/DI
     public LeaderboardService(GameplayDAO gameplayDAO) {
         this.gameplayDAO = gameplayDAO;
     }
 
-    /**
-     * Gets the top plays for a specific game type, ordered by payout amount.
-     *
-     * @param gameType The type of game.
-     * @return List of top Gameplay objects.
-     */
     public List<Gameplay> getTopPayouts(GameType gameType) {
         LOGGER.fine("LeaderboardService fetching top payouts for: " + gameType);
         try {
@@ -41,12 +34,6 @@ public class LeaderboardService {
         }
     }
 
-    /**
-     * Gets the top plays for a specific game type, ordered by multiplier (payout/stake).
-     *
-     * @param gameType The type of game.
-     * @return List of top Gameplay objects.
-     */
     public List<Gameplay> getTopMultipliers(GameType gameType) {
         LOGGER.fine("LeaderboardService fetching top multipliers for: " + gameType);
         try {

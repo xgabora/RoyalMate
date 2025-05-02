@@ -78,23 +78,19 @@ public class AddGameController {
     @FXML private GridPane symbolGrid;
     @FXML private Label symbolPromptLabel;
     @FXML private Label symbolErrorLabel;
-    @FXML private Button actionButton; // Unified button
-    @FXML private Button importButton; // <-- Inject import button
+    @FXML private Button actionButton;
+    @FXML private Button importButton;
     @FXML private Label generalMessageLabel;
 
-    // --- Services and Helpers ---
     private final AdminService adminService;
     private final FileChooser imageFileChooser;
-    private FileChooser xmlImportFileChooser; // <-- File chooser for XML
+    private FileChooser xmlImportFileChooser;
     private ToggleGroup gameTypeGroup;
 
-    // --- State ---
-    private Game gameToEdit = null; // If null, ADD mode; otherwise EDIT mode
+    private Game gameToEdit = null;
     private final ObjectProperty<ImageDataHolder> coverImageData = new SimpleObjectProperty<>(null);
     private final Map<Integer, ObjectProperty<ImageDataHolder>> symbolImageDataMap = new HashMap<>(); // Index -> Property
-    // No need to store existingSymbolAssets map anymore, we fetch assets when needed
 
-    // --- Data ---
     private final List<BigDecimal> minWagers = List.of(new BigDecimal("0.10"), new BigDecimal("0.50"), new BigDecimal("1.00"), new BigDecimal("2.00"));
     private final List<BigDecimal> maxWagers = List.of(new BigDecimal("500.00"), new BigDecimal("1000.00"), new BigDecimal("2000.00"));
     private final List<Integer> volatilities = List.of(1, 2, 3, 4, 5);
@@ -106,40 +102,34 @@ public class AddGameController {
             new NamedColor("Light Grey", "#95A5A6"), new NamedColor("White", "#FFFFFF")
     );
 
-    // Helper record for ComboBox color display
     private record NamedColor(String name, String hexValue) {
         @Override public String toString() { return name; }
         public String getHexValue() { return hexValue; }
     }
-    // Helper record to store image data and file info temporarily
     private record ImageDataHolder(byte[] data, String format, String name) {}
 
-    // --- Constructor ---
     public AddGameController() {
         adminService = new AdminService();
         imageFileChooser = new FileChooser();
-        xmlImportFileChooser = new FileChooser(); // Initialize XML chooser
+        xmlImportFileChooser = new FileChooser();
         setupFileChooser();
-        setupXmlImportFileChooser(); // Configure XML chooser
+        setupXmlImportFileChooser();
     }
 
-    // --- Initialization ---
     @FXML
     public void initialize() {
         setupGameTypeToggle();
         setupComboBoxes();
         createSymbolUploadBoxes();
         clearMessages();
-        prepareForAddMode(); // Default to ADD mode initially
+        prepareForAddMode();
 
         if (!SessionManager.isAdmin()) {
             LOGGER.severe("Non-admin loaded Add/Edit Game Screen!");
             rootPane.setDisable(true);
-            // Platform.runLater(this::navigateToAdminSettings); // Option to navigate back
         }
     }
 
-    /** Prepares the screen for adding a new game (default state) */
     private void prepareForAddMode() {
         this.gameToEdit = null;
         titleLabel.setText(LocaleManager.getString("admin.title.addgame"));
@@ -149,10 +139,6 @@ public class AddGameController {
         LOGGER.info("Add/Edit Game Controller initialized in ADD mode.");
     }
 
-    /**
-     * Public method called by GameListController to populate the form for editing.
-     * @param gameId The ID of the game to load.
-     */
     public void loadGameForEditing(int gameId) {
         LOGGER.info("Loading game data for editing, ID: " + gameId);
         Optional<Game> gameOpt = adminService.getGameDetails(gameId);
@@ -160,7 +146,6 @@ public class AddGameController {
         if (gameOpt.isPresent()) {
             this.gameToEdit = gameOpt.get();
 
-            // --- Populate Core Fields ---
             titleLabel.setText(MessageFormat.format(LocaleManager.getString("admin.title.editgame"), gameToEdit.getName()));
             gameNameField.setText(gameToEdit.getName());
             descriptionArea.setText(gameToEdit.getDescription());
@@ -181,10 +166,8 @@ public class AddGameController {
             volatilityComboBox.setValue(gameToEdit.getVolatility());
             bgColorComboBox.setValue(findNamedColorByHex(gameToEdit.getBackgroundColor()));
 
-            // --- Load Assets ---
             loadAndDisplayExistingAssets(gameId);
 
-            // --- Update Button ---
             actionButton.setText(LocaleManager.getString("admin.button.updategame"));
             actionButton.setOnAction(this::handleSaveGameAction);
 
@@ -197,7 +180,6 @@ public class AddGameController {
         }
     }
 
-    /** Fetches and displays existing assets for the game being edited */
     private void loadAndDisplayExistingAssets(int gameId) {
         List<GameAsset> assets = adminService.getGameAssets(gameId);
         clearSymbolUploads();
@@ -224,8 +206,6 @@ public class AddGameController {
         // Load Symbols
         List<GameAsset> symbols = assets.stream()
                 .filter(a -> a.getAssetType() == AssetType.SYMBOL)
-                // Optional: Sort by ID or Name if needed for consistent order
-                // .sorted(Comparator.comparing(GameAsset::getId))
                 .collect(Collectors.toList());
         for (int i = 0; i < Math.min(symbols.size(), MAX_SYMBOLS); i++) {
             GameAsset symbol = symbols.get(i);
@@ -233,7 +213,6 @@ public class AddGameController {
             if (prop != null) {
                 try {
                     prop.set(new ImageDataHolder(symbol.getImageData(), ImageUtil.getFileExtension(symbol.getAssetName()), symbol.getAssetName()));
-                    // Payout multiplier is no longer displayed/edited here
                 } catch (Exception e) {
                     LOGGER.log(Level.WARNING, "Failed to load existing symbol image " + i + " for game ID " + gameId, e);
                 }
@@ -241,7 +220,6 @@ public class AddGameController {
         }
     }
 
-    // Helper to find NamedColor by Hex value for ComboBox selection
     private NamedColor findNamedColorByHex(String hexValue) {
         if (hexValue == null) return backgroundColors.get(0);
         return backgroundColors.stream()
@@ -250,7 +228,6 @@ public class AddGameController {
                 .orElse(backgroundColors.get(0));
     }
 
-    // --- Setup Methods ---
     private void setupFileChooser() {
         imageFileChooser.setTitle(LocaleManager.getString("admin.message.banner.select")); // Reuse key
         imageFileChooser.getExtensionFilters().addAll(
@@ -272,7 +249,7 @@ public class AddGameController {
             symbolGrid.setDisable(!isSlot);
             symbolGrid.setOpacity(isSlot ? 1.0 : 0.5);
             String promptKey = isSlot ? "admin.addgame.label.symbols" : "admin.addgame.label.symbols.hint"; // <-- Use new key
-            symbolPromptLabel.setText(LocaleManager.getString(promptKey)); // <-- Use variable
+            symbolPromptLabel.setText(LocaleManager.getString(promptKey));
             if (!isSlot) {
                 clearSymbolUploads();
             }
@@ -281,7 +258,7 @@ public class AddGameController {
         symbolGrid.setDisable(!isSlot);
         symbolGrid.setOpacity(isSlot ? 1.0 : 0.5);
         String initialPromptKey = isSlot ? "admin.addgame.label.symbols" : "admin.addgame.label.symbols.hint"; // <-- Use new key
-        symbolPromptLabel.setText(LocaleManager.getString(initialPromptKey)); // <-- Use variable
+        symbolPromptLabel.setText(LocaleManager.getString(initialPromptKey));
     }
 
     private void setupComboBoxes() {
@@ -318,17 +295,16 @@ public class AddGameController {
             imageView.setFitWidth(60);
             imageView.setPreserveRatio(true);
 
-            // --- Set label based on index ---
             String labelKey;
             Object[] labelArgs;
-            if (i < 3) { // First 3 are regular
+            if (i < 3) { // regular symbols
                 labelKey = "admin.addgame.symbol.regular";
                 labelArgs = new Object[]{i + 1};
-            } else if (i < 5) { // Next 2 are rare
+            } else if (i < 5) { // rare symbols
                 labelKey = "admin.addgame.symbol.rare";
-                labelArgs = new Object[]{i - 3 + 1}; // Number them 1, 2 within rare category
+                labelArgs = new Object[]{i - 3 + 1}; // number within rare category
             } else {
-                labelArgs = null; // Last one is max win
+                labelArgs = null;
                 labelKey = "admin.addgame.symbol.maxwin";
             }
             String labelText = (labelArgs != null)
@@ -336,7 +312,6 @@ public class AddGameController {
                     : LocaleManager.getString(labelKey);
             Label promptLabel = new Label(labelText);
             promptLabel.getStyleClass().add("upload-hint-label");
-            // --------------------------------
 
             uploadBox.getChildren().addAll(imageView, promptLabel);
 
@@ -346,14 +321,13 @@ public class AddGameController {
             uploadBox.setOnMouseClicked(event -> handleUploadSymbolImage(index, imageView, promptLabel));
 
             imageProp.addListener((obs, oldHolder, newHolder) -> {
-                // Keep original prompt text logic based on index, but show filename when loaded
                 String defaultText = (labelArgs != null)
                         ? MessageFormat.format(LocaleManager.getString(labelKey), labelArgs)
                         : LocaleManager.getString(labelKey);
                 if (newHolder != null) {
                     try {
                         imageView.setImage(ImageUtil.byteArrayToImage(newHolder.data()));
-                        promptLabel.setText(newHolder.name()); // Show filename on load
+                        promptLabel.setText(newHolder.name());
                         promptLabel.setTextAlignment(TextAlignment.CENTER);
                     } catch (IOException e) {
                         LOGGER.log(Level.WARNING, "Failed to display symbol image " + index, e);
@@ -362,7 +336,7 @@ public class AddGameController {
                     }
                 } else {
                     imageView.setImage(null);
-                    promptLabel.setText(defaultText); // Reset to default text when cleared
+                    promptLabel.setText(defaultText);
                 }
             });
 
@@ -372,7 +346,6 @@ public class AddGameController {
         }
     }
 
-    // --- Image Upload Handlers ---
     @FXML
     void handleUploadCoverImage(javafx.scene.input.MouseEvent event) {
         clearMessages();
@@ -386,7 +359,7 @@ public class AddGameController {
                 if (imageData != null) {
                     coverImageData.set(new ImageDataHolder(imageData, format, selectedFile.getName()));
                     coverImageView.setImage(image);
-                    coverPromptLabel.setText(selectedFile.getName()); // Show new filename
+                    coverPromptLabel.setText(selectedFile.getName());
                     coverErrorLabel.setVisible(false);
                     coverErrorLabel.setManaged(false);
                 } else {
@@ -427,10 +400,8 @@ public class AddGameController {
 
     private void clearSymbolUploads() {
         symbolImageDataMap.values().forEach(prop -> prop.set(null));
-        // Listeners handle clearing UI
     }
 
-    // --- Save/Update Action ---
     @FXML
     void handleSaveGameAction(ActionEvent event) {
         clearMessages();
@@ -445,45 +416,38 @@ public class AddGameController {
         actionButton.setDisable(true);
         boolean success = false;
         try {
-            if (gameToEdit == null) { // ADD Mode
+            if (gameToEdit == null) {
                 if (newCoverAssetOpt.isEmpty()) {
                     showError(coverErrorLabel, LocaleManager.getString("admin.addgame.error.nocover"));
-                    actionButton.setDisable(false); // Re-enable on validation fail
+                    actionButton.setDisable(false);
                     return; // Stop
                 }
                 success = adminService.createGame(gameData, newCoverAssetOpt.get(), symbolAssets);
                 if (success) {
-                    // Navigate back on success
                     LOGGER.info("Game added successfully, navigating to game list.");
-                    navigateToGameList(); // <--- ADDED NAVIGATION
-                    // clearForm(); // No longer needed as we are navigating away
+                    navigateToGameList();
                 } else {
                     showGeneralMessage(LocaleManager.getString("admin.addgame.message.error"), true);
-                    actionButton.setDisable(false); // Re-enable on failure
+                    actionButton.setDisable(false);
                 }
             } else { // EDIT Mode
                 gameData.setId(gameToEdit.getId());
                 success = adminService.updateGame(gameData, newCoverAssetOpt, symbolAssets);
                 if (success) {
-                    // Navigate back on success
                     LOGGER.info("Game updated successfully, navigating to game list.");
-                    navigateToGameList(); // <--- ADDED NAVIGATION
-                    // showGeneralMessage(LocaleManager.getString("admin.addgame.message.updatesuccess"), false); // Message not seen if we navigate immediately
+                    navigateToGameList();
                 } else {
                     showGeneralMessage(LocaleManager.getString("admin.addgame.message.updateerror"), true);
-                    actionButton.setDisable(false); // Re-enable on failure
+                    actionButton.setDisable(false);
                 }
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Unexpected error saving/updating game", e);
             showGeneralMessage(LocaleManager.getString("admin.addgame.message.error.exception"), true);
-            actionButton.setDisable(false); // Re-enable on exception
+            actionButton.setDisable(false);
         }
     }
 
-    // --- NEW XML Import Logic ---
-
-    /** Configures the FileChooser for XML import */
     private void setupXmlImportFileChooser() {
         xmlImportFileChooser.setTitle(LocaleManager.getString("admin.import.title"));
         xmlImportFileChooser.getExtensionFilters().add(
@@ -491,7 +455,6 @@ public class AddGameController {
         );
     }
 
-    /** Handler for the "Import from XML" button */
     @FXML
     void handleImportXml(ActionEvent event) {
         clearMessages();
@@ -509,22 +472,14 @@ public class AddGameController {
         }
     }
 
-    /** Parses the selected XML file and populates the form */
     private void parseAndLoadGameFromXml(File xmlFile) {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
-            // --- ADJUSTED SECURITY SETTINGS ---
-            // Keep secure processing enabled
             dbFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            // Keep disallow doctype decl
             dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            // Remove or comment out the problematic feature:
-            // dbFactory.setFeature("http://xml.apache.org/xml/features/nonvalidating/load-external-dtd", false); // <-- REMOVED/COMMENTED
-            // Keep these disabled
             dbFactory.setXIncludeAware(false);
             dbFactory.setExpandEntityReferences(false);
-            // ------------------------------------
 
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlFile);
@@ -534,7 +489,6 @@ public class AddGameController {
             if (gameNodes.getLength() > 0) {
                 Element gameElement = (Element) gameNodes.item(0);
                 populateFormFromXmlElement(gameElement);
-                // Switch to ADD mode visually
                 this.gameToEdit = null;
                 titleLabel.setText(LocaleManager.getString("admin.title.addgame"));
                 actionButton.setText(LocaleManager.getString("admin.button.addnewgame"));
@@ -546,7 +500,7 @@ public class AddGameController {
                 showGeneralMessage(LocaleManager.getString("admin.import.error.nodata"), true);
             }
 
-        } catch (ParserConfigurationException | SAXException e) { // Catch SAXException too
+        } catch (ParserConfigurationException | SAXException e) {
             LOGGER.log(Level.SEVERE, "Error parsing XML file: " + xmlFile.getName(), e);
             showGeneralMessage(MessageFormat.format(LocaleManager.getString("admin.import.error.parse"), e.getMessage()), true);
         } catch (IOException e) {
@@ -558,10 +512,7 @@ public class AddGameController {
         }
     }
 
-    /** Populates form fields based on data from an XML <game> Element */
     private void populateFormFromXmlElement(Element gameElement) throws Exception {
-        // --- Extract and Set Data ---
-        // Attributes
         String gameName = gameElement.getAttribute("name");
         String gameTypeStr = gameElement.getAttribute("type");
 
@@ -570,7 +521,6 @@ public class AddGameController {
         }
         gameNameField.setText(gameName);
 
-        // Set Game Type Toggle
         try {
             GameType type = GameType.valueOf(gameTypeStr.toUpperCase());
             switch (type) {
@@ -582,7 +532,6 @@ public class AddGameController {
             throw new Exception(MessageFormat.format(LocaleManager.getString("admin.import.error.invalidtype"), gameTypeStr));
         }
 
-        // Child Elements
         descriptionArea.setText(getElementTextContent(gameElement, "description"));
 
         try {
@@ -597,7 +546,6 @@ public class AddGameController {
         String bgColorHex = getElementTextContent(gameElement, "backgroundColor");
         bgColorComboBox.setValue(findNamedColorByHex(bgColorHex));
 
-        // Clear existing assets - Import only sets definition data
         coverImageData.set(null);
         coverImageView.setImage(null);
         coverPromptLabel.setText(LocaleManager.getString("admin.addgame.label.uploadcover"));
@@ -605,18 +553,14 @@ public class AddGameController {
         showGeneralMessage(LocaleManager.getString("admin.import.assetnote"), false); // Inform user
     }
 
-    /** Helper to get text content of a child element, returns empty string if not found */
     private String getElementTextContent(Element parent, String childTagName) {
         NodeList nl = parent.getElementsByTagName(childTagName);
         if (nl != null && nl.getLength() > 0) {
             return nl.item(0).getTextContent();
         }
-        return ""; // Return empty instead of null
+        return "";
     }
 
-    // --- END XML Import Logic ---
-
-    /** Builds the core Game object from form inputs */
     private Game buildGameFromForm() {
         return Game.builder()
                 .name(gameNameField.getText().trim())
@@ -630,7 +574,6 @@ public class AddGameController {
                 .build();
     }
 
-    /** Builds the cover GameAsset Optional based on uploaded data */
     private Optional<GameAsset> buildCoverAssetFromForm() {
         ImageDataHolder coverHolder = coverImageData.get();
         if (coverHolder != null) {
@@ -656,10 +599,10 @@ public class AddGameController {
             for (int i = 0; i < MAX_SYMBOLS; i++) {
                 ImageDataHolder symbolHolder = symbolImageDataMap.get(i).get();
                 if (symbolHolder != null) {
-                    BigDecimal payoutMultiplier = BigDecimal.ONE; // Placeholder!
+                    BigDecimal payoutMultiplier = BigDecimal.ONE;
 
                     symbols.add(GameAsset.builder()
-                            .assetName("symbol_" + (i + 1)) // Simple name
+                            .assetName("symbol_" + (i + 1))
                             .imageData(symbolHolder.data())
                             .assetType(AssetType.SYMBOL)
                             .symbolPayoutMultiplier(payoutMultiplier)
@@ -671,7 +614,6 @@ public class AddGameController {
     }
 
 
-    // --- Validation ---
     private boolean validateInput() {
         boolean valid = true;
         clearMessages();
@@ -694,15 +636,13 @@ public class AddGameController {
             showGeneralMessage("Please select background color.", true); valid = false; // Add locale key
         }
 
-        // Cover Image: Mandatory if adding OR if editing and no cover existed before.
         if (coverImageData.get() == null) {
             boolean existedBefore = false;
             if (gameToEdit != null) {
-                // Re-fetch assets to check if cover existed at the start of edit session
                 List<GameAsset> assets = adminService.getGameAssets(gameToEdit.getId());
                 existedBefore = assets.stream().anyMatch(a -> a.getAssetType() == AssetType.COVER);
             }
-            if (!existedBefore) { // If adding OR editing and none existed -> Error
+            if (!existedBefore) {
                 showError(coverErrorLabel, LocaleManager.getString("admin.addgame.error.nocover"));
                 valid = false;
             }
@@ -720,18 +660,16 @@ public class AddGameController {
     }
 
 
-    // --- Getters / Helpers ---
     private GameType getSelectedGameType() {
         Toggle selected = gameTypeGroup.getSelectedToggle();
         if (selected == slotToggleButton) return GameType.SLOT;
         if (selected == rouletteToggleButton) return GameType.ROULETTE;
         if (selected == coinflipToggleButton) return GameType.COINFLIP;
-        return GameType.SLOT; // Fallback
+        return GameType.SLOT;
     }
 
     private String getExistingAssetName(AssetType type) {
         if (gameToEdit == null) return null;
-        // Fetch assets specifically for this check if needed, or rely on initially loaded data
         List<GameAsset> assets = adminService.getGameAssets(gameToEdit.getId());
         if (type == AssetType.COVER) {
             return assets.stream()
@@ -739,11 +677,9 @@ public class AddGameController {
                     .map(GameAsset::getAssetName)
                     .findFirst().orElse(null);
         }
-        // Add for symbols if more complex comparison needed
         return null;
     }
 
-    // --- Form/Message Clearing ---
     private void clearForm() {
         gameNameField.clear();
         descriptionArea.clear();
@@ -757,7 +693,7 @@ public class AddGameController {
         coverPromptLabel.setText(LocaleManager.getString("admin.addgame.label.uploadcover")); // Reset prompt
         clearSymbolUploads();
         clearMessages();
-        gameToEdit = null; // Ensure we are back in ADD mode
+        gameToEdit = null; // getting back to ADD mode
         actionButton.setText(LocaleManager.getString("admin.button.addnewgame"));
         actionButton.setOnAction(this::handleSaveGameAction);
     }
@@ -786,7 +722,6 @@ public class AddGameController {
 
     // --- Navigation ---
     private void navigateToAdminSettings() {
-        // Simplified navigation back
         if (rootPane == null || rootPane.getScene() == null) return;
         try {
             FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/sk/vava/royalmate/view/admin-settings-view.fxml")), LocaleManager.getBundle());
@@ -796,7 +731,6 @@ public class AddGameController {
             LOGGER.log(Level.SEVERE, "Failed to navigate back to admin settings.", e);
         }
     }
-    // Optional: Navigate back to game list after successful save/update
     private void navigateToGameList() {
         LOGGER.info("Navigating back to Game List.");
         if (rootPane == null || rootPane.getScene() == null) return;

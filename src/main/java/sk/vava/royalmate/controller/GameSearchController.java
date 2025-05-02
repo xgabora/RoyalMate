@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
-
 public class GameSearchController {
 
     private static final Logger LOGGER = Logger.getLogger(GameSearchController.class.getName());
@@ -45,10 +44,10 @@ public class GameSearchController {
     @FXML private ToggleButton rouletteFilterButton;
     @FXML private ToggleButton coinflipFilterButton;
     @FXML private Label gameCountLabel;
-    @FXML private TilePane gameGridPane; // Changed to TilePane
+    @FXML private TilePane gameGridPane;
 
     private final GameService gameService;
-    private List<Game> allGames = new ArrayList<>(); // Cache all games
+    private List<Game> allGames = new ArrayList<>();
     private Pattern searchPattern = null;
 
     public GameSearchController() {
@@ -59,113 +58,95 @@ public class GameSearchController {
     public void initialize() {
         if (SessionManager.getCurrentAccount() == null) {
             LOGGER.severe("Game Search loaded without user session.");
-            // Optionally redirect, but maybe allow viewing games if desired?
+
             return;
         }
 
-        // Set initial filter state (all selected)
         slotsFilterButton.setSelected(true);
         rouletteFilterButton.setSelected(true);
         coinflipFilterButton.setSelected(true);
 
-        // Add listeners for search and filters
         searchTextField.textProperty().addListener(this::onFilterChanged);
         slotsFilterButton.selectedProperty().addListener(this::onFilterChanged);
         rouletteFilterButton.selectedProperty().addListener(this::onFilterChanged);
         coinflipFilterButton.selectedProperty().addListener(this::onFilterChanged);
 
-        // Load all games initially
         loadAllGamesAndDisplay();
 
         LOGGER.info("GameSearchController initialized.");
     }
 
-    /** Method called by navigating controller to set initial filters */
     public void applyInitialFilters(Set<GameType> initialFilters) {
-        Platform.runLater(() -> { // Ensure runs after initialize
+        Platform.runLater(() -> {
             LOGGER.info("Applying initial filters: " + initialFilters);
             slotsFilterButton.setSelected(initialFilters.contains(GameType.SLOT));
             rouletteFilterButton.setSelected(initialFilters.contains(GameType.ROULETTE));
             coinflipFilterButton.setSelected(initialFilters.contains(GameType.COINFLIP));
-            // The listener attached in initialize will trigger updateDisplayedGames
+
         });
     }
 
-
-    /** Listener method called when search text or filter toggles change */
     private void onFilterChanged(Observable observable) {
         updateSearchPattern();
         updateDisplayedGames();
     }
 
-    /** Updates the regex pattern based on search text */
     private void updateSearchPattern() {
         String searchText = searchTextField.getText().trim();
         if (searchText.isEmpty()) {
-            searchPattern = null; // No search pattern needed
+            searchPattern = null;
         } else {
             try {
-                // Simple contains search, case-insensitive, escapes special regex chars
-                // Use Pattern.quote for safety if user input shouldn't be regex
-                // String quotedSearchText = Pattern.quote(searchText);
-                // searchPattern = Pattern.compile(quotedSearchText, Pattern.CASE_INSENSITIVE);
 
-                // If allowing basic regex-like features from user (e.g., word boundary, start/end)
-                // Be cautious with user-provided regex patterns for security/performance
                 searchPattern = Pattern.compile(searchText, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
                 LOGGER.fine("Search pattern updated: " + searchPattern.pattern());
 
             } catch (PatternSyntaxException e) {
                 LOGGER.log(Level.WARNING, "Invalid regex pattern entered: " + searchText, e);
-                searchPattern = null; // Treat invalid regex as no search for now
-                // Optionally show feedback to the user about invalid pattern
+                searchPattern = null;
+
             }
         }
     }
 
-    /** Fetches all games from the service and updates the display */
     private void loadAllGamesAndDisplay() {
-        // Consider doing this in a background task if loading takes time
+
         this.allGames = gameService.getAllActiveGamesWithCovers();
         LOGGER.fine("Loaded " + allGames.size() + " active games from service.");
-        updateDisplayedGames(); // Display initially loaded games
+        updateDisplayedGames();
     }
 
-    /** Filters the cached game list and updates the UI grid */
     private void updateDisplayedGames() {
         Set<GameType> selectedTypes = getSelectedGameTypes();
         List<Game> filteredGames;
 
-        // Filter logic
         filteredGames = allGames.stream()
                 .filter(game -> {
-                    // Type filter: must match one of the selected types
+
                     boolean typeMatch = selectedTypes.contains(game.getGameType());
                     if (!typeMatch) return false;
 
-                    // Search filter: must match pattern if pattern exists
                     if (searchPattern != null) {
                         Matcher nameMatcher = searchPattern.matcher(game.getName() != null ? game.getName() : "");
                         Matcher descMatcher = searchPattern.matcher(game.getDescription() != null ? game.getDescription() : "");
-                        if (!nameMatcher.find() && !descMatcher.find()) { // Check if pattern is found anywhere
+                        if (!nameMatcher.find() && !descMatcher.find()) {
                             return false;
                         }
                     }
-                    return true; // Passed all filters
+                    return true;
                 })
                 .collect(Collectors.toList());
 
         LOGGER.fine("Filtering resulted in " + filteredGames.size() + " games.");
 
-        // Update UI (must run on JavaFX thread)
         Platform.runLater(() -> {
             updateGameCountLabel(filteredGames.size());
-            gameGridPane.getChildren().clear(); // Clear previous cards
+            gameGridPane.getChildren().clear();
 
             if (filteredGames.isEmpty()) {
                 Label noGamesMsg = new Label(LocaleManager.getString("gamesearch.nogames.found"));
                 noGamesMsg.getStyleClass().add("message-label");
-                gameGridPane.getChildren().add(noGamesMsg); // Add message directly to TilePane
+                gameGridPane.getChildren().add(noGamesMsg);
             } else {
                 for (Game game : filteredGames) {
                     Node gameCard = createGameCardNode(game);
@@ -175,7 +156,6 @@ public class GameSearchController {
         });
     }
 
-    /** Gets the set of currently selected GameTypes from the toggle buttons */
     private Set<GameType> getSelectedGameTypes() {
         Set<GameType> selected = new HashSet<>();
         if (slotsFilterButton.isSelected()) selected.add(GameType.SLOT);
@@ -184,22 +164,20 @@ public class GameSearchController {
         return selected;
     }
 
-    /** Updates the "N GAMES FOUND" label */
     private void updateGameCountLabel(int count) {
         String messageKey = (count == 1) ? "gamesearch.count.label.one" : "gamesearch.count.label";
         String message = MessageFormat.format(LocaleManager.getString(messageKey), count);
-        gameCountLabel.setText(message.toUpperCase()); // Make text uppercase as per design
+        gameCountLabel.setText(message.toUpperCase());
     }
 
-    /** Creates a clickable card node for a single game */
     private Node createGameCardNode(Game game) {
         StackPane cellPane = new StackPane();
-        cellPane.getStyleClass().add("game-grid-cell"); // Use existing style from homepage
+        cellPane.getStyleClass().add("game-grid-cell");
         cellPane.setAlignment(Pos.CENTER);
         cellPane.setCursor(Cursor.HAND);
 
         ImageView coverImageView = new ImageView();
-        // Consistent size with homepage grid cards
+
         coverImageView.setFitHeight(112);
         coverImageView.setFitWidth(200);
         coverImageView.setPreserveRatio(false);
@@ -228,13 +206,11 @@ public class GameSearchController {
         return cellPane;
     }
 
-    /** Action when a game card is clicked */
     private void handleGameClick(Game game, MouseEvent event) {
         LOGGER.info("Game card clicked: " + game.getName() + " (ID: " + game.getId() + ")");
-        navigateToGame(game); // Navigate to the specific game screen
+        navigateToGame(game);
     }
 
-    /** Navigates to the appropriate game screen based on GameType */
     private void navigateToGame(Game game) {
         if (game == null) return;
 
@@ -249,14 +225,13 @@ public class GameSearchController {
                 fxmlPath = "/sk/vava/royalmate/view/roulette-game-view.fxml";
                 break;
             case COINFLIP:
-                fxmlPath = "/sk/vava/royalmate/view/coinflip-game-view.fxml"; // <-- Use correct path
+                fxmlPath = "/sk/vava/royalmate/view/coinflip-game-view.fxml";
                 break;
             default:
                 LOGGER.severe("Unknown game type for navigation: " + game.getGameType());
                 return;
         }
 
-        // Fetch assets only if needed (Slots)
         List<GameAsset> assets = Collections.emptyList();
         if(game.getGameType() == GameType.SLOT) {
             assets = gameService.getGameAssets(game.getId(), AssetType.SYMBOL);
@@ -277,13 +252,12 @@ public class GameSearchController {
 
             controllerInstance = loader.getController();
 
-            // Call initData based on controller type
             if (controllerInstance instanceof SlotGameController slotController && game.getGameType() == GameType.SLOT) {
                 slotController.initData(game, assets);
             } else if (controllerInstance instanceof RouletteGameController rouletteController && game.getGameType() == GameType.ROULETTE) {
                 rouletteController.initData(game);
             } else if (controllerInstance instanceof CoinflipGameController coinflipController && game.getGameType() == GameType.COINFLIP) {
-                coinflipController.initData(game); // <-- CALL COINFLIP INIT
+                coinflipController.initData(game);
             }
             else {
                 LOGGER.severe("Loaded FXML ("+fxmlPath+") but controller type mismatch or null: " + (controllerInstance != null ? controllerInstance.getClass().getName() : "null"));
@@ -299,8 +273,6 @@ public class GameSearchController {
         }
     }
 
+    private void navigateTo(ActionEvent event, String fxmlPath) {  }
 
-    // --- Navigation (Consider utility class) ---
-    private void navigateTo(ActionEvent event, String fxmlPath) { /* ... existing helper ... */ }
-    // Add navigateTo for MouseEvent if needed, or refactor to use Node source
 }

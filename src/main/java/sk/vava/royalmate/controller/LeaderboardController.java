@@ -10,18 +10,18 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image; // Import Image
-import javafx.scene.image.ImageView; // Import ImageView
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import sk.vava.royalmate.model.GameType;
 import sk.vava.royalmate.model.Gameplay;
 import sk.vava.royalmate.service.LeaderboardService;
-import sk.vava.royalmate.util.ImageUtil; // Import ImageUtil
+import sk.vava.royalmate.util.ImageUtil;
 import sk.vava.royalmate.util.LocaleManager;
 import sk.vava.royalmate.util.SessionManager;
 
-import java.io.IOException; // Import IOException
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.ZoneId;
@@ -152,38 +152,33 @@ public class LeaderboardController {
         }
     }
 
-    /** Creates the UI node (HBox) for a single leaderboard entry (NO LABELS, Uses Cover Image) */
     private Node createLeaderboardCardNode(Gameplay play, boolean showPayout) {
-        HBox card = new HBox(10); // Spacing between elements
+        HBox card = new HBox(10);
         card.getStyleClass().add("leaderboard-card-new");
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // Column 1: Game Cover Image
         ImageView coverImageView = new ImageView();
-        coverImageView.setFitHeight(45); // Adjust size as needed
-        coverImageView.setFitWidth(70);  // Adjust size ~16:9
-        coverImageView.setPreserveRatio(false); // Allow minor distortion if needed
-        coverImageView.getStyleClass().add("leaderboard-cover-image"); // Add style class if needed
+        coverImageView.setFitHeight(45);
+        coverImageView.setFitWidth(70);
+        coverImageView.setPreserveRatio(false);
+        coverImageView.getStyleClass().add("leaderboard-cover-image");
 
         if (play.getCoverImageData() != null) {
             try {
                 coverImageView.setImage(ImageUtil.byteArrayToImage(play.getCoverImageData()));
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "Failed to load cover image for leaderboard entry, game: " + play.getGameName(), e);
-                coverImageView.setImage(null); // Or set a placeholder
+                coverImageView.setImage(null);
             }
         } else {
-            coverImageView.setImage(null); // No cover available
-            // Optionally add a placeholder graphic or color
-            // Rectangle placeholder = new Rectangle(70, 45, Color.DARKGREY);
-            // card.getChildren().add(placeholder); // Add before other elements if using placeholder
+            coverImageView.setImage(null);
+
         }
 
-        // Column 2: Player Name & Date (stacked)
-        VBox playerDateBox = new VBox(1); // Reduced spacing
+        VBox playerDateBox = new VBox(1);
         playerDateBox.setAlignment(Pos.CENTER_LEFT);
         Label playerLabel = new Label(play.getUsername() != null ? play.getUsername() : "Unknown");
-        playerLabel.getStyleClass().add("leaderboard-player-name-small"); // Use smaller style class
+        playerLabel.getStyleClass().add("leaderboard-player-name-small");
         String formattedDate = "N/A";
         if (play.getTimestamp() != null) {
             formattedDate = play.getTimestamp().toInstant()
@@ -193,11 +188,9 @@ public class LeaderboardController {
         Label dateLabel = new Label(formattedDate);
         dateLabel.getStyleClass().add("leaderboard-date");
         playerDateBox.getChildren().addAll(playerLabel, dateLabel);
-        // Give player/date box flexible width but limit game name
+
         HBox.setHgrow(playerDateBox, Priority.SOMETIMES);
 
-
-        // Column 3: Metric (Payout/Multiplier)
         String metricText;
         NumberFormat formatter = createCurrencyFormatter();
         if (showPayout) {
@@ -208,19 +201,16 @@ public class LeaderboardController {
             metricText = formatter.format(multiplier) + LocaleManager.getString("leaderboard.suffix.multiplier");
         }
         Label metricLabel = new Label(metricText);
-        metricLabel.getStyleClass().add("leaderboard-metric-small"); // Use smaller style class
-        // Allow metric to take remaining space and align right
+        metricLabel.getStyleClass().add("leaderboard-metric-small");
+
         HBox metricContainer = new HBox(metricLabel);
         metricContainer.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(metricContainer, Priority.ALWAYS);
 
-
-        // Add columns to card
         card.getChildren().addAll(coverImageView, playerDateBox, metricContainer);
         return card;
     }
 
-    // --- Utils ---
     private NumberFormat createCurrencyFormatter() {
         NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LocaleManager.getCurrentLocale());
         currencyFormatter.setMinimumFractionDigits(2);
@@ -228,7 +218,6 @@ public class LeaderboardController {
         return currencyFormatter;
     }
 
-    /** Shuts down the background thread executor */
     public void shutdownExecutor() {
         LOGGER.info("Shutting down Leaderboard executor service.");
         executorService.shutdown();

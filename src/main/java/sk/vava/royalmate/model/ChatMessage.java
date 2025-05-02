@@ -13,11 +13,10 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class ChatMessage {
 
-    private long id; // Use long for BIGINT
+    private long id;
     private int senderId;
     private String messageText;
     private Timestamp sentAt;
 
-    // Transient field to hold username after JOIN
     private transient String senderUsername;
 }

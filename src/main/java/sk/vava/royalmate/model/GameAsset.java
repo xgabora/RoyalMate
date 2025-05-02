@@ -16,8 +16,8 @@ public class GameAsset {
     private int id;
     private int gameId;
     private AssetType assetType;
-    private String assetName; // e.g., "Symbol 7", "Cherry", "Cover Image"
-    private byte[] imageData; // BLOB data
-    private BigDecimal symbolPayoutMultiplier; // Nullable, only for SYMBOL type
+    private String assetName;
+    private byte[] imageData;
+    private BigDecimal symbolPayoutMultiplier; //nepouzivame zatial
     private Timestamp uploadedAt;
 }

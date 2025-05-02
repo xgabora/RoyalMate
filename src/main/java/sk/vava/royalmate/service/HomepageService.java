@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public class HomepageService {
 
     private static final Logger LOGGER = Logger.getLogger(HomepageService.class.getName());
-    private static final int DEFAULT_TOP_GAMES_LIMIT = 16; // For 4x4 grid
+    private static final int DEFAULT_TOP_GAMES_LIMIT = 16;
 
     private final HomepageBannerDAO bannerDAO;
     private final GameDAO gameDAO;
@@ -22,27 +22,18 @@ public class HomepageService {
         this.gameDAO = new GameDAO();
     }
 
-    // Constructor for testing/DI
     public HomepageService(HomepageBannerDAO bannerDAO, GameDAO gameDAO) {
         this.bannerDAO = bannerDAO;
         this.gameDAO = gameDAO;
     }
 
-    /**
-     * Gets the main banner for the homepage.
-     * @return Optional containing the banner if found.
-     */
     public Optional<HomepageBanner> getMainBanner() {
         LOGGER.fine("HomepageService fetching main banner.");
-        return bannerDAO.findMainBanner(); // Assuming findMainBanner exists and works
+        return bannerDAO.findMainBanner();
     }
 
-    /**
-     * Gets the list of top games for the homepage grid.
-     * @return List of top Game objects (up to the limit).
-     */
     public List<Game> getTopGames() {
         LOGGER.fine("HomepageService fetching top " + DEFAULT_TOP_GAMES_LIMIT + " games.");
-        return gameDAO.findTopGames(DEFAULT_TOP_GAMES_LIMIT); // Use the new DAO method
+        return gameDAO.findTopGames(DEFAULT_TOP_GAMES_LIMIT);
     }
 }

@@ -9,93 +9,79 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.math.BigDecimal; // Import BigDecimal
-import java.math.RoundingMode; // Import RoundingMode
-
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class GameDAO {
 
     private static final Logger LOGGER = Logger.getLogger(GameDAO.class.getName());
 
-    // Use exact table/column names from your schema
     private static final String TABLE_NAME = "games";
-    private static final String ASSET_TABLE_NAME = "game_assets"; // Assuming game_assets
-    private static final String ACCOUNT_TABLE_NAME = "accounts"; // Assuming accounts
-    private static final String GAMEPLAYS_TABLE_NAME = "game_plays"; // <-- NEW
+    private static final String ASSET_TABLE_NAME = "game_assets";
+    private static final String ACCOUNT_TABLE_NAME = "accounts";
+    private static final String GAMEPLAYS_TABLE_NAME = "game_plays";
 
-
-    // Updated INSERT_GAME_SQL with underscored column names
     private static final String INSERT_GAME_SQL = "INSERT INTO " + TABLE_NAME +
             " (name, description, game_type, min_stake, max_stake, volatility, background_color, created_by_admin_id, is_active, created_at) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    // Updated FIND_ALL_SORTED_SQL with underscored column names in SELECT, JOIN, and ORDER BY
     private static final String FIND_ALL_SORTED_SQL =
             "SELECT g.id, g.name, g.description, g.game_type, g.min_stake, g.max_stake, g.volatility, g.background_color, g.created_by_admin_id, g.is_active, g.created_at, " +
-                    "a.username as admin_username, ga.image_data as cover_image " + // Use image_data for the alias
+                    "a.username as admin_username, ga.image_data as cover_image " +
                     "FROM " + TABLE_NAME + " g " +
                     "JOIN " + ACCOUNT_TABLE_NAME + " a ON g.created_by_admin_id = a.id " +
-                    "LEFT JOIN " + ASSET_TABLE_NAME + " ga ON g.id = ga.game_id AND ga.asset_type = 'COVER' " + // Use game_id and asset_type
+                    "LEFT JOIN " + ASSET_TABLE_NAME + " ga ON g.id = ga.game_id AND ga.asset_type = 'COVER' " +
                     "ORDER BY g.created_at DESC";
 
-    // Updated FIND_BY_ID_SQL with underscored column names in SELECT and JOIN
     private static final String FIND_BY_ID_SQL =
             "SELECT g.id, g.name, g.description, g.game_type, g.min_stake, g.max_stake, g.volatility, g.background_color, g.created_by_admin_id, g.is_active, g.created_at, " +
                     "a.username as admin_username " +
                     "FROM " + TABLE_NAME + " g " +
                     "JOIN " + ACCOUNT_TABLE_NAME + " a ON g.created_by_admin_id = a.id " +
-                    "WHERE g.id = ?"; // 'id' doesn't have an underscore
+                    "WHERE g.id = ?";
 
-    // Updated UPDATE_GAME_SQL with underscored column names
     private static final String UPDATE_GAME_SQL = "UPDATE " + TABLE_NAME + " SET " +
             "name = ?, description = ?, game_type = ?, min_stake = ?, max_stake = ?, " +
-            "volatility = ?, background_color = ?, is_active = ? " + // Removed createdByAdminId, createdAt as per original logic
+            "volatility = ?, background_color = ?, is_active = ? " +
             "WHERE id = ?";
 
     private static final String DELETE_GAME_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = ?";
 
-    // Find top N active games ordered by play count, joining for cover image and admin username
-    // Use ANY_VALUE() for non-aggregated columns not in GROUP BY
     private static final String FIND_TOP_GAMES_SQL =
             "SELECT g.id, g.name, g.description, g.game_type, g.min_stake, g.max_stake, g.volatility, g.background_color, g.created_by_admin_id, g.is_active, g.created_at, " +
-                    "ANY_VALUE(a.username) as admin_username, " + // <-- Use ANY_VALUE()
-                    "ANY_VALUE(ga.image_data) as cover_image, " + // <-- Use ANY_VALUE()
+                    "ANY_VALUE(a.username) as admin_username, " +
+                    "ANY_VALUE(ga.image_data) as cover_image, " +
                     "COUNT(gp.id) as spin_count " +
                     "FROM " + TABLE_NAME + " g " +
                     "JOIN " + ACCOUNT_TABLE_NAME + " a ON g.created_by_admin_id = a.id " +
                     "LEFT JOIN " + ASSET_TABLE_NAME + " ga ON g.id = ga.game_id AND ga.asset_type = 'COVER' " +
                     "LEFT JOIN " + GAMEPLAYS_TABLE_NAME + " gp ON g.id = gp.game_id " +
                     "WHERE g.is_active = true " +
-                    "GROUP BY g.id " + // Group only by the primary key of the main table
+                    "GROUP BY g.id " +
                     "ORDER BY spin_count DESC " +
                     "LIMIT ?";
 
-    // Find ALL ACTIVE games, joining for cover image and admin username (order can be added if needed)
     private static final String FIND_ALL_ACTIVE_WITH_COVERS_SQL =
             "SELECT g.id, g.name, g.description, g.game_type, g.min_stake, g.max_stake, g.volatility, g.background_color, g.created_by_admin_id, g.is_active, g.created_at, " +
                     "a.username as admin_username, " +
                     "ga.image_data as cover_image, " +
-                    "COALESCE(gc.play_count, 0) as spin_count " + // Use COALESCE for games with 0 plays
+                    "COALESCE(gc.play_count, 0) as spin_count " +
                     "FROM " + TABLE_NAME + " g " +
                     "JOIN " + ACCOUNT_TABLE_NAME + " a ON g.created_by_admin_id = a.id " +
                     "LEFT JOIN " + ASSET_TABLE_NAME + " ga ON g.id = ga.game_id AND ga.asset_type = 'COVER' " +
-                    // Subquery or Left Join to get play counts efficiently
+
                     "LEFT JOIN (SELECT game_id, COUNT(id) as play_count FROM " + GAMEPLAYS_TABLE_NAME + " GROUP BY game_id) gc ON g.id = gc.game_id " +
-                    "WHERE g.is_active = true " + // Only active games
-                    "ORDER BY g.name ASC"; // Default sort by name
+                    "WHERE g.is_active = true " +
+                    "ORDER BY g.name ASC";
 
-
-    // --- NEW SQL for Export ---
-    // Fetches ALL games (active or inactive) with aggregated stats and admin username
-    // Does NOT fetch cover image blob for export efficiency
     private static final String FIND_ALL_WITH_STATS_SQL =
             "SELECT g.id, g.name, g.description, g.game_type, g.min_stake, g.max_stake, g.volatility, g.background_color, g.created_by_admin_id, g.is_active, g.created_at, " +
                     "a.username as admin_username, " +
-                    "COALESCE(gc.play_count, 0) as total_spins, " + // Use COALESCE
-                    "COALESCE(gc.max_payout, 0.00) as max_payout " +  // Use COALESCE
+                    "COALESCE(gc.play_count, 0) as total_spins, " +
+                    "COALESCE(gc.max_payout, 0.00) as max_payout " +
                     "FROM " + TABLE_NAME + " g " +
                     "JOIN " + ACCOUNT_TABLE_NAME + " a ON g.created_by_admin_id = a.id " +
-                    // Subquery to get stats per game_id
+
                     "LEFT JOIN (" +
                     "SELECT " +
                     "game_id, " +
@@ -104,14 +90,8 @@ public class GameDAO {
                     "FROM " + GAMEPLAYS_TABLE_NAME + " " +
                     "GROUP BY game_id" +
                     ") gc ON g.id = gc.game_id " +
-                    "ORDER BY g.id ASC"; // Order consistently for export
+                    "ORDER BY g.id ASC";
 
-    /**
-     * Saves a new game and returns its generated ID.
-     *
-     * @param game The Game object to save (without ID).
-     * @return The generated ID if successful, -1 otherwise.
-     */
     public int save(Game game) {
         LOGGER.info("Attempting to save new game: " + game.getName());
         ResultSet generatedKeys = null;
@@ -153,12 +133,6 @@ public class GameDAO {
         }
     }
 
-    /**
-     * Retrieves all games, ordered by creation date descending.
-     * Includes creator username and cover image data.
-     *
-     * @return List of Game objects.
-     */
     public List<Game> findAllSortedByDateDesc() {
         LOGGER.fine("Finding all games sorted by date desc.");
         List<Game> games = new ArrayList<>();
@@ -167,7 +141,7 @@ public class GameDAO {
              ResultSet rs = stmt.executeQuery(FIND_ALL_SORTED_SQL)) {
 
             while (rs.next()) {
-                games.add(mapResultSetToGame(rs, true)); // Map extra JOINed data
+                games.add(mapResultSetToGame(rs, true));
             }
             LOGGER.fine("Found " + games.size() + " games.");
 
@@ -177,12 +151,6 @@ public class GameDAO {
         return games;
     }
 
-    /**
-     * Finds a single game by its ID, including the creator's username.
-     *
-     * @param gameId The ID of the game.
-     * @return Optional containing the Game if found.
-     */
     public Optional<Game> findById(int gameId) {
         LOGGER.fine("Finding game by ID: " + gameId);
         try (Connection conn = DatabaseManager.getConnection();
@@ -191,7 +159,7 @@ public class GameDAO {
             pstmt.setInt(1, gameId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToGame(rs, true)); // Map joined username
+                    return Optional.of(mapResultSetToGame(rs, true));
                 }
             }
         } catch (SQLException e) {
@@ -200,13 +168,6 @@ public class GameDAO {
         return Optional.empty();
     }
 
-    /**
-     * Updates an existing game's details.
-     * Does NOT update creator or creation timestamp.
-     *
-     * @param game The Game object with updated information (must have correct ID).
-     * @return true if successful, false otherwise.
-     */
     public boolean update(Game game) {
         LOGGER.info("Attempting to update game ID: " + game.getId());
         if (game.getId() <= 0) {
@@ -224,7 +185,7 @@ public class GameDAO {
             pstmt.setInt(6, game.getVolatility());
             pstmt.setString(7, game.getBackgroundColor());
             pstmt.setBoolean(8, game.isActive());
-            pstmt.setInt(9, game.getId()); // WHERE clause
+            pstmt.setInt(9, game.getId());
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
@@ -240,13 +201,6 @@ public class GameDAO {
         }
     }
 
-
-    /**
-     * Deletes a game by its ID. Assets are deleted via CASCADE constraint.
-     *
-     * @param gameId The ID of the game to delete.
-     * @return true if successful, false otherwise.
-     */
     public boolean delete(int gameId) {
         LOGGER.warning("Attempting to DELETE game ID: " + gameId);
         try (Connection conn = DatabaseManager.getConnection();
@@ -268,26 +222,17 @@ public class GameDAO {
         }
     }
 
-
-// --- NEW METHOD ---
-    /**
-     * Finds the top N most played active games.
-     * Includes cover image and admin username.
-     *
-     * @param limit The maximum number of games to return.
-     * @return A list of top Game objects.
-     */
     public List<Game> findTopGames(int limit) {
         LOGGER.fine("Finding top " + limit + " games by play count.");
         List<Game> games = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(FIND_TOP_GAMES_SQL)) {
 
-            pstmt.setInt(1, limit); // Set the LIMIT parameter
+            pstmt.setInt(1, limit);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    // Map including the new spin_count alias
+
                     games.add(mapResultSetToGame(rs, true));
                 }
             }
@@ -298,15 +243,7 @@ public class GameDAO {
         }
         return games;
     }
-    // --- END NEW METHOD ---
 
-    // --- NEW METHOD ---
-    /**
-     * Retrieves all ACTIVE games, including creator username and cover image data.
-     * Ordered by game name ascending.
-     *
-     * @return List of active Game objects.
-     */
     public List<Game> findAllActiveWithCovers() {
         LOGGER.fine("Finding all active games with covers.");
         List<Game> games = new ArrayList<>();
@@ -315,7 +252,7 @@ public class GameDAO {
              ResultSet rs = stmt.executeQuery(FIND_ALL_ACTIVE_WITH_COVERS_SQL)) {
 
             while (rs.next()) {
-                games.add(mapResultSetToGame(rs, true)); // Map includes cover, username, spins
+                games.add(mapResultSetToGame(rs, true));
             }
             LOGGER.fine("Found " + games.size() + " active games.");
 
@@ -324,15 +261,7 @@ public class GameDAO {
         }
         return games;
     }
-    // --- END NEW METHOD ---
 
-// --- NEW METHOD for Export ---
-    /**
-     * Retrieves ALL games with aggregated statistics (total spins, max payout)
-     * and creator username, suitable for export. Excludes BLOB data.
-     *
-     * @return List of Game objects with stats.
-     */
     public List<Game> findAllWithStats() {
         LOGGER.fine("Finding all games with stats for export.");
         List<Game> games = new ArrayList<>();
@@ -341,8 +270,8 @@ public class GameDAO {
              ResultSet rs = stmt.executeQuery(FIND_ALL_WITH_STATS_SQL)) {
 
             while (rs.next()) {
-                // Map using a flag to indicate stats should be included, but not cover image
-                games.add(mapResultSetToGame(rs, true, true)); // includeJoinData=true, includeStatsData=true
+
+                games.add(mapResultSetToGame(rs, true, true));
             }
             LOGGER.fine("Found " + games.size() + " games with stats.");
 
@@ -351,16 +280,12 @@ public class GameDAO {
         }
         return games;
     }
-    // --- END NEW METHOD ---
 
-
-    /** Overloaded Helper to map ResultSet to Game object (MODIFIED) */
     private Game mapResultSetToGame(ResultSet rs, boolean includeJoinData) throws SQLException {
-        // Calls the new helper, excluding stats by default for existing calls
+
         return mapResultSetToGame(rs, includeJoinData, false);
     }
 
-    /** Main Helper to map ResultSet to Game object (NEW OVERLOAD) */
     private Game mapResultSetToGame(ResultSet rs, boolean includeJoinData, boolean includeStatsData) throws SQLException {
         Game game = Game.builder()
                 .id(rs.getInt("id"))
@@ -380,7 +305,7 @@ public class GameDAO {
             if (hasColumn(rs, "admin_username")) {
                 game.setCreatedByAdminUsername(rs.getString("admin_username"));
             }
-            // Only map cover if needed (not for stats export)
+
             if (!includeStatsData && hasColumn(rs, "cover_image")) {
                 Blob coverBlob = rs.getBlob("cover_image");
                 if (coverBlob != null) {
@@ -390,25 +315,21 @@ public class GameDAO {
             }
         }
 
-        // Map stats if requested
         if (includeStatsData) {
-            if (hasColumn(rs, "total_spins")) { // Use total_spins from new query
+            if (hasColumn(rs, "total_spins")) {
                 game.setTotalSpins(rs.getLong("total_spins"));
             }
-            if (hasColumn(rs, "max_payout")) { // Map max_payout from new query
+            if (hasColumn(rs, "max_payout")) {
                 game.setMaxPayout(rs.getBigDecimal("max_payout"));
             }
         } else if (includeJoinData && hasColumn(rs, "spin_count")) {
-            // Compatibility for older calls that used spin_count alias in JOINs
+
             game.setTotalSpins(rs.getLong("spin_count"));
         }
-
 
         return game;
     }
 
-
-    /** Utility to check if a column exists in the ResultSet metadata */
     private boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
         ResultSetMetaData rsmd = rs.getMetaData();
         int columns = rsmd.getColumnCount();

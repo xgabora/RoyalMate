@@ -1,15 +1,14 @@
 package sk.vava.royalmate.service;
 
 import sk.vava.royalmate.data.AccountDAO;
-import sk.vava.royalmate.data.GameplayDAO; // Import GameplayDAO
+import sk.vava.royalmate.data.GameplayDAO;
 import sk.vava.royalmate.model.Account;
-import sk.vava.royalmate.model.UserStatistics; // Import UserStatistics
+import sk.vava.royalmate.model.UserStatistics;
 import sk.vava.royalmate.util.PasswordUtil;
 import sk.vava.royalmate.util.SessionManager;
 
 import java.math.BigDecimal;
-// Removed: import java.util.Collections;
-// Removed: import java.util.Map;
+
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,7 +35,7 @@ public class AuthService {
     }
 
     public Optional<Account> authenticate(String username, String password) {
-        // ... keep existing implementation ...
+
         if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) { return Optional.empty(); }
         Optional<Account> accountOpt = accountDAO.findByUsername(username);
         if (accountOpt.isPresent()) {
@@ -49,9 +48,8 @@ public class AuthService {
         } else { LOGGER.warning("Authentication failed: User not found: " + username); return Optional.empty(); }
     }
 
-
     public Optional<Account> register(String email, String username, String password) throws IllegalArgumentException, RuntimeException {
-        // ... keep existing implementation ...
+
         if (username == null || username.trim().isEmpty() || email == null || email.trim().isEmpty() || password == null || password.isEmpty()) { throw new IllegalArgumentException("Username, email, and password cannot be empty."); }
         if (!EMAIL_PATTERN.matcher(email).matches()) { throw new IllegalArgumentException("Invalid email format."); }
         if (accountDAO.findByUsername(username).isPresent()) { LOGGER.warning("Registration failed: Username already exists: " + username); return Optional.empty(); }
@@ -63,19 +61,10 @@ public class AuthService {
         else { LOGGER.severe("Registration failed: Could not save account for user: " + username); throw new RuntimeException("Failed to save the new account due to a database error."); }
     }
 
-
-    /**
-     * Retrieves calculated user statistics from the database.
-     * THIS IS THE CORRECT METHOD.
-     *
-     * @param accountId The ID of the user.
-     * @return An Optional containing the UserStatistics object, or empty if an error occurred.
-     */
     public Optional<UserStatistics> getUserStatistics(int accountId) {
         LOGGER.fine("Fetching statistics via service for account ID: " + accountId);
         return gameplayDAO.getUserStatistics(accountId);
     }
-
 
     public boolean withdrawFunds(int accountId, BigDecimal amount) throws IllegalArgumentException, IllegalStateException {
         LOGGER.info("Withdrawal attempt for account ID: " + accountId + ", Amount: " + amount);
@@ -87,7 +76,6 @@ public class AuthService {
         if (success) { LOGGER.info("Withdrawal successful for account ID: " + accountId + ", Amount: " + amount); SessionManager.setCurrentAccount(accountDAO.findByUsername(currentAccount.getUsername()).orElse(null)); return true; }
         else { LOGGER.severe("Withdrawal failed during database update for account ID: " + accountId); return false; }
     }
-
 
     public boolean changePassword(int accountId, String oldPasswordPlain, String newPasswordPlain) throws IllegalArgumentException {
         LOGGER.info("Password change attempt for account ID: " + accountId);

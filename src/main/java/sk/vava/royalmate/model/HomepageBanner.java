@@ -15,12 +15,9 @@ public class HomepageBanner {
 
     private int id;
     private String name;
-    private byte[] imageData; // Store image data as byte array
-    private int position; // Use int for TINYINT UNSIGNED
+    private byte[] imageData;
+    private int position;
     private boolean isActive;
     private int uploadedByAdminId;
     private Timestamp uploadedAt;
-
-    // Optional: Add reference to the uploading Admin Account object if needed later
-    // private Account uploadedByAdmin;
 }

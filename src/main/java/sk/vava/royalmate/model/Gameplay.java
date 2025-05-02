@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.sql.Blob; // Import Blob if directly using (though DAO handles it)
+import java.sql.Blob;
 import java.sql.Timestamp;
 
 @Data
@@ -22,9 +22,8 @@ public class Gameplay {
     private BigDecimal payoutAmount;
     private Timestamp timestamp;
 
-    // Transient fields populated by JOINs
     private transient String username;
     private transient String gameName;
     private transient BigDecimal multiplier;
-    private transient byte[] coverImageData; // <-- ADDED
+    private transient byte[] coverImageData;
 }
