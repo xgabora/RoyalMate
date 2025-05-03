@@ -97,10 +97,8 @@ public class ProfileController {
         setupTabs();
         loadProfileHeader();
         loadBalanceTab();
-        // Load stats tab content when the tab is selected (or initially if it's default)
-        if (statsTabButton.isSelected()) {
-            loadStatsTab();
-        }
+        loadStatsTab();
+
         loadSettingsTab();
         LOGGER.info("ProfileController initialized for user: " + currentUser.getUsername());
     }
@@ -122,7 +120,7 @@ public class ProfileController {
                     loadBalanceTab();
                 } else if (newToggle == statsTabButton) {
                     statsContent.setVisible(true); statsContent.setManaged(true);
-                    loadStatsTab(); // Load stats when tab becomes visible
+                    loadStatsTab();
                 } else if (newToggle == settingsTabButton) {
                     settingsContent.setVisible(true); settingsContent.setManaged(true);
                     loadSettingsTab();

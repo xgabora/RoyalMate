@@ -45,27 +45,48 @@ public class CoinflipGameController {
     private static final Logger LOGGER = Logger.getLogger(CoinflipGameController.class.getName());
 
     // --- FXML Injections ---
-    @FXML private BorderPane rootPane;
-    @FXML private Label gameTitleLabel;
-    @FXML private VBox gameAreaVBox;
-    @FXML private Rectangle gameBackgroundRect;
-    @FXML private StackPane coinPane;
-    @FXML private Circle coinCircle;
-    @FXML private ToggleButton headsBetButton;
-    @FXML private ToggleButton tailsBetButton;
-    @FXML private HBox betControlsBox;
-    @FXML private Label currentStakeLabel;
-    @FXML private Label recentWinLossLabel;
-    @FXML private Button decreaseStakeButton;
-    @FXML private Button increaseStakeButton;
-    @FXML private Button actionButton; // Flip button (no longer changes to BACK)
-    @FXML private VBox leaderboardArea;
-    @FXML private VBox leaderboardContent;
-    @FXML private Button leaderboardButton;
-    @FXML private VBox gameInfoPane;
-    @FXML private Label descriptionLabel;
-    @FXML private Label minStakeLabel;
-    @FXML private Label maxStakeLabel;
+    @FXML
+    private BorderPane rootPane;
+    @FXML
+    private Label gameTitleLabel;
+    @FXML
+    private VBox gameAreaVBox;
+    @FXML
+    private Rectangle gameBackgroundRect;
+    @FXML
+    private StackPane coinPane;
+    @FXML
+    private Circle coinCircle;
+    @FXML
+    private ToggleButton headsBetButton;
+    @FXML
+    private ToggleButton tailsBetButton;
+    @FXML
+    private HBox betControlsBox;
+    @FXML
+    private Label currentStakeLabel;
+    @FXML
+    private Label recentWinLossLabel;
+    @FXML
+    private Button decreaseStakeButton;
+    @FXML
+    private Button increaseStakeButton;
+    @FXML
+    private Button actionButton; // Flip button (no longer changes to BACK)
+    @FXML
+    private VBox leaderboardArea;
+    @FXML
+    private VBox leaderboardContent;
+    @FXML
+    private Button leaderboardButton;
+    @FXML
+    private VBox gameInfoPane;
+    @FXML
+    private Label descriptionLabel;
+    @FXML
+    private Label minStakeLabel;
+    @FXML
+    private Label maxStakeLabel;
 
     // --- Constants & Services ---
     private static final Duration FLIP_HALF_DURATION = Duration.millis(100);
@@ -106,8 +127,9 @@ public class CoinflipGameController {
     private BetType selectedBet = BetType.HEADS;
     private FlipResult currentVisualResult = FlipResult.HEADS; // Track visual state during flip
 
-    private enum BetType { HEADS, TAILS }
-    private enum FlipResult { HEADS, TAILS }
+    private enum BetType {HEADS, TAILS}
+
+    private enum FlipResult {HEADS, TAILS}
 
     // --- Constructor ---
     public CoinflipGameController() {
@@ -116,7 +138,9 @@ public class CoinflipGameController {
 
     // --- Initialization & Data Loading ---
 
-    /** Called by navigation to pass game data */
+    /**
+     * Called by navigation to pass game data
+     */
     public void initData(Game game) {
         this.currentGame = Objects.requireNonNull(game, "Game cannot be null");
         Platform.runLater(() -> {
@@ -141,13 +165,14 @@ public class CoinflipGameController {
             return;
         }
         recentWinLossLabel.setText("");
-        // spinCompleted = false; // Reset state // No longer needed
         setupBetToggles();
         setCoinAppearance(FlipResult.HEADS); // Start visually as Heads
         stopHighlightBlinking(); // Ensure no initial glow/blink
     }
 
-    /** Populates UI elements once game data is available */
+    /**
+     * Populates UI elements once game data is available
+     */
     private void populateUI() {
         if (currentGame == null) return;
 
@@ -187,11 +212,17 @@ public class CoinflipGameController {
 
         betToggleGroup.selectedToggleProperty().addListener((observable, oldToggle, newToggle) -> {
             if (isFlipping) return; // Don't allow change during flip
-            if (newToggle == headsBetButton) { selectedBet = BetType.HEADS; }
-            else if (newToggle == tailsBetButton) { selectedBet = BetType.TAILS; }
-            else { // Prevent deselection
-                if(oldToggle != null) { Platform.runLater(() -> betToggleGroup.selectToggle(oldToggle)); }
-                else { headsBetButton.setSelected(true); selectedBet = BetType.HEADS; }
+            if (newToggle == headsBetButton) {
+                selectedBet = BetType.HEADS;
+            } else if (newToggle == tailsBetButton) {
+                selectedBet = BetType.TAILS;
+            } else { // Prevent deselection
+                if (oldToggle != null) {
+                    Platform.runLater(() -> betToggleGroup.selectToggle(oldToggle));
+                } else {
+                    headsBetButton.setSelected(true);
+                    selectedBet = BetType.HEADS;
+                }
             }
             LOGGER.fine("Selected bet: " + selectedBet);
         });
@@ -205,27 +236,38 @@ public class CoinflipGameController {
                 .sorted().collect(Collectors.toList());
         if (availableStakes.isEmpty()) {
             LOGGER.severe("No valid stakes available for game " + currentGame.getName());
-            actionButton.setDisable(true); increaseStakeButton.setDisable(true); decreaseStakeButton.setDisable(true);
-            currentStakeLabel.setText("Stake: N/A"); return;
+            actionButton.setDisable(true);
+            increaseStakeButton.setDisable(true);
+            decreaseStakeButton.setDisable(true);
+            currentStakeLabel.setText("Stake: N/A");
+            return;
         }
         currentStakeIndex = 0;
-        for(int i=0; i < availableStakes.size(); i++){ if(availableStakes.get(i).compareTo(currentGame.getMinStake()) >= 0){ currentStakeIndex = i; break; } }
+        for (int i = 0; i < availableStakes.size(); i++) {
+            if (availableStakes.get(i).compareTo(currentGame.getMinStake()) >= 0) {
+                currentStakeIndex = i;
+                break;
+            }
+        }
         updateStakeDisplay();
-        updateActionButtonState(); // Call CORRECT method name
+        updateActionButtonState();
     }
 
-    @FXML private void handleIncreaseStake(ActionEvent event) {
+    @FXML
+    private void handleIncreaseStake(ActionEvent event) {
         if (!isFlipping && currentStakeIndex < availableStakes.size() - 1) {
             currentStakeIndex++;
             updateStakeDisplay();
-            updateActionButtonState(); // Call CORRECT method name
+            updateActionButtonState();
         }
     }
-    @FXML private void handleDecreaseStake(ActionEvent event) {
+
+    @FXML
+    private void handleDecreaseStake(ActionEvent event) {
         if (!isFlipping && currentStakeIndex > 0) {
             currentStakeIndex--;
             updateStakeDisplay();
-            updateActionButtonState(); // Call CORRECT method name
+            updateActionButtonState();
         }
     }
 
@@ -238,14 +280,19 @@ public class CoinflipGameController {
         increaseStakeButton.setDisable(isFlipping || currentStakeIndex >= availableStakes.size() - 1);
     }
 
-    /** Checks balance, flip state, and enables/disables flip button */
+    /**
+     * Checks balance, flip state, and enables/disables flip button
+     */
     private void updateActionButtonState() {
         // No longer checks spinCompleted, button is always FLIP unless currently flipping
         actionButton.setText(LocaleManager.getString("coinflip.button.flip"));
         actionButton.setOnAction(this::handleFlip);
 
         // Check affordability
-        if (availableStakes.isEmpty()) { actionButton.setDisable(true); return; }
+        if (availableStakes.isEmpty()) {
+            actionButton.setDisable(true);
+            return;
+        }
         BigDecimal currentStake = availableStakes.get(currentStakeIndex);
         Account acc = SessionManager.getCurrentAccount();
         boolean canAfford = acc != null && acc.getBalance() != null && acc.getBalance().compareTo(currentStake) >= 0;
@@ -259,7 +306,8 @@ public class CoinflipGameController {
             // Clear message ONLY if it's the insufficient funds one AND not flipping
             // AND not showing a win/loss effect from previous spin
             if (coinCircle.getEffect() == null) {
-                recentWinLossLabel.setText(""); recentWinLossLabel.setEffect(null);
+                recentWinLossLabel.setText("");
+                recentWinLossLabel.setEffect(null);
             }
         }
     }
@@ -273,30 +321,44 @@ public class CoinflipGameController {
             LOGGER.warning("Flip rejected: isFlipping=" + isFlipping);
             return;
         }
-        if (selectedBet == null) { showWinLossMessage(LocaleManager.getString("coinflip.message.selectbet"), true, false); return; }
+        if (selectedBet == null) {
+            showWinLossMessage(LocaleManager.getString("coinflip.message.selectbet"), true, false);
+            return;
+        }
 
         BigDecimal currentStake = availableStakes.get(currentStakeIndex);
         Account acc = SessionManager.getCurrentAccount();
         if (acc == null || acc.getBalance() == null || acc.getBalance().compareTo(currentStake) < 0) {
             showWinLossMessage(LocaleManager.getString("slot.error.insufficientfunds"), true, false);
-            actionButton.setDisable(true); return;
+            actionButton.setDisable(true);
+            return;
         }
 
         isFlipping = true;
-        actionButton.setDisable(true); increaseStakeButton.setDisable(true); decreaseStakeButton.setDisable(true);
+        actionButton.setDisable(true);
+        increaseStakeButton.setDisable(true);
+        decreaseStakeButton.setDisable(true);
         disableBetToggles(true);
-        recentWinLossLabel.setText(""); recentWinLossLabel.setEffect(null);
+        recentWinLossLabel.setText("");
+        recentWinLossLabel.setEffect(null);
         stopHighlightBlinking(); // Clear previous win state visual
 
         showWinLossMessage(LocaleManager.getString("slot.message.placingbet"), false, false);
 
         Task<Long> placeBetTask = new Task<>() {
-            @Override protected Long call() throws Exception { return gameService.placeBet(currentUser.getId(), currentGame.getId(), currentStake); }
+            @Override
+            protected Long call() throws Exception {
+                return gameService.placeBet(currentUser.getId(), currentGame.getId(), currentStake);
+            }
         };
         placeBetTask.setOnSucceeded(workerStateEvent -> {
             long gameplayId = placeBetTask.getValue();
-            if (gameplayId < 0) { finishFlip(false, "slot.error.betfailed"); }
-            else { showWinLossMessage(LocaleManager.getString("slot.message.spinning"), false, false); startFlipAnimation(gameplayId, currentStake); }
+            if (gameplayId < 0) {
+                finishFlip(false, "slot.error.betfailed");
+            } else {
+                showWinLossMessage(LocaleManager.getString("slot.message.spinning"), false, false);
+                startFlipAnimation(gameplayId, currentStake);
+            }
         });
         placeBetTask.setOnFailed(workerStateEvent -> {
             LOGGER.log(Level.SEVERE, "Placing bet task failed.", placeBetTask.getException());
@@ -306,7 +368,9 @@ public class CoinflipGameController {
     }
 
     private void startFlipAnimation(long gameplayId, BigDecimal stakeAmount) {
-        if (flipAnimation != null) { flipAnimation.stop(); }
+        if (flipAnimation != null) {
+            flipAnimation.stop();
+        }
 
         FlipResult finalResult = (random.nextBoolean()) ? FlipResult.HEADS : FlipResult.TAILS;
         LOGGER.info("Final coin flip result determined: " + finalResult);
@@ -335,22 +399,30 @@ public class CoinflipGameController {
 
     private Animation createHalfFlip(FlipResult nextSide) {
         ScaleTransition scaleDown = new ScaleTransition(FLIP_HALF_DURATION.divide(2), coinCircle);
-        scaleDown.setFromX(1.0); scaleDown.setToX(0.0); scaleDown.setInterpolator(Interpolator.EASE_IN);
+        scaleDown.setFromX(1.0);
+        scaleDown.setToX(0.0);
+        scaleDown.setInterpolator(Interpolator.EASE_IN);
         PauseTransition changeFace = new PauseTransition(Duration.millis(1));
         // Change visual appearance (color) when scaled down, no glow
         changeFace.setOnFinished(e -> setCoinAppearance(nextSide));
         ScaleTransition scaleUp = new ScaleTransition(FLIP_HALF_DURATION.divide(2), coinCircle);
-        scaleUp.setFromX(0.0); scaleUp.setToX(1.0); scaleUp.setInterpolator(Interpolator.EASE_OUT);
+        scaleUp.setFromX(0.0);
+        scaleUp.setToX(1.0);
+        scaleUp.setInterpolator(Interpolator.EASE_OUT);
         return new SequentialTransition(scaleDown, changeFace, scaleUp);
     }
 
-    /** Updates the coin circle's appearance (fill color only, NO effect) */
+    /**
+     * Updates the coin circle's appearance (fill color only, NO effect)
+     */
     private void setCoinAppearance(FlipResult side) {
         coinCircle.setFill(side == FlipResult.HEADS ? HEADS_COLOR_DISPLAY : TAILS_COLOR_DISPLAY);
         coinCircle.setEffect(null); // Ensure no glow during intermediate flips
     }
 
-    /** Sets the final coin appearance based on Win/Loss state */
+    /**
+     * Sets the final coin appearance based on Win/Loss state
+     */
     private void setCoinWinLossAppearance(boolean win) {
         // Coin is GOLD on WIN, WHITE/GREY on LOSS
         coinCircle.setFill(win ? WIN_COLOR : LOSS_COLOR);
@@ -384,14 +456,22 @@ public class CoinflipGameController {
         // Record result in background
         final BigDecimal finalPayout = payoutAmount;
         Task<Boolean> recordTask = new Task<>() {
-            @Override protected Boolean call() throws Exception { return gameService.recordResult(gameplayId, result.name(), finalPayout, currentUser.getId()); }
+            @Override
+            protected Boolean call() throws Exception {
+                return gameService.recordResult(gameplayId, result.name(), finalPayout, currentUser.getId());
+            }
         };
         boolean finalIsWin = win;
         recordTask.setOnSucceeded(e -> {
             boolean recorded = recordTask.getValue();
-            if (!recorded) { LOGGER.severe("Failed to record coinflip result for gameplayId: " + gameplayId); }
-            else { LOGGER.info("Coinflip result recorded successfully for gameplayId: " + gameplayId); }
-            if (finalIsWin && recorded) { loadRecentWinsLeaderboard(); }
+            if (!recorded) {
+                LOGGER.severe("Failed to record coinflip result for gameplayId: " + gameplayId);
+            } else {
+                LOGGER.info("Coinflip result recorded successfully for gameplayId: " + gameplayId);
+            }
+            if (finalIsWin && recorded) {
+                loadRecentWinsLeaderboard();
+            }
             // spinCompleted = true; // No longer needed
             finishFlip(true, null); // Re-enable controls
         });
@@ -405,7 +485,10 @@ public class CoinflipGameController {
     }
 
     // --- Blinking Logic ---
-    /** Starts blinking the win glow effect */
+
+    /**
+     * Starts blinking the win glow effect
+     */
     private void startHighlightBlinking() {
         stopHighlightBlinking(); // Stop previous if any
 
@@ -425,7 +508,9 @@ public class CoinflipGameController {
         LOGGER.fine("Started coin highlight blinking (glow toggle).");
     }
 
-    /** Stops the blinking animation and resets effect */
+    /**
+     * Stops the blinking animation and resets effect
+     */
     private void stopHighlightBlinking() {
         if (blinkTimeline != null) {
             blinkTimeline.stop();
@@ -441,7 +526,9 @@ public class CoinflipGameController {
         }
     }
 
-    /** Called after flip sequence and result processing are done */
+    /**
+     * Called after flip sequence and result processing are done
+     */
     private void finishFlip(boolean betPlacedSuccessfully, String messageKeyIfFailed) {
         isFlipping = false;
 
@@ -474,13 +561,18 @@ public class CoinflipGameController {
             Color textColor;
             if (message.equals(LocaleManager.getString("slot.message.placingbet")) || message.equals(LocaleManager.getString("slot.message.spinning"))) {
                 textColor = Color.BLACK;
-            } else { textColor = isError ? Color.INDIANRED : Color.GREEN; }
+            } else {
+                textColor = isError ? Color.INDIANRED : Color.GREEN;
+            }
             recentWinLossLabel.setTextFill(textColor);
             if (applyEffect && textColor != Color.BLACK) {
                 Color shadowColor = isError ? Color.INDIANRED : Color.LIGHTGREEN;
-                DropShadow ds = new DropShadow(1.0, 0.0, 0.0, shadowColor); ds.setSpread(0.05);
+                DropShadow ds = new DropShadow(1.0, 0.0, 0.0, shadowColor);
+                ds.setSpread(0.05);
                 recentWinLossLabel.setEffect(ds);
-            } else { recentWinLossLabel.setEffect(null); }
+            } else {
+                recentWinLossLabel.setEffect(null);
+            }
         });
     }
 
@@ -493,16 +585,20 @@ public class CoinflipGameController {
         leaderboardRefreshTimeline.play();
         LOGGER.info("Leaderboard refresh started.");
     }
+
     private void loadRecentWinsLeaderboard() {
-        if(currentGame == null) return;
+        if (currentGame == null) return;
         Task<List<Gameplay>> loadTask = new Task<>() {
-            @Override protected List<Gameplay> call() throws Exception { return gameService.getRecentGameWins(currentGame.getId()); }
+            @Override
+            protected List<Gameplay> call() throws Exception {
+                return gameService.getRecentGameWins(currentGame.getId());
+            }
         };
         loadTask.setOnSucceeded(e -> {
             List<Gameplay> wins = loadTask.getValue();
             Platform.runLater(() -> {
                 leaderboardContent.getChildren().clear();
-                if(wins == null || wins.isEmpty()) {
+                if (wins == null || wins.isEmpty()) {
                     Label emptyLabel = new Label(LocaleManager.getString("coinflip.leaderboard.empty")); // Use coinflip key
                     emptyLabel.getStyleClass().add("leaderboard-entry-label");
                     leaderboardContent.getChildren().add(emptyLabel);
@@ -514,17 +610,28 @@ public class CoinflipGameController {
         loadTask.setOnFailed(e -> LOGGER.log(Level.SEVERE, "Failed to load recent wins leaderboard.", loadTask.getException()));
         new Thread(loadTask).start();
     }
+
     private Node createLeaderboardCard(Gameplay win) {
-        HBox card = new HBox(); card.getStyleClass().add("leaderboard-card");
+        HBox card = new HBox();
+        card.getStyleClass().add("leaderboard-card");
         ImageView icon = new ImageView();
-        try { icon.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/profile_icon_white.png")))); }
-        catch (Exception e) { LOGGER.warning("Failed to load profile_icon_white.png for leaderboard"); }
-        icon.setFitHeight(20); icon.setFitWidth(20);
-        Label usernameLabel = new Label(win.getUsername() != null ? win.getUsername() : "Unknown"); usernameLabel.getStyleClass().add("leaderboard-username");
-        Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
-        Label amountLabel = new Label(createCurrencyFormatter().format(win.getPayoutAmount()) + " €"); amountLabel.getStyleClass().add("leaderboard-amount");
-        card.getChildren().addAll(icon, usernameLabel, spacer, amountLabel); return card;
+        try {
+            icon.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/profile_icon_white.png"))));
+        } catch (Exception e) {
+            LOGGER.warning("Failed to load profile_icon_white.png for leaderboard");
+        }
+        icon.setFitHeight(20);
+        icon.setFitWidth(20);
+        Label usernameLabel = new Label(win.getUsername() != null ? win.getUsername() : "Unknown");
+        usernameLabel.getStyleClass().add("leaderboard-username");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Label amountLabel = new Label(createCurrencyFormatter().format(win.getPayoutAmount()) + " €");
+        amountLabel.getStyleClass().add("leaderboard-amount");
+        card.getChildren().addAll(icon, usernameLabel, spacer, amountLabel);
+        return card;
     }
+
     @FXML
     private void handleLeaderboardButton(ActionEvent event) {
         LOGGER.info("Navigate to Leaderboards");
@@ -534,31 +641,42 @@ public class CoinflipGameController {
     // --- Utils & Navigation ---
     private NumberFormat createCurrencyFormatter() {
         NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LocaleManager.getCurrentLocale());
-        currencyFormatter.setMinimumFractionDigits(2); currencyFormatter.setMaximumFractionDigits(2);
+        currencyFormatter.setMinimumFractionDigits(2);
+        currencyFormatter.setMaximumFractionDigits(2);
         return currencyFormatter;
     }
 
-    /** Handles the action when the button says "BACK TO CASINO". Removed as button reverts to FLIP */
+    /**
+     * Handles the action when the button says "BACK TO CASINO". Removed as button reverts to FLIP
+     */
     // private void handleBackToCasino(ActionEvent event) { }
-
     private void navigateTo(ActionEvent event, String fxmlPath) {
         Node source = (Node) event.getSource();
         try {
             cleanup(); // Stop timers before navigating away
             Scene scene = source.getScene();
-            if (scene == null) { scene = rootPane.getScene(); if (scene == null) { LOGGER.severe("Could not get current scene."); return; } }
+            if (scene == null) {
+                scene = rootPane.getScene();
+                if (scene == null) {
+                    LOGGER.severe("Could not get current scene.");
+                    return;
+                }
+            }
             FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource(fxmlPath)), LocaleManager.getBundle());
             Parent nextRoot = loader.load();
             // Cleanup previous controller before setting new root
             Object oldController = scene.getUserData();
-            if(oldController instanceof SlotGameController oldSlot) oldSlot.cleanup();
-            else if(oldController instanceof RouletteGameController oldRoulette) oldRoulette.cleanup();
-            else if(oldController instanceof CoinflipGameController oldCoinflip) oldCoinflip.cleanup();
+            if (oldController instanceof SlotGameController oldSlot) oldSlot.cleanup();
+            else if (oldController instanceof RouletteGameController oldRoulette) oldRoulette.cleanup();
+            else if (oldController instanceof CoinflipGameController oldCoinflip) oldCoinflip.cleanup();
             scene.setRoot(nextRoot);
             scene.setUserData(null); // Clear user data
             LOGGER.info("Successfully navigated to: " + fxmlPath);
-        } catch (IOException | NullPointerException e) { LOGGER.log(Level.SEVERE, "Failed to load FXML: " + fxmlPath, e);
-        } catch (ClassCastException e) { LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e); }
+        } catch (IOException | NullPointerException e) {
+            LOGGER.log(Level.SEVERE, "Failed to load FXML: " + fxmlPath, e);
+        } catch (ClassCastException e) {
+            LOGGER.log(Level.SEVERE, "Failed to cast event source to Node.", e);
+        }
     }
 
     // --- Cleanup ---
