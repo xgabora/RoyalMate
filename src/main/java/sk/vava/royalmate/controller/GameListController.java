@@ -53,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 
+
 public class GameListController {
 
     private static final Logger LOGGER = Logger.getLogger(GameListController.class.getName());
