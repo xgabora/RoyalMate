@@ -19,6 +19,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 public class LoginController {
 
     private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
