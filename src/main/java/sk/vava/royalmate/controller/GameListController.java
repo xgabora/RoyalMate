@@ -158,7 +158,6 @@ public class GameListController {
                 // thumbnail.getParent().getChildren().add(new javafx.scene.shape.Rectangle(90, 60, Color.DARKGREY));
             }
         } else {
-            // Placeholder if no image data
             thumbnail.setImage(null); // Or set default placeholder image
         }
 
