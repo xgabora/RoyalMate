@@ -2,12 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.Color?>
-<?import javafx.scene.text.*?>
 
 <BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1080.0" style="-fx-background-color: black;" stylesheets="@../../../../css/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.vava.royalmate.controller.LeaderboardController">
     <top>
@@ -30,10 +27,7 @@
                         <Insets bottom="30.0" left="40.0" right="40.0" top="40.0" />
                     </padding>
                     <children>
-                        <!-- Title Removed -->
-                        <!-- <Label styleClass="page-title" text="%leaderboard.title" textFill="#F1DA2C" /> -->
 
-                        <!-- Filter/Sort Toggle Buttons -->
                         <HBox alignment="CENTER" spacing="10.0">
                             <children>
                                 <ToggleButton fx:id="payoutSortButton" mnemonicParsing="false" styleClass="tab-button" text="%leaderboard.sort.payout" />
@@ -44,15 +38,12 @@
                             </VBox.margin>
                         </HBox>
 
-                        <!-- Leaderboard Columns HBox -->
-                        <!-- Reduced spacing between columns -->
                         <HBox alignment="TOP_CENTER" spacing="20.0" VBox.vgrow="ALWAYS">
                             <children>
                                 <!-- Slots Column -->
                                 <VBox alignment="TOP_CENTER" spacing="10.0" styleClass="leaderboard-column" HBox.hgrow="ALWAYS">
                                     <children>
                                         <Label styleClass="leaderboard-column-title" text="%leaderboard.header.slots" />
-                                        <!-- Reduced spacing within column -->
                                         <VBox fx:id="slotsColumnContent" spacing="8.0" />
                                     </children>
                                 </VBox>
