@@ -107,9 +107,6 @@ public class AdminService {
             return false;
         }
         LOGGER.warning("Admin deleting account ID: " + targetAccountId);
-        // Cascade deletion of related data (like chat messages) depends on DB schema constraints.
-        // Foreign keys in gameplays reference accounts with ON DELETE RESTRICT, so this might fail
-        // if the user has played games. Consider changing FKs or implementing soft delete instead.
         return accountDAO.deleteAccount(targetAccountId);
     }
 
