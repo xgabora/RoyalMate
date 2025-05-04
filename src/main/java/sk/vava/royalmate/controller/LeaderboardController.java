@@ -174,9 +174,6 @@ public class LeaderboardController {
             }
         } else {
             coverImageView.setImage(null); // No cover available
-            // Optionally add a placeholder graphic or color
-            // Rectangle placeholder = new Rectangle(70, 45, Color.DARKGREY);
-            // card.getChildren().add(placeholder); // Add before other elements if using placeholder
         }
 
         // Column 2: Player Name & Date (stacked)
