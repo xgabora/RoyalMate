@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 public class LocaleManager {
 
     private static final Logger LOGGER = Logger.getLogger(LocaleManager.class.getName());
-    private static final String BUNDLE_BASENAME = "bundles.messages"; // Path relative to resources root
+    private static final String BUNDLE_BASENAME = "bundles.messages";
 
     public static final Locale ENGLISH = Locale.ENGLISH;
     public static final Locale SLOVAK = new Locale("sk"); // Slovak locale
@@ -20,12 +20,11 @@ public class LocaleManager {
     private static Locale currentLocale = ENGLISH; // Default to English
     private static ResourceBundle currentBundle;
 
-    // Static initializer block to load the default bundle immediately when the class is loaded
     static {
-        loadBundle(currentLocale); // Load default bundle (English)
+        loadBundle(currentLocale);
     }
 
-    // Private constructor to prevent instantiation
+    // private constructor to prevent instantiation
     private LocaleManager() {}
 
     /**
