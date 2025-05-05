@@ -46,7 +46,6 @@
                                     <children>
                                         <!-- Background Rectangle - RE-ADDED -->
                                         <!-- Set managed="false" so it doesn't affect VBox layout much -->
-                                        <!-- Size will be set by controller based on gameAreaVBox bounds -->
                                         <Rectangle fx:id="gameBackgroundRect" arcHeight="20.0" arcWidth="20.0" styleClass="slot-background-rect" managed="false" />
 
                                         <!-- VBox holding the actual game content (wheel, bets, controls) -->

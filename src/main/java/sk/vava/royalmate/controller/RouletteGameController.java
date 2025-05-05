@@ -88,12 +88,12 @@ public class RouletteGameController {
     private static final Duration FLASH_TOTAL_DURATION = Duration.seconds(2);
     private static final Duration LEADERBOARD_REFRESH_INTERVAL = Duration.seconds(30);
 
-    // Payout Multipliers (Now used multiplicatively)
+    // Payout Multipliers
     private static final BigDecimal COLOR_PAYOUT_MULTIPLIER = new BigDecimal("2.00");
     private static final BigDecimal RANGE_PAYOUT_MULTIPLIER = new BigDecimal("4.00");
     private static final BigDecimal GREEN_PAYOUT_MULTIPLIER = new BigDecimal("36.00");
 
-    // --- UPDATED BASE STAKES TO INCLUDE HIGHER VALUES ---
+    // Base Stakes
     private final List<BigDecimal> BASE_ALLOWED_STAKES = List.of(
             new BigDecimal("0.10"), new BigDecimal("0.20"), new BigDecimal("0.50"), new BigDecimal("1.00"),
             new BigDecimal("2.00"), new BigDecimal("5.00"), new BigDecimal("10.00"), new BigDecimal("20.00"),
@@ -120,7 +120,7 @@ public class RouletteGameController {
     private Set<BetType> selectedBetTypes = new HashSet<>();
 
     // Enum for Bet Types
-    private enum BetType { RED, BLACK, GREEN, RANGE_1_9, RANGE_10_18, RANGE_19_27, RANGE_28_36 }
+   private enum BetType { RED, BLACK, GREEN, RANGE_1_9, RANGE_10_18, RANGE_19_27, RANGE_28_36 }
 
     public RouletteGameController() {
         this.gameService = new GameService();
@@ -144,7 +144,6 @@ public class RouletteGameController {
         resultDisplayPane.setVisible(false);
 
         setupBetToggles();
-        // Leaderboard starts after populateUI
     }
 
     /** Populates UI elements once game data is available */
@@ -155,7 +154,7 @@ public class RouletteGameController {
         descriptionLabel.setText(currentGame.getDescription());
         try {
             gameBackgroundRect.setFill(Color.web(currentGame.getBackgroundColor(), 0.8));
-            // Auto-resize background rectangle
+
             Platform.runLater(() -> {
                 Bounds contentBounds = gameAreaVBox.getBoundsInParent();
                 double padding = 30.0;
@@ -172,7 +171,7 @@ public class RouletteGameController {
         maxStakeLabel.setText(LocaleManager.getString("slot.label.maxstake") + " " + currencyFormatter.format(currentGame.getMaxStake()) + " €");
         volatilityLabel.setText(LocaleManager.getString("slot.label.volatility") + " " + currentGame.getVolatility() + "/5");
 
-        setupStakeControls(); // Now uses extended BASE_ALLOWED_STAKES and filters correctly
+        setupStakeControls();
         startLeaderboardRefresh();
 
         LOGGER.info("Roulette game UI populated for: " + currentGame.getName());
@@ -241,7 +240,6 @@ public class RouletteGameController {
         // Set initial stake index to the lowest available valid stake
         currentStakeIndex = 0;
         // Find the first stake >= minStake (already filtered, so index 0 is fine if list not empty)
-        // But let's find the index explicitly in case filtering logic changes
         for(int i=0; i < availableStakes.size(); i++){
             if(availableStakes.get(i).compareTo(currentGame.getMinStake()) >= 0){
                 currentStakeIndex = i;
@@ -325,10 +323,9 @@ public class RouletteGameController {
         recentWinLossLabel.setText(""); recentWinLossLabel.setEffect(null);
         resultDisplayPane.setVisible(false);
 
-        // --- ADDED: Show "Placing bet..." message ---
         showWinLossMessage(LocaleManager.getString("slot.message.placingbet"), false, false); // Black text, no effect
 
-        // --- 1. Place Bet (Background Task) ---
+        // Place Bet (Background Task)
         Task<Long> placeBetTask = new Task<>() {
             @Override protected Long call() throws Exception {
                 return gameService.placeBet(currentUser.getId(), currentGame.getId(), currentStake);
@@ -338,7 +335,6 @@ public class RouletteGameController {
             long gameplayId = placeBetTask.getValue();
             if (gameplayId < 0) { finishSpin(false, "slot.error.betfailed"); }
             else {
-                // --- ADDED: Show "Spinning..." message ---
                 showWinLossMessage(LocaleManager.getString("slot.message.spinning"), false, false); // Black text, no effect
                 startSpinAnimation(gameplayId, currentStake);
             }
@@ -454,13 +450,13 @@ public class RouletteGameController {
                     (selectedBetTypes.contains(BetType.BLACK) && winningColorName.equals("Black"));
 
             // Check if the winning number satisfies AT LEAST ONE of the PLACED range bets (if any)
-            boolean rangeConditionMet = !rangeBetPlaced || // Always true if no range bet placed
+            boolean rangeConditionMet = !rangeBetPlaced ||
                     (selectedBetTypes.contains(BetType.RANGE_1_9) && isInRange(winningNumber, BetType.RANGE_1_9)) ||
                     (selectedBetTypes.contains(BetType.RANGE_10_18) && isInRange(winningNumber, BetType.RANGE_10_18)) ||
                     (selectedBetTypes.contains(BetType.RANGE_19_27) && isInRange(winningNumber, BetType.RANGE_19_27)) ||
                     (selectedBetTypes.contains(BetType.RANGE_28_36) && isInRange(winningNumber, BetType.RANGE_28_36));
 
-            // --- Determine Win and Multiplier based on your specific rules ---
+            // Determine Win and Multiplier
             if (colorConditionMet && rangeConditionMet) {
                 // Win only if BOTH conditions met for the bets actually placed.
 
@@ -472,7 +468,7 @@ public class RouletteGameController {
                         case 2 -> new BigDecimal("4.00"); // COLOR + 2 RANGES = x4
                         case 3 -> new BigDecimal("3.00"); // COLOR + 3 RANGES = x3
                         case 4 -> new BigDecimal("2.00"); // COLOR + 4 RANGES = x2 (same as just color)
-                        default -> BigDecimal.ZERO; // Should not happen if rangeBetPlaced is true
+                        default -> BigDecimal.ZERO;
                     };
                     LOGGER.fine("Winning combined Color + Range. Ranges selected: " + selectedRangeCount + ", Multiplier: " + calculatedMultiplier);
 
@@ -494,9 +490,7 @@ public class RouletteGameController {
                     };
                     LOGGER.fine("Winning bet type: Range Only. Ranges selected: " + selectedRangeCount + ", Multiplier: " + calculatedMultiplier);
                 }
-                // If neither colorBetPlaced nor rangeBetPlaced, then selectedBetTypes was empty (caught earlier) or logic error. betWon remains false.
             }
-            // If colorConditionMet or rangeConditionMet is false for the placed bets, it's a loss. betWon remains false.
         }
 
         // Calculate final payout (Stake * Multiplier = Total Return)
