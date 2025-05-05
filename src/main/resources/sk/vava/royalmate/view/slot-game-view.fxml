@@ -25,14 +25,12 @@
                 </ImageView>
 
                 <!-- HBox splitting Game Column and Leaderboard Column -->
-                <!-- Align columns to the TOP by default -->
                 <HBox spacing="10.0" alignment="TOP_CENTER" maxWidth="1000.0"> <!-- Changed alignment to TOP_CENTER -->
                     <padding>
                         <Insets bottom="2.0" left="30.0" right="30.0" top="10.0" />
                     </padding>
                     <children>
                         <!-- === Column 1: Game Content === -->
-                        <!-- Set spacing to 0 -->
                         <VBox fx:id="gameContentColumn" spacing="0.0" alignment="TOP_LEFT" HBox.hgrow="ALWAYS">
                             <children>
                                 <!-- Row 1: Title -->
@@ -44,7 +42,6 @@
                                 </Label>
 
                                 <!-- Row 2: Game Area -->
-                                <!-- Removed VBox.margin -->
                                 <VBox fx:id="gameAreaVBox" spacing="10.0" alignment="CENTER" styleClass="game-area-box">
                                     <StackPane>
                                         <children>
@@ -63,7 +60,6 @@
                                 </VBox>
 
                                 <!-- Row 3: Info Area -->
-                                <!-- Removed VBox.margin, add padding to the top of this VBox instead -->
                                 <VBox fx:id="gameInfoPane" spacing="10.0" styleClass="game-info-pane" alignment="TOP_LEFT">
                                     <padding>
                                         <Insets top="2.0"/> <!-- Padding at the top of the info box -->
@@ -85,21 +81,20 @@
                         </VBox>
 
                         <!-- === Column 2: Leaderboard === -->
-                        <!-- Parent HBox alignment=TOP_CENTER keeps it aligned with top of game column -->
                         <!-- Set Pref Height to allow shrinking, Max Height to limit -->
                         <VBox fx:id="leaderboardArea" spacing="10.0" alignment="TOP_CENTER" styleClass="leaderboard-area-box" prefHeight="660.0" maxHeight="660.0">
                             <children>
                                 <Label styleClass="leaderboard-title" text="%slot.label.leaderboard"/>
                                 <VBox fx:id="leaderboardContent" spacing="8.0" VBox.vgrow="NEVER" styleClass="leaderboard-content-vbox"/>
-                                <!-- Spacer pushes button to bottom -->
+
                                 <Region VBox.vgrow="ALWAYS" minHeight="10.0"/> <!-- Min height ensures spacer works -->
                                 <Button fx:id="leaderboardButton" onAction="#handleLeaderboardButton" styleClass="button-secondary-small" text="%slot.leaderboard.button"/>
                             </children>
                         </VBox>
 
-                    </children> <!-- End of Main HBox -->
+                    </children>
                 </HBox>
-            </children> <!-- End of Center StackPane -->
+            </children>
         </StackPane>
     </center>
 </BorderPane>
