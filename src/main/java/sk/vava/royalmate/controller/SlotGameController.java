@@ -141,7 +141,6 @@ public class SlotGameController {
         recentWinLossLabel.setText("");
         recentWinLossLabel.setEffect(null); // Clear effect initially
         createSlotGridCells();
-        // Start leaderboard refresh polling *after* currentGame is set in initData/populateUI
     }
 
     /** Populates UI elements once game data is available */
@@ -443,7 +442,6 @@ public class SlotGameController {
         // Volatility: 5 (High) -> Favors ends (most common and rarest)
         int volatility = currentGame.getVolatility(); // 1-5
         // Map volatility to an adjustment factor (e.g., -2 to +2, or a multiplier)
-        // Let's use a factor that scales the *change* applied based on distance from middle
         double volatilityFactor = (volatility - 3.0) * 0.5; // Range approx -1.0 to +1.0 (adjust multiplier 0.5 as needed)
 
         double middleIndex = (numSymbols - 1.0) / 2.0;
@@ -455,8 +453,6 @@ public class SlotGameController {
 
             // Calculate adjustment: Positive factor increases weight further from middle, decreases closer to middle.
             // Negative factor does the opposite.
-            // We add 1.0 to avoid multiplying by zero if volatilityFactor is 0.
-            // We use Math.pow to make the effect stronger further from the middle (e.g., power of 1.5 or 2)
             double adjustmentMultiplier = Math.pow(1.5, distanceFromMiddle * volatilityFactor); // Adjust base 1.5 or power as needed
 
             // Apply the adjustment, ensuring weight is at least 1
@@ -618,10 +614,7 @@ public class SlotGameController {
             blinkTimeline.stop();
             blinkTimeline = null;
             LOGGER.fine("Stopped highlight blinking.");
-            // --- FIX: Explicitly reset winning cells AFTER stopping ---
-            // This ensures they revert to default even if stopped during the white phase
             resetWinningCellHighlights();
-            // -----------------------------------------------------
         }
     }
 
@@ -649,11 +642,8 @@ public class SlotGameController {
 
     /** Clears highlights, stops blinking, and clears the win/loss label */
     private void clearHighlightsAndWinLoss() {
-        stopHighlightBlinking(); // This now stops the timer AND resets the cells in winningLineCoords
+        stopHighlightBlinking();
 
-        // --- FIX: Explicitly reset ALL cells just in case (belt-and-suspenders) ---
-        // This handles cases where blinking might have stopped unexpectedly
-        // or if we just want a full reset regardless of winningLineCoords state.
         for (int r = 0; r < GRID_SIZE; r++) {
             for (int c = 0; c < GRID_SIZE; c++) {
                 resetCellHighlight(r, c);
@@ -664,7 +654,6 @@ public class SlotGameController {
             recentWinLossLabel.setText("");
             recentWinLossLabel.setEffect(null);
         });
-        // winningLineCoords should already be cleared by stopHighlightBlinking -> resetWinningCellHighlights
     }
 
     /** Resets a specific cell's highlight */
@@ -701,7 +690,7 @@ public class SlotGameController {
                 ds.setOffsetX(0.0);
                 ds.setOffsetY(0.0);
                 ds.setColor(shadowColor);
-                ds.setSpread(0.05); // Subtle spread
+                ds.setSpread(0.05);
                 recentWinLossLabel.setEffect(ds);
             } else {
                 recentWinLossLabel.setEffect(null); // Remove effect for intermediate messages or no effect requested
