@@ -1,50 +1,41 @@
-# RoyalMate
+# RoyalMate - VAVA 2024/25
 
-**RoyalMate 👑** je simulátor internetovej herne poskytujúci hráčom široké spektrum zábavných kasíno hier (ruleta, sloty, coinflip). Program simuluje online kasíno a hráčov angažuje prostredníctvom hier aj komunitných nástrojov (rebríčky, chat).
+## Úvod
 
-Projekt RoyalMate je semestrálnou prácou v rámci predmetu **VAVA_B** na FIIT STU.
+RoyalMate 👑 je simulátor internetovej herne poskytujúci hráčom široké spektrum zábavných kasíno hier (ruleta, sloty, coinflip,...). Program simuluje online kasíno a hráčov angažuje prostredníctvom hier aj komunitných nástrojov (rebríčky, chat).
 
-# AKTUÁLNE TASKY
+Celé zadanie projektu a požiadavky na projekt sú dostupné tu: [Zadanie projektu a požiadavky na projekt](https://github.com/miroslav-reiter/VAVA_JAVA)
 
-**ADAM:** 
+## Manažment projektu
 
-- dokončiť obrazovku slot hry, testovať zvyšné veci
+K riešeniu prístupu riešiteľov k projektu bola využitá platforma GitHub, konkrétne zdieľaný verejný repozitár [RoyalMate GitHub Repository](https://github.com/xgabora/RoyalMate). Delegovanie a manažovanie aktuálnych otvorených bodov prebehlo v softvéri Jira. Riešenie celého projektu bolo rozdelené na 8 šprintov a spolu 46 taskov, pričom sme konzistenciu s GitHub commitmi udržiavali prostredníctvom Jira komentárov.
 
-**VŠETCI ČLENOVIA TÍMU:** 
+## Lokálne spustenie aplikácie
 
- - vyskúšať si pull-núť tento repozitár, spustiť aplikáciu v IDE aj ako .jar, zbuildiť aplikáciu (JDK 17+, IntelliJ ideálne)
- - ak nejde otvoriť .JAR, tu je riešenie: https://www.youtube.com/watch?v=S5Tra0WEypU
- - rozmýšľať nad svojou funkcionalitou - čo sa dá spraviť, ako
- - pre ideálny štart s JAVAFX obetovať jedno poobedie / večer času: https://www.youtube.com/watch?v=9XJicRt_FaI&ab_channel=BroCode
+Existujú dva hlavné spôsoby, ako spustiť aplikáciu lokálne na vašom počítači: priamo zo zdrojového kódu pomocou vývojového prostredia (IDE) alebo spustením skompilovaného JAR súboru. Oba spôsoby vyžadujú, aby ste mali nainštalovanú kompatibilnú verziu Java Development Kit (JDK), konkrétne JDK 17 alebo novšiu, a aby bola správne nakonfigurovaná systémová premenná JAVA_HOME alebo aby bola Java dostupná v systémovej ceste (PATH).
 
-## 5W
-**WHO - KTO?** 
-RoyalMate primárne cieli na B2C segment, konkrétne na mladých dospelých vo veku 21-40 rokov, ktorí majú záujem o online hazardné hry v bezpečnom a regulovanom prostredí. Naša primárna demografická skupina sú digitálne zdatnejší jednotlivci, ktorí oceňujú kombináciu zábavy, sociálnej interakcie a možnosti výhry. Vzhľadom na vzdelávací účel simulátora tiež sekundárne a okrajovo cielime na segment študentov informatiky a herného dizajnu, ktorí môžu študovať mechanizmy hazardných hier bez finančných rizík.
+Adresár so zdrojovým kódom k projektu a takisto .jar spustiteľným súborom nájdete tu: [RoyalMate Source Code and JAR](https://github.com/xgabora/RoyalMate/tree/main)
 
-**WHY - PREČO?** 
-RoyalMate je komplexná simulačná platforma online kasína, ktorá spája adrenalín z hazardných hier s bezpečným prostredím bez rizika skutočných finančných strát. Aplikácia vytvára realistický zážitok z online herní vrátane populárnych hier ako ruleta, sloty či koleso šťastia, pričom dopĺňa herný zážitok o komunitné prvky ako chat a rebríčky. Fundamentálnym účelom RoyalMate je poskytnúť zábavu, súťaživé prostredie a sociálnu interakciu, zatiaľ čo zároveň zvyšuje povedomie o mechanizmoch a pravdepodobnostiach v hazardných hrách.
+### 2.1 Zdrojový kód
 
-Biznis model RoyalMate je postavený na free princípe, pričom sú všetky funkcionality aplikácie použávateľovi dostupné zadarmo. Aplikácia vytvára hodnotu tým, že poskytuje používateľom bezpečnú alternatívu k skutočnému hazardu, ponúka edukatívnu vrstvu o pravdepodobnosti a rizikách, a buduje lojálnu komunitu hráčov. V dlhodobom horizonte RoyalMate môže slúžiť ako platforma pre partnerskú spoluprácu s legálnymi poskytovateľmi hazardných hier, organizovanie turnajov alebo ako vzdelávací nástroj pre pochopenie dynamiky či marketingu hazardných hier.
+Pre spustenie aplikácie v IDE je nevyhnutné mať prístup k súboru `Config.java` s údajmi pre prístup k databáze. Tento súbor je možné poskytnúť na vyžiadanie kontaktovaním xgabora@stuba.sk. Alternatívou je vytvorenie lokálnej databázy podľa diagramu tried v kapitole 6.1 a napojenie tejto databázy prostredníctvom vlastného `Config.java` súboru v balíku `util/`.
 
+Návod na spustenie projektu:
 
-**WHEN - KEDY?** 
-Používatelia pristupujú k RoyalMate v rôznych časových vzorcoch, najmä však počas večerných hodín (18:00 - 23:00) v pracovných dňoch a flexibilnejšie počas víkendov. Analýza používateľského správania očakáva, že priemerný používateľ spustí aplikáciu 3- až 4-krát týždenne, s priemernou dĺžkou relácie 30 - 45 minút. Špičky aktivity sa objavujú počas piatkových a sobotných večerov, kedy používatelia trávia v aplikácii dlhšie časové úseky a aktívnejšie sa zapájajú do komunitných funkcií ako chat či turnaje. RoyalMate je najčastejšie využívaný v situáciách, keď používatelia hľadajú krátku formu zábavy v čase oddychu - napríklad po práci, počas cestovnej dopravy, alebo ako sociálnu aktivitu s priateľmi cez víkend. Významné používateľské aktivácie sú evidované počas špeciálnych udalostí ako virtuálne turnaje alebo nepravidelné pridanie nových hier, ktoré je strategicky plánované na udržanie angažovanosti používateľov
+1.  Otvorte projekt v IDE.
+2.  Nechajte IDE stiahnuť všetky závislosti definované v `pom.xml` (Maven dependencies a v `module-info.java`).
+3.  Nájdite hlavnú spúšťaciu triedu `sk.vava.royalmate.app.Main` alebo priamo `sk.vava.royalmate.app.RoyalMate`.
+4.  Kliknite pravým tlačidlom myši na túto triedu a zvoľte možnosť "Run" alebo "Debug". IDE sa postará o kompiláciu kódu a spustenie aplikácie s potrebnými JavaFX modulmi. Uistite sa, že konfigurácia spustenia v IDE používa JDK 17+.
 
-**WHERE - KDE?** 
-RoyalMate je desktopová aplikácia vyžadujúca počítač alebo laptop s operačným systémom Windows 10/11, macOS alebo Linux s minimálne 4 GB RAM, 2 GHz dvojjadrovým procesorom a 500 MB voľného diskového priestoru. Pre využívanie aplikácie je potrebné stabilné pripojenie na internet s rýchlosťou minimálne 10 Mbps. Aplikácia je optimalizovaná pre obrazovky s rozlíšením 1920x1080 a vyšším. Z technického hľadiska RoyalMate vyžaduje inštaláciu Java Runtime Environment (JRE) 11 alebo novšej verzie. Vzhľadom na sociálny aspekt aplikácie je dôležité zabezpečiť stabilnú a bezpečnú dátovú komunikáciu, preto aplikácia implementuje šifrovanú komunikáciu a zabezpečené pripojenie k centrálnemu serveru. V budúcich verziách plánujeme implementovať cloudové zálohovanie používateľských dát a profilov, čo umožní plynulý prechod medzi rôznymi zariadeniami a lokáciami bez straty herného progresu.
+### 2.2 Spustenie JAR súboru
 
-**HOW - AKO?** 
-Obchodný proces RoyalMate začína získavaním používateľov cez digitálne marketingové kanály s dôrazom na sociálne médiá a platformy pre hráčov. Nový používateľ sa registruje pomocou e-mailu a získava uvítací bonus vo forme voľných točení. Následne prechádza onboardingom, ktorý ho na domovskej obrazovke zoznámi s hlavnými funkciami a hrami. Typ hazardnej hry si potom môže zvoliť podľa svojej používateľskej preferencie, a takisto je mu umožnené interagovať s ostatnými používateľmi prostredníctvom komunitných nástrojov. 
+Toto je štandardný spôsob distribúcie a spúšťania finálnej aplikácie pre koncových používateľov. JAR súbor nájdete dostupný v GitHub release: [RoyalMate V1 Release](https://github.com/xgabora/RoyalMate/releases/tag/V1)
 
-Špeciálnym typom používateľa je superuser “Administrátor”, ktorý dokáže manažovať príspevky v komunitnom čete, meniť vzhľad domovskej stránky aj pridávať nové hry do kasína a pripisovať používateľom (hráčom) na ich hráčske konto odmeny. 
+V prípade, že chcete JAR súbor skompilovať z fungujúceho kódu, využite Maven príkazy v terminále “mvn clean” na vyčistenie cieľového priečenka `target/` a potom “mvn install” na inštaláciu priečinka `target`. V rámci programu sa vďaka implementovaniu pluginu `maven-shade-plugin` vytvorí aj tzv. “fat jar”, teda .jar súbor so všetkými dôležitými a potrebnými knižnicami a súbormi.
 
-Kľúčovým obchodným procesom je udržanie používateľskej angažovanosti prostredníctvom pravidelných udalostí a stimulov. Systém odmien motivuje k pravidelnému prihlasovaniu, turnaje podporujú súťaživosť a lojalitu. Sociálne funkcie ako chat či zdieľanie výsledkov budujú komunitu.
+Po úspešnom builde nájdete vygenerovaný JAR súbor v adresári `target/`.
 
-**HOW MUCH - KOĽKO?** 
-Reálny vývoj aplikácie RoyalMate v rozsahu uvedených funkcionalít vyžaduje vývojový tím pozostávajúci z 6-10 členov pracujúcich po dobu 3-4 mesiacov. Fiktívny rozpočet na tento projekt sa odhaduje v rozmedzí 25 000 € - 40 000 €, pričom táto suma zahŕňa náklady na návrh, vývoj, testovanie a implementáciu základnej verzie aplikácie.
+Otvorte terminál alebo príkazový riadok, prejdite do adresára `target` a spustite JAR súbor pomocou príkazu:
+`java -jar nazov-vasheho-jar-suboru.jar` (nahraďte `nazov-vasheho-jar-suboru.jar` skutočným názvom súboru, napr. `royalmate-1.0-SNAPSHOT-uber.jar`). Aplikácia by sa mala spustiť v novom okne. Prípadne môžete vo svojom prieskumníku súborov navigovať do priečinka `target/` a spustiť fat jar súbor dvojitým kliknutím.
 
-Najväčšiu časť rozpočtu tvorí práca vývojárov (približne 80 - 85 % celkovej sumy), kde rátame s hodinovou sadzbou 15 - 35 € závislosti od seniority a špecializácie. Práca UI/UX dizajnéra predstavuje približne 5 - 10 % rozpočtu a zvyšných 5 % tvoria náklady na projektový manažment.
-
-Okrem priamych nákladov na vývoj je potrebné počítať s dodatočnými výdavkami v rozmedzí 5 000€ - 8 000 € na licencie pre vývojové nástroje a softvér (IDE, grafické programy, licencie pre knižnice), školenia vývojového tímu v oblasti JavaFX a náklady na základnú infraštruktúru vrátane testovacej databázy a vývojových serverov. Tieto náklady nerátajú s prevádzkovými výdavkami po nasadení aplikácie, ako sú hosting, údržba, aktualizácie a zákaznícka podpora.
-
-V prípade rozšírenia projektu o mobilnú aplikáciu alebo pokročilejšie funkcie je potrebné počítať s dodatočnými nákladmi v rozmedzí 15 000 € - 30 000 € v závislosti od komplexnosti požadovaných rozšírení. Celkové náklady na reálne zhotovenie aplikácie RoyalMate v nami naplánovanom rozsahu sú teda v rozmedzí 30 000 až 50 000 eur s odchýlkou 10 % zo sumy v oboch smeroch.
+Aplikácia RoyalMate vyžaduje pre správny beh stabilné pripojenie na internet. V prípade problémov so spustením .jar súboru odporúčame postupovať podľa nasledujúceho videa, ktoré poskytuje riešenia pre situácie, keď počítač nedokáže nájsť alebo načítať Java Runtime Environment. [Riešenie problémov so spustením Java aplikácií](https://www.youtube.com/watch?v=Uaml9ouqKNk) - Video od Guiding Tech o riešení problémov s Java Runtime Environment.
